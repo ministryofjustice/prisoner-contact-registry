@@ -1,6 +1,6 @@
 {
   "role": {
-    "name": "hmpps-template-kotlin"
+    "name": "prisoner-contact-registry"
   },
   "customDimensions": {
     "service.version": "${BUILD_NUMBER}"
