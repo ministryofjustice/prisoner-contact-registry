@@ -1,0 +1,145 @@
+openapi: "3.0.2"
+info:
+  title: Prisoner Contact Registry
+  version: "1.0"
+servers:
+  - url: https://prisoner-contact-registry.gov.uk/v1
+    variables:
+      environment:
+        default: test # Test
+        enum:
+          - dev       #Development
+          - test      #Test
+          - preprod   #Pre-production
+          - Prod      #Production
+paths:
+  /prisoner-contacts/{nomisPersonId}:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Returns details of a prisoner contact
+      tags:
+        - prisoner-contacts
+      operationId: getprisonerContactDetails
+      parameters:
+        - name: nomisPersonId
+          in: path
+          description: NOMIS Person Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+        404:
+          description: Contact not found
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/NonSuccessResponse'
+        401:
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/NonSuccessResponse'
+        403:
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/NonSuccessResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    NonSuccessResponse:
+      type: object
+      properties:
+        applicationErrorCode:
+          type: string
+        applicationErrorDescription:
+          type: string
+    Contact:
+      type: object
+      description: A contact for a prisoner
+      properties:
+        nomisPersonId:
+          type: string
+          description: Unique Identifier for this contact (from NOMIS)
+        firstName:
+          type: string
+          description: Contact first name
+        middleName:
+          type: string
+          description: Contact middle name
+        lastName:
+          type: string
+          description: Contact last name
+        dateOfBirth:
+          type: string
+          description: Contact date of birth
+          format: date
+        relationshipType:
+          type: string
+          description: Code for relationship to Prisoner
+        relationshipDescription:
+          type: string
+          description: Description of relationship to Prisoner
+        contactType:
+          type: string
+          description: Type of Contact
+        contactTypeDescription:
+          type: string
+          description: Description of Contact Type
+        approvedVisitor:
+          type: boolean
+          description: Approved Visitor Flag
+        emergencyContact:
+          type: boolean
+          description: Emergency Contact Flag
+        nextOfKin:
+          type: boolean
+          description: Next of Kin Flag
+        commentText:
+          type: string
+          description: Additional Information
+        restrictions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Restriction'
+    Restriction:
+      type: object
+      properties:
+        restrictionType:
+          type: string
+          description: Restriction Code
+        restrictionTypeDescription:
+          type: string
+          description: Description of Restriction Type
+        startDate:
+          type: string
+          description: Date from which the restriction applies
+          format: date
+        expiryDate:
+          type: string
+          description: Restriction Expiry
+        globalRestriction:
+          type: boolean
+          description: true if applied globally to the contact or false if applied in the context of a visit
+        comment:
+          type: string
+          description: Comment text
+
