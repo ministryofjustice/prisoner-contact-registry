@@ -8,7 +8,14 @@ configurations {
 }
 
 dependencies {
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.2.0-BETA.4")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
+  annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.5.10")
+  implementation("org.springdoc:springdoc-openapi-ui:1.5.10")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.10")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.10")
 }
 
 java {
