@@ -1,9 +1,6 @@
 server:
   shutdown: immediate
 
-aws:
-  provider: localstack
-
 oauth:
   endpoint.url: http://localhost:8090/auth
 
@@ -12,8 +9,6 @@ management.endpoint:
   info.cache.time-to-live: 0
 
 spring:
-  main:
-    allow-bean-definition-overriding: true
 
   security:
     oauth2:

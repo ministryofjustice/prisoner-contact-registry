@@ -1,6 +1,6 @@
 # prisoner-contact-registry
 
-Back end Microservice holding prisoner contact informtion. Used by **Visit Someone in Prison** Service.
+Back end Microservice holding prisoner contact information. Used by **Visit Someone in Prison** Service.
 
 Initially a facade over the NOMIS Prison API enabling access to data held in NOMIS
 

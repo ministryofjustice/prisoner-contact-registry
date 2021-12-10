@@ -11,11 +11,17 @@ parameters:
     type: string
     default: dps-releases
 
+executors:
+  validator:
+    docker:
+      - image: cimg/openjdk:17.0-browsers
+    environment:
+      _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=1
+    working_directory: ~/app
+
 jobs:
   validate:
-    executor:
-      name: hmpps/java
-      tag: "16.0"
+    executor: validator
     steps:
       - checkout
       - restore_cache:
@@ -32,6 +38,11 @@ jobs:
           path: build/test-results
       - store_artifacts:
           path: build/reports/tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build/libs
+            - build.gradle.kts
 
 workflows:
   version: 2
