@@ -5,12 +5,45 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.reactive.function.client.WebClientException
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PersonNotFoundException
 import javax.validation.ValidationException
 
 @RestControllerAdvice
 class PrisonerContactRegistryExceptionHandler {
+  @ExceptionHandler(AccessDeniedException::class)
+  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
+    log.debug("Forbidden (403) returned with message {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.FORBIDDEN)
+      .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value())))
+  }
+
+  @ExceptionHandler(WebClientResponseException::class)
+  fun handleWebClientResponseException(e: WebClientResponseException): ResponseEntity<ByteArray> {
+    if (e.statusCode.is4xxClientError) {
+      log.info("Unexpected client exception with message {}", e.message)
+    } else {
+      log.error("Unexpected server exception", e)
+    }
+    return ResponseEntity
+      .status(e.rawStatusCode)
+      .body(e.responseBodyAsByteArray)
+  }
+
+  @ExceptionHandler(WebClientException::class)
+  fun handleWebClientException(e: WebClientException): ResponseEntity<ErrorResponse> {
+    log.error("Unexpected exception", e)
+    return ResponseEntity
+      .status(INTERNAL_SERVER_ERROR)
+      .body(ErrorResponse(status = (INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
+  }
+
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: {}", e.message)
@@ -20,6 +53,28 @@ class PrisonerContactRegistryExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
+          developerMessage = e.message
+        )
+      )
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException::class)
+  fun handleValidationException(e: MissingServletRequestParameterException): ResponseEntity<ErrorResponse> {
+    log.debug("Bad Request (400) returned", e.message)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(ErrorResponse(status = (BAD_REQUEST.value()), developerMessage = (e.message)))
+  }
+
+  @ExceptionHandler(PersonNotFoundException::class)
+  fun handlePersonNotFoundException(e: PersonNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Person not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Person not found: ${e.message}",
           developerMessage = e.message
         )
       )
@@ -60,3 +115,5 @@ data class ErrorResponse(
   ) :
     this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }
+
+// TODO: sortout 401 & 403

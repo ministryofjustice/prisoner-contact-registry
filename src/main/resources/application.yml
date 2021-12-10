@@ -8,15 +8,22 @@ spring:
   codec:
     max-in-memory-size: 10MB
 
+  profiles:
+    group:
+      test:
+        - "stdout"
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${oauth.endpoint.url}/.well-known/jwks.json
+
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
 
-  profiles:
-    group:
-      test:
-        - "stdout"
 
 server:
   port: 8080
@@ -37,7 +44,7 @@ management:
     web:
       base-path: /
       exposure:
-        include: 'info, health'
+        include: 'info, health, ping'
   endpoint:
     health:
       cache:
@@ -49,3 +56,6 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+
+oauth:
+  token.url: ${oauth.endpoint.url}/oauth/token
