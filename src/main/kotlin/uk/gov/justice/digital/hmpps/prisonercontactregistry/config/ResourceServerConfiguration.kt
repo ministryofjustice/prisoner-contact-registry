@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.security.AuthAwareTo
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
+
   override fun configure(http: HttpSecurity) {
     http
       .sessionManagement()
@@ -19,11 +20,14 @@ class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
       .and().csrf().disable()
       .authorizeRequests { auth ->
         auth.antMatchers(
+          "/health/**", "/info",
+          "/v3/api-docs/**",
+          "/swagger-ui/**", "/swagger-ui.html",
+          "/swagger-resources",
+          "/swagger-resources/configuration/ui",
+          "/swagger-resources/configuration/security",
           "/webjars/**", "/favicon.ico", "/csrf",
-          "/health/**", "/info", "/prisoner-contacts/**",
-          "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
-        )
-          .permitAll().anyRequest().authenticated()
+        ).permitAll().anyRequest().authenticated()
       }.oauth2ResourceServer().jwt().jwtAuthenticationConverter(AuthAwareTokenConverter())
   }
 }

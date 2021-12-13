@@ -4,6 +4,9 @@ orbs:
   hmpps: ministryofjustice/hmpps@3.11
 
 parameters:
+  docker-image-name:
+    type: string
+    default: 'quay.io/hmpps/prisoner-contact-registry'
   alerts-slack-channel:
     type: string
     default: dps_alerts_security
@@ -56,6 +59,7 @@ workflows:
           name: helm_lint
       - hmpps/build_docker:
           name: build_docker
+          image_name: << pipeline.parameters.docker-image-name >>
           filters:
             branches:
               only:
@@ -80,8 +84,8 @@ workflows:
           name: deploy_preprod
           env: "preprod"
           context:
-            - hmpps-common-vars
             - prisoner-contact-registry-preprod
+            - hmpps-common-vars
           requires:
             - request-preprod-approval
 #      - request-prod-approval:
@@ -113,6 +117,7 @@ workflows:
           context:
             - hmpps-common-vars
       - hmpps/trivy_latest_scan:
+          image_name: << pipeline.parameters.docker-image-name >>
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
           context:
             - hmpps-common-vars

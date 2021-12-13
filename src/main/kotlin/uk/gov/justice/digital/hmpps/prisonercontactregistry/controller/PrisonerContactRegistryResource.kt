@@ -31,10 +31,7 @@ class PrisonerContactRegistryResource(
       )
     ]
   )
-  fun getPing(): String = "PONG!"
-
-  @GetMapping("/ping-it")
-  fun getPingIt(): String = contactService.getPingMsg()
+  fun getPing(): String = contactService.getPingMsg()
 
   // @PreAuthorize("hasRole('PRISONER_CONTACT')") - use visits/dev to start
   // @PreAuthorize("hasRole('VIEW_PRISONER_DATA')")

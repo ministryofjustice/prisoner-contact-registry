@@ -6,19 +6,19 @@ import java.time.LocalDate
 
 @Schema(description = "A contact for a prisoner")
 class ContactDTO private constructor(
-  @Schema(description = "Unique Identifier for this contact (from NOMIS)", example = "123", required = true) val nomisPersonId: String,
-  @Schema(description = "Contact first name", example = "123", required = false) val firstName: String?,
-  @Schema(description = "Contact middle name", example = "123", required = false) val middleName: String?,
-  @Schema(description = "Contact last name", example = "123", required = false) val lastName: String?,
-  @Schema(description = "Contact date of birth", example = "123", required = false) val dateOfBirth: LocalDate?,
-  @Schema(description = "Code for relationship to Prisoner", example = "123", required = false) val relationshipType: String?,
-  @Schema(description = "Description of relationship to Prisoner", example = "123", required = false) val relationshipDescription: String?,
-  @Schema(description = "Type of Contact", example = "123", required = false) val contactType: String?,
-  @Schema(description = "Description of Contact Type", example = "123", required = false) val contactTypeDescription: String?,
+  @Schema(description = "Unique Identifier for this contact (from NOMIS)", example = "12345", required = true) val nomisPersonId: String,
+  @Schema(description = "Contact first name", example = "First", required = false) val firstName: String?,
+  @Schema(description = "Contact middle name", example = "Middle", required = false) val middleName: String?,
+  @Schema(description = "Contact last name", example = "Last", required = false) val lastName: String?,
+  @Schema(description = "Contact date of birth", example = "2000-10-31", required = false) val dateOfBirth: LocalDate?,
+  @Schema(description = "Code for relationship to Prisoner", example = "Type", required = false) val relationshipType: String?,
+  @Schema(description = "Description of relationship to Prisoner", example = "", required = false) val relationshipDescription: String?,
+  @Schema(description = "Type of Contact", example = "Type", required = false) val contactType: String?,
+  @Schema(description = "Description of Contact Type", example = "", required = false) val contactTypeDescription: String?,
   @Schema(description = "Approved Visitor Flag", required = false) val approvedVisitor: Boolean = false,
   @Schema(description = "Emergency Contact Flag", required = false) val emergencyContact: Boolean = false,
   @Schema(description = "Next of Kin Flag", required = false) val nextOfKin: Boolean = false,
-  @Schema(description = "Additional Information", example = "123", required = false) val commentText: String?,
+  @Schema(description = "Additional Information", example = "", required = false) val commentText: String?,
   @Schema(description = "Restriction List", required = false) val restrictions: List<RestrictionDto> = listOf()
 ) {
 
