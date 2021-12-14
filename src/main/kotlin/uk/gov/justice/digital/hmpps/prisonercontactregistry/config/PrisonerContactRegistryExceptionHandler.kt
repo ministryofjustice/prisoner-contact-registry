@@ -116,4 +116,4 @@ data class ErrorResponse(
     this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }
 
-// TODO: sortout 401 & 403
+// TODO: sort out 401 & 403

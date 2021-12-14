@@ -1,16 +1,3 @@
-server:
-  shutdown: immediate
-
-aws:
-  provider: localstack
-
-oauth:
-  endpoint.url: http://localhost:8090/auth
-
-management.endpoint:
-  health.cache.time-to-live: 0
-  info.cache.time-to-live: 0
-
 spring:
   main:
     allow-bean-definition-overriding: true
@@ -20,3 +7,18 @@ spring:
       resourceserver:
         jwt:
           public-key-location: classpath:local-public-key.pub
+
+server:
+  shutdown: immediate
+
+management.endpoint:
+  health.cache.time-to-live: 0
+  info.cache.time-to-live: 0
+
+hmpps.auth.url: http://localhost:8081/auth
+prison.api.url: http://localhost:8082
+
+aws:
+  provider: localstack
+
+

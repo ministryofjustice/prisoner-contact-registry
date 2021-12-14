@@ -9,7 +9,7 @@ class RestrictionDto private constructor(
   @Schema(description = "Restriction Code", example = "123", required = false) val restrictionType: String?,
   @Schema(description = "Description of Restriction Type", example = "123", required = false) val restrictionTypeDescription: String?,
   @Schema(description = "Date from which the restriction applies", example = "2000-10-31", required = false) val startDate: LocalDate?,
-  @Schema(description = "Restriction Expiry", required = false) val expiryDate: LocalDate?,
+  @Schema(description = "Restriction Expiry", example = "2000-10-31", required = false) val expiryDate: LocalDate?,
   @Schema(description = "true if applied globally to the contact or false if applied in the context of a visit", required = false) val globalRestriction: Boolean = false,
   @Schema(description = "Comment text", example = "123", required = false) val comment: String?
 ) {

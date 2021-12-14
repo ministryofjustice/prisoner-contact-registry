@@ -15,6 +15,8 @@ class PrisonerContactRegistryService {
 
   fun getContactById(nomisPersonId: String): ContactDTO {
     // TODO: ContactDTO -> aggregate dto or update to PrisonAPI, just stub data for now
+    // look at uk.gov.justice.digital.hmpps.pcms.service.PrisonerProfileService#getProfile
+
     return ContactDTO.Builder(nomisPersonId)
       .firstName("Phil")
       .lastName("Milne")
