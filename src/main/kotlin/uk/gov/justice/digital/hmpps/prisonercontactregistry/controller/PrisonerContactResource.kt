@@ -1,53 +1,44 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDTO
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Contact
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryService
 
 @RestController
-@RequestMapping(name = "Contact Resource", path = ["/prisoner-contacts"], produces = [MediaType.APPLICATION_JSON_VALUE])
-class PrisonerContactRegistryResource(
+@Validated
+@RequestMapping(name = "Contact Resource", path = ["/prisoners"], produces = [MediaType.APPLICATION_JSON_VALUE])
+class PrisonerContactResource(
   private val contactService: PrisonerContactRegistryService
 ) {
 
-  @GetMapping("/ping")
-  @Operation(
-    summary = "Get Ping",
-    description = "Retrieve Ping Message",
-    responses = [
-      ApiResponse(
-        responseCode = "200",
-        description = "Ping Msg Returned"
-      )
-    ]
-  )
-  fun getPing(): String = contactService.getPingMsg()
-
-  // @PreAuthorize("hasRole('PRISONER_CONTACT')") - use visits/dev to start
-  // @PreAuthorize("hasRole('VIEW_PRISONER_DATA')")
-  @PreAuthorize("hasRole('VISIT_SCHEDULER')")
-  @GetMapping("{nomisPersonId}")
+  @PreAuthorize("hasRole('OFFENDER_CONTACTS')")
+  @GetMapping("{prisonerId}/contacts")
   @Operation(
     summary = "Get Prisoner Contact",
-    description = "Returns details of a prisoner contact",
+    description = "Returns details of a prisoner contacts",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Prisoner Contact Information Returned"
+        description = "Prisoner Contacts Information Returned"
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Incorrect request to Get Prisoner Contact for Person Identifier",
+        description = "Incorrect request to Get Prisoner Contacts for Prisoner Identifier",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
       ),
       ApiResponse(
@@ -57,18 +48,40 @@ class PrisonerContactRegistryResource(
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Incorrect permissions retrieve a Prisoner Contact",
+        description = "Incorrect permissions retrieve a Prisoner Contacts",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Prisoner Contact not found",
+        description = "Prisoner not found",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
       ),
     ]
   )
   fun getPrisonerContact(
-    @Schema(description = "NOMIS Person Identifier", example = "ID12345", required = true)
-    @PathVariable nomisPersonId: String
-  ): ContactDTO = contactService.getContactById(nomisPersonId)
+    @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
+    @PathVariable prisonerId: String,
+    @RequestParam(value = "type", required = false)
+    @Parameter(
+      description = "Query by Type (NOMIS Contact Type)",
+      example = "S"
+    ) contactType: String?,
+    @RequestParam(value = "id", required = false)
+    @Parameter(
+      description = "Query by Person Identifier (NOMIS Person ID)",
+      example = "9147510"
+    ) personId: Long?
+  ): List<Contact> {
+    log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId")
+    return contactService.getContactList(prisonerId, contactType, personId)
+
+    // 400 invalid prisonerId - bad request
+    // 404 prisonerId not found
+    // 200 contact list - full
+    // 200 empty list - no contacts found
+  }
+
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
 }

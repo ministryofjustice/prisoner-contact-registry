@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.16"
-  kotlin("plugin.spring") version "1.6.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.1"
+  kotlin("plugin.spring") version "1.6.10"
   idea
 }
 
@@ -18,15 +18,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
   // Swagger
-  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.5.12")
-  implementation("org.springdoc:springdoc-openapi-ui:1.5.12")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.12")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.12")
+  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.4")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.4")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.4")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.4")
 
   // AWS
 
   // Insights
-  agentDeps("com.microsoft.azure:applicationinsights-agent:3.2.0-BETA.4")
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.2.4")
 
   // DB
 
@@ -36,13 +36,11 @@ dependencies {
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.28.0")
   testImplementation("org.springframework.security:spring-security-test")
+  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
 }
 
 java {
   toolchain.languageVersion.set(JavaLanguageVersion.of(16))
-}
-repositories {
-  mavenCentral()
 }
 
 tasks {

@@ -1,9 +1,3 @@
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          public-key-location: classpath:local-public-key.pub
 
 server:
   shutdown: immediate
@@ -13,4 +7,8 @@ management.endpoint:
   info.cache.time-to-live: 0
 
 hmpps.auth.url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
-prison.api.url: https://api-dev.prison.service.justice.gov.uk
+
+prison:
+  api:
+    url: https://api-dev.prison.service.justice.gov.uk
+    timeout: 5s

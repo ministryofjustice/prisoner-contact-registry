@@ -38,6 +38,21 @@ To create a Token (local):
 curl --location --request POST "http://localhost:8081/auth/oauth/token?grant_type=client_credentials" --header "Authorization: Basic $(echo -n {Client}:{ClientSecret} | base64)"
 ```
 
+Call info endpoint:
+```
+$ curl 'http://localhost:8080/info' -i -X GET
+```
+
+## Swagger v3
+Prisoner Contact Registry
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+Export Spec
+```
+http://localhost:8080/v3/api-docs?group=full-api
+```
 
 ## App Insights
 Future addition ...

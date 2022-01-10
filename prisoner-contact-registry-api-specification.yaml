@@ -1,109 +1,181 @@
-openapi: "3.0.2"
+openapi: 3.0.1
 info:
-  title: Prisoner Contact Registry
-  version: "1.0"
+  title: prisoner-contact-registry
+  description: API providing prisoner contact details
+  contact:
+    name: HMPPS Digital Studio
+    email: feedback@digital.justice.gov.uk
+  version: '2022-01-20'
 servers:
-  - url: https://prisoner-contact-registry.gov.uk/v1
-    variables:
-      environment:
-        default: test # Test
-        enum:
-          - dev       #Development
-          - test      #Test
-          - preprod   #Pre-production
-          - Prod      #Production
+  - url: https://prisoner-contact-registry-preprod.hmpps.service.justice.gov.uk
+    description: PreProd
+  - url: https://prisoner-contact-registry-dev.hmpps.service.justice.gov.uk
+    description: Development
+  - url: http://localhost:8080
+    description: Local
 paths:
-  /prisoner-contacts/{nomisPersonId}:
+  "/prisoners/{prisonerId}/contacts":
     get:
-      security:
-        - bearerAuth: []
-      summary: Returns details of a prisoner contact
       tags:
-        - prisoner-contacts
-      operationId: getprisonerContactDetails
+        - prisoner-contact-resource
+      summary: Get Prisoner Contact
+      description: Returns details of a prisoner contacts
+      operationId: getPrisonerContact
       parameters:
-        - name: nomisPersonId
+        - name: prisonerId
           in: path
-          description: NOMIS Person Identifier
           required: true
           schema:
             type: string
+            description: Prisoner Identifier (NOMIS Offender No)
+            example: A1234AA
+        - name: type
+          in: query
+          description: Query by Type (NOMIS Contact Type)
+          required: false
+          schema:
+            type: string
+          example: S
+        - name: id
+          in: query
+          description: Query by Person Identifier (NOMIS Person ID)
+          required: false
+          schema:
+            type: integer
+            format: int64
+          example: 9147510
       responses:
-        200:
-          description: Success
+        '200':
+          description: Prisoner Contacts Information Returned
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Contact'
-        404:
-          description: Contact not found
+                  "$ref": "#/components/schemas/OffenderContact"
+        '400':
+          description: Incorrect request to Get Prisoner Contacts for Prisoner Identifier
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/NonSuccessResponse'
-        401:
-          description: Authentication required.
+                "$ref": "#/components/schemas/ErrorResponse"
+        '401':
+          description: Unauthorized to access this endpoint
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/NonSuccessResponse'
-        403:
-          description: Access denied
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: Incorrect permissions retrieve a Prisoner Contacts
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/NonSuccessResponse'
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: Prisoner not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
   schemas:
-    NonSuccessResponse:
+    ErrorResponse:
+      required:
+        - status
       type: object
       properties:
-        applicationErrorCode:
+        status:
+          type: integer
+          format: int32
+        errorCode:
+          type: integer
+          format: int32
+        userMessage:
           type: string
-        applicationErrorDescription:
+        developerMessage:
           type: string
-    Contact:
+        moreInfo:
+          type: string
+    ContactRestriction:
+      required:
+        - globalRestriction
       type: object
+      properties:
+        restrictionType:
+          type: string
+          description: Restriction Type Code
+          example: '123'
+        restrictionTypeDescription:
+          type: string
+          description: Description of Restriction Type
+          example: '123'
+        startDate:
+          type: string
+          description: Date from which the restriction applies
+          format: date
+          example: '2000-10-31'
+        expiryDate:
+          type: string
+          description: Restriction Expiry
+          format: date
+          example: '2000-10-31'
+        globalRestriction:
+          type: boolean
+          description: True if applied globally to the contact or False if applied
+            in the context of a visit
+        comment:
+          type: string
+          description: Additional Information
+          example: This is a comment text
       description: A contact for a prisoner
+    OffenderContact:
+      required:
+        - addresses
+        - approvedVisitor
+        - emergencyContact
+        - nextOfKin
+        - personId
+        - restrictions
+      type: object
       properties:
-        nomisPersonId:
-          type: string
-          description: Unique Identifier for this contact (from NOMIS)
+        personId:
+          type: integer
+          description: Identifier for this contact (Person in NOMIS)
+          format: int64
+          example: 5871791
         firstName:
           type: string
-          description: Contact first name
+          description: First name
+          example: John
         middleName:
           type: string
-          description: Contact middle name
+          description: Middle name
+          example: Mark
         lastName:
           type: string
-          description: Contact last name
+          description: Last name
+          example: Smith
         dateOfBirth:
           type: string
-          description: Contact date of birth
+          description: Date of birth
           format: date
-        relationshipType:
+          example: '1980-01-28'
+        relationshipCode:
           type: string
           description: Code for relationship to Prisoner
+          example: RO
         relationshipDescription:
           type: string
           description: Description of relationship to Prisoner
+          example: Responsible Officer
         contactType:
           type: string
           description: Type of Contact
+          example: O
         contactTypeDescription:
           type: string
           description: Description of Contact Type
+          example: Official
         approvedVisitor:
           type: boolean
           description: Approved Visitor Flag
@@ -113,33 +185,135 @@ components:
         nextOfKin:
           type: boolean
           description: Next of Kin Flag
+        restrictions:
+          type: array
+          description: List of restrictions associated with the contact
+          items:
+            "$ref": "#/components/schemas/ContactRestriction"
+        addresses:
+          type: array
+          description: List of addresses associated with the contact
+          items:
+            "$ref": "#/components/schemas/PersonAddress"
         commentText:
           type: string
           description: Additional Information
-        restrictions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Restriction'
-    Restriction:
+          example: This is a comment text
+      description: A contact for a prisoner
+    PersonAddress:
+      required:
+        - addressUsages
+        - noFixedAddress
+        - phones
+        - primary
       type: object
       properties:
-        restrictionType:
+        addressType:
           type: string
-          description: Restriction Code
-        restrictionTypeDescription:
+          description: Address Type
+          example: BUS
+        flat:
           type: string
-          description: Description of Restriction Type
-        startDate:
+          description: Flat
+          example: 3B
+        premise:
           type: string
-          description: Date from which the restriction applies
-          format: date
-        expiryDate:
+          description: Premise
+          example: Liverpool Prison
+        street:
           type: string
-          description: Restriction Expiry
-        globalRestriction:
-          type: boolean
-          description: true if applied globally to the contact or false if applied in the context of a visit
+          description: Street
+          example: Slinn Street
+        locality:
+          type: string
+          description: Locality
+          example: Brincliffe
+        town:
+          type: string
+          description: Town/City
+          example: Liverpool
+        postalCode:
+          type: string
+          description: Postal Code
+          example: LI1 5TH
+        county:
+          type: string
+          description: County
+          example: HEREFORD
+        country:
+          type: string
+          description: Country
+          example: ENG
         comment:
           type: string
-          description: Comment text
-
+          description: Additional Information
+          example: This is a comment text
+        primary:
+          type: boolean
+          description: Primary Address
+          example: false
+        noFixedAddress:
+          type: boolean
+          description: No Fixed Address
+          example: false
+        startDate:
+          type: string
+          description: Date Added
+          format: date
+          example: '2000-10-31'
+        endDate:
+          type: string
+          description: Date ended
+          format: date
+          example: '2000-10-31'
+        phones:
+          type: array
+          description: The phone number associated with the address
+          items:
+            "$ref": "#/components/schemas/PersonTelephone"
+        addressUsages:
+          type: array
+          description: The address usages/types
+          items:
+            "$ref": "#/components/schemas/PersonAddressUsage"
+      description: An address
+    PersonAddressUsage:
+      type: object
+      properties:
+        addressUsage:
+          type: string
+          description: The address usages
+          example: HDC
+        addressUsageDescription:
+          type: string
+          description: The address usages description
+          example: HDC Address
+        activeFlag:
+          type: boolean
+          description: Active Flag
+          example: true
+      description: An Offender's address usage
+    PersonTelephone:
+      required:
+        - number
+        - type
+      type: object
+      properties:
+        number:
+          type: string
+          description: Telephone number
+          example: 0114 2345678
+        type:
+          type: string
+          description: Telephone type
+          example: TEL
+        ext:
+          type: string
+          description: Telephone extension number
+          example: '123'
+      description: Telephone Details
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
