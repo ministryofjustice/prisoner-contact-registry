@@ -1,6 +1,10 @@
 info.app:
   name: Prisoner Contact Registry
   version: 1.0
+  description: API providing prisoner contact details
+  contact:
+    name: HMPPS Digital Studio
+    email: feedback@digital.justice.gov.uk
 
 spring:
   application:
@@ -15,12 +19,13 @@ spring:
         - dev
       test:
         - stdout
-        - dev
+        - test
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
+    default-property-inclusion: non_null
 
   security:
     oauth2:
@@ -30,12 +35,6 @@ spring:
       client:
         registration:
           prison-api:
-            provider: hmpps-auth
-            client-id: ${system.client.id}
-            client-secret: ${system.client.secret}
-            authorization-grant-type: client_credentials
-            scope: read
-          hmpps-auth-api:
             provider: hmpps-auth
             client-id: ${system.client.id}
             client-secret: ${system.client.secret}
@@ -76,4 +75,8 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+
+prison:
+  api:
+    timeout: 10s
 

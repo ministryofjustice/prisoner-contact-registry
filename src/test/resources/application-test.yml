@@ -11,14 +11,16 @@ spring:
 server:
   shutdown: immediate
 
+aws:
+  provider: localstack
+
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
 
 hmpps.auth.url: http://localhost:8081/auth
-prison.api.url: http://localhost:8082
 
-aws:
-  provider: localstack
-
-
+prison:
+  api:
+    url: http://localhost:8082
+    timeout: 5s
