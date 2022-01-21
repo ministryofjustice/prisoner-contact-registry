@@ -27,28 +27,28 @@ internal class PrisonerContactRegistryServiceTest {
 
   private val apiClient = mock<PrisonApiClient>()
 
-  private val personTelephone = Telephone.Builder(
+  private val personTelephone = Telephone(
     number = "0114 2345678", type = "TEL", ext = "123"
-  ).build()
-  private val personAddressUsage = AddressUsage.Builder(
+  )
+  private val personAddressUsage = AddressUsage(
     addressUsage = "HDC", addressUsageDescription = "HDC Address", activeFlag = false
-  ).build()
-  private val personAddress = Address.Builder(
+  )
+  private val personAddress = Address(
     addressType = "BUS", flat = "3B", premise = "Liverpool Prison", street = "Slinn Street", locality = "Brincliffe",
     town = "Liverpool", postalCode = "LI1 5TH", county = "HEREFORD", country = "ENG",
     comment = "This is a comment text", primary = false, noFixedAddress = false, startDate = LocalDate.now(),
     endDate = LocalDate.now(), phones = listOf(personTelephone), addressUsages = listOf(personAddressUsage)
-  ).build()
-  private val contactRestriction = Restriction.Builder(
+  )
+  private val contactRestriction = Restriction(
     restrictionType = "123", restrictionTypeDescription = "123", startDate = LocalDate.now(),
     expiryDate = LocalDate.now(), globalRestriction = false, comment = "This is a comment text"
-  ).build()
-  private val offenderContact = Contact.Builder(
+  )
+  private val offenderContact = Contact(
     personId = 5871791, firstName = "John", middleName = "Mark", lastName = "Smith", dateOfBirth = LocalDate.now(),
     relationshipCode = "RO", relationshipDescription = "Responsible Officer", contactType = "O",
     contactTypeDescription = "Official", approvedVisitor = false, emergencyContact = false, nextOfKin = false,
     restrictions = listOf(contactRestriction), addresses = listOf(personAddress), commentText = "This is a comment text"
-  ).build()
+  )
 
   @BeforeEach
   fun setUp() {

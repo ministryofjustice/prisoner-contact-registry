@@ -74,11 +74,6 @@ class PrisonerContactResource(
   ): List<Contact> {
     log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId")
     return contactService.getContactList(prisonerId, contactType, personId)
-
-    // 400 invalid prisonerId - bad request
-    // 404 prisonerId not found
-    // 200 contact list - full
-    // 200 empty list - no contacts found
   }
 
   companion object {

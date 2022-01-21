@@ -25,7 +25,7 @@ class PrisonApiMockServer : WireMockServer(8082) {
     )
   }
 
-  fun stubGetOffenderContactSingleContact(offenderNo: String) {
+  fun stubGetOffenderContactFullContact(offenderNo: String) {
     stubFor(
       get("/api/offenders/$offenderNo/contacts")
         .willReturn(
@@ -76,6 +76,44 @@ class PrisonApiMockServer : WireMockServer(8082) {
     )
   }
 
+  fun stubGetOffenderContactMinimumContact(offenderNo: String) {
+    stubFor(
+      get("/api/offenders/$offenderNo/contacts")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .withStatus(200)
+            .withBody(
+              """
+                {
+                "offenderContacts": [
+                  {
+                    "lastName": "Ireron",
+                    "firstName": "Ehicey",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405,
+                    "restrictions": [
+                      {
+                          "restrictionId": 22022,
+                          "restrictionType": "BAN",
+                          "restrictionTypeDescription": "Banned",
+                          "startDate": "2012-09-13",
+                          "globalRestriction": false
+                      }
+                    ]
+                  }
+                ]
+                }
+              """.trimIndent()
+            )
+        )
+    )
+  }
+
   fun stubGetOffenderNotFound(offenderNo: String) {
     stubFor(
       get("/api/offenders/$offenderNo/contacts")
@@ -103,7 +141,7 @@ class PrisonApiMockServer : WireMockServer(8082) {
     )
   }
 
-  fun stubGetPersonAddressesSingleAddress(personId: Long) {
+  fun stubGetPersonAddressesFullAddress(personId: Long) {
     stubFor(
       get("/api/persons/$personId/addresses")
         .willReturn(
@@ -143,6 +181,39 @@ class PrisonApiMockServer : WireMockServer(8082) {
                           "addressUsage": "HDC",
                           "addressUsageDescription": "HDC Address",
                           "activeFlag": true
+                        }
+                      ]
+                  }
+              ]
+              """.trimIndent()
+            )
+        )
+    )
+  }
+
+  fun stubGetPersonAddressesMinimumAddress(personId: Long) {
+    stubFor(
+      get("/api/persons/$personId/addresses")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .withStatus(200)
+            .withBody(
+              """
+                [
+                  {
+                      "primary": true,
+                      "noFixedAddress": false,
+                      "phones": [
+                        {
+                            "phoneId": 620163,
+                            "number": "504 555 24302",
+                            "type": "BUS"
+                        }
+                      ],
+                      "addressUsages": [
+                        {
+                          "addressId": "23422313"
                         }
                       ]
                   }

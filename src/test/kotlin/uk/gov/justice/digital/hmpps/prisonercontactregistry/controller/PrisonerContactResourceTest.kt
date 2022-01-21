@@ -40,12 +40,12 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `prisoner has one full contact`() {
+  fun `prisoner has one full contact with address`() {
     val prisonerId = "A1234AA"
     val personId: Long = 2187521
 
-    prisonApiMockServer.stubGetOffenderContactSingleContact(prisonerId)
-    prisonApiMockServer.stubGetPersonAddressesSingleAddress(personId)
+    prisonApiMockServer.stubGetOffenderContactFullContact(prisonerId)
+    prisonApiMockServer.stubGetPersonAddressesFullAddress(personId)
 
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")
       .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
@@ -98,6 +98,75 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `prisoner has one minimum contact`() {
+    val prisonerId = "A1234AA"
+    val personId: Long = 2187521
+
+    prisonApiMockServer.stubGetOffenderContactMinimumContact(prisonerId)
+    prisonApiMockServer.stubGetPersonAddressesMinimumAddress(personId)
+
+    webTestClient.get().uri("/prisoners/$prisonerId/contacts")
+      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("$.length()").isEqualTo(1)
+      .jsonPath("$[0].firstName").isEqualTo("Ehicey")
+      .jsonPath("$[0].lastName").isEqualTo("Ireron")
+      .jsonPath("$[0].relationshipCode").isEqualTo("PROB")
+      .jsonPath("$[0].contactType").isEqualTo("O")
+      .jsonPath("$[0].approvedVisitor").isEqualTo("false")
+      .jsonPath("$[0].emergencyContact").isEqualTo("false")
+      .jsonPath("$[0].nextOfKin").isEqualTo("false")
+      .jsonPath("$[0].restrictions.length()").isEqualTo(1)
+      .jsonPath("$[0].restrictions[0].restrictionType").isEqualTo("BAN")
+      .jsonPath("$[0].restrictions[0].restrictionTypeDescription").isEqualTo("Banned")
+      .jsonPath("$[0].restrictions[0].startDate").isEqualTo("2012-09-13")
+      .jsonPath("$[0].restrictions[0].globalRestriction").isEqualTo(false)
+      .jsonPath("$[0].addresses.length()").isEqualTo(0)
+  }
+
+  @Test
+  fun `prisoner has one minimum address`() {
+    val prisonerId = "A1234AA"
+    val personId: Long = 2187521
+
+    prisonApiMockServer.stubGetOffenderContactFullContact(prisonerId)
+    prisonApiMockServer.stubGetPersonAddressesMinimumAddress(personId)
+
+    webTestClient.get().uri("/prisoners/$prisonerId/contacts")
+      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("$.length()").isEqualTo(1)
+      .jsonPath("$[0].addresses.length()").isEqualTo(1)
+      .jsonPath("$[0].addresses[0].primary").isEqualTo(true)
+      .jsonPath("$[0].addresses[0].noFixedAddress").isEqualTo(false)
+      .jsonPath("$[0].addresses[0].phones.length()").isEqualTo(1)
+      .jsonPath("$[0].addresses[0].phones[0].number").isEqualTo("504 555 24302")
+      .jsonPath("$[0].addresses[0].phones[0].type").isEqualTo("BUS")
+      .jsonPath("$[0].addresses[0].addressUsages.length()").isEqualTo(1)
+  }
+
+  @Test
+  fun `prisoner has one contact with no address`() {
+    val prisonerId = "A1234AA"
+    val personId: Long = 2187521
+
+    prisonApiMockServer.stubGetOffenderContactFullContact(prisonerId)
+    prisonApiMockServer.stubGetPersonAddressesEmpty(personId)
+
+    webTestClient.get().uri("/prisoners/$prisonerId/contacts")
+      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("$.length()").isEqualTo(1)
+      .jsonPath("$[0].addresses.length()").isEqualTo(0)
+  }
+
+  @Test
   fun `prisoner has no contacts`() {
     val prisonerId = "A1234AA"
     prisonApiMockServer.stubGetOffenderContactsEmpty(prisonerId)
@@ -124,7 +193,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     val prisonerId = "A1234AA"
     val personId: Long = 2187521
 
-    prisonApiMockServer.stubGetOffenderContactSingleContact(prisonerId)
+    prisonApiMockServer.stubGetOffenderContactFullContact(prisonerId)
     prisonApiMockServer.stubGetPersonNotFound(personId)
 
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")

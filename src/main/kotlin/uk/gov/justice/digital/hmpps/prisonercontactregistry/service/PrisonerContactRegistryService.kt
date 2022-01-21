@@ -16,10 +16,9 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null): List<Contact> {
     // Prisoners (Offenders) have a subset of Contacts (Persons / Visitors) which can be filtered by type and person id.
     // When filtering the offenders contacts by type of person this results in a query result (list of matching contacts
-    // or empty list)
-    // If a prisoner is not found this results in a PrisonerNotFoundException (404).
+    // or empty list) If a prisoner is not found this results in a PrisonerNotFoundException (404).
 
-    var contacts = getContactById(prisonerId) ?: emptyList()
+    var contacts = getContactById(prisonerId)
 
     if (personId != null) {
       contacts = filterByPersonId(contacts, personId)
@@ -31,19 +30,19 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
     contacts.forEach {
       try {
-        it.addresses = getAddressesById(it.personId)
+        // In NOMIS a contact does not require a personId
+        it.addresses = it.personId?.let { id -> getAddressesById(id) } ?: emptyList()
       } catch (e: PersonNotFoundException) {
         // Nomis data quality issue - treat as no address data available
         log.warn("Person not found for prisoner $prisonerId contact ${it.personId}")
         it.addresses = emptyList()
       }
     }
-
     return contacts
   }
 
   @Throws(PrisonerNotFoundException::class)
-  protected fun getContactById(id: String): List<Contact>? {
+  private fun getContactById(id: String): List<Contact> {
     try {
       return prisonApiClient.getOffenderContacts(id)!!.offenderContacts
     } catch (e: WebClientResponseException) {
@@ -54,7 +53,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   @Throws(PersonNotFoundException::class)
-  protected fun getAddressesById(id: Long): List<Address> {
+  private fun getAddressesById(id: Long): List<Address> {
     try {
       return prisonApiClient.getPersonAddress(id)!!
     } catch (e: WebClientResponseException) {
@@ -64,11 +63,11 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     }
   }
 
-  protected fun filterByPersonId(contacts: List<Contact>?, personId: Long): List<Contact> {
+  private fun filterByPersonId(contacts: List<Contact>?, personId: Long): List<Contact> {
     return contacts?.filter { it.personId == personId } ?: emptyList()
   }
 
-  protected fun filterByContactType(contacts: List<Contact>?, contactType: String): List<Contact> {
+  private fun filterByContactType(contacts: List<Contact>?, contactType: String): List<Contact> {
     return contacts?.filter { it.contactType.equals(contactType, true) } ?: emptyList()
   }
 

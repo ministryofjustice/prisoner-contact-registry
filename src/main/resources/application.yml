@@ -26,7 +26,6 @@ spring:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
     default-property-inclusion: non_null
-##    default-property-inclusion: non_empty
 
   security:
     oauth2:

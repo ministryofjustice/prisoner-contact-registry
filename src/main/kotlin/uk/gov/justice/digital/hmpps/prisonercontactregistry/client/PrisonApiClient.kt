@@ -27,7 +27,7 @@ class PrisonApiClient(
       .bodyToMono(contacts)
       .block(apiTimeout)
       .also {
-        log.debug("Get offender contact called")
+        log.debug("Get offender contact called for $offenderNo")
       }
   }
 
@@ -38,7 +38,7 @@ class PrisonApiClient(
       .bodyToMono(addresses)
       .block(apiTimeout)
       .also {
-        log.debug("Get person address called")
+        log.debug("Get person address called for $personId")
       }
   }
 
