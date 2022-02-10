@@ -4,11 +4,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
+import org.mockito.kotlin.whenever
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -59,7 +59,7 @@ internal class PrisonerContactRegistryServiceTest {
   fun `Get Contact Returns Contact List`() {
     val prisonerId = "A1234AA"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(listOf(offenderContact)))
 
@@ -75,7 +75,7 @@ internal class PrisonerContactRegistryServiceTest {
   fun `Get Contact Returns Empty Contact List`() {
     val prisonerId = "A1234AA"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(emptyList()))
 
@@ -91,7 +91,7 @@ internal class PrisonerContactRegistryServiceTest {
   fun `Get Contact Throws PrisonerNotFoundException for NOT_FOUND`() {
     val prisonerId = "A1234AA"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenThrow(
       WebClientResponseException.create(HttpStatus.NOT_FOUND.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null)
@@ -108,7 +108,7 @@ internal class PrisonerContactRegistryServiceTest {
   fun `Get Contact Throws WebClientResponseException`() {
     val prisonerId = "A1234AA"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenThrow(
       WebClientResponseException.create(HttpStatus.INTERNAL_SERVER_ERROR.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null)
@@ -125,10 +125,10 @@ internal class PrisonerContactRegistryServiceTest {
   fun `Get Contact Returns Contact List with Address List`() {
     val prisonerId = "A1234AA"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(listOf(offenderContact)))
-    Mockito.`when`(
+    whenever(
       apiClient.getPersonAddress(any())
     ).thenReturn(listOf(personAddress))
 
@@ -147,10 +147,10 @@ internal class PrisonerContactRegistryServiceTest {
   fun `Get Contact Returns Contact List with person Not Found`() {
     val prisonerId = "A1234AA"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(listOf(offenderContact)))
-    Mockito.`when`(
+    whenever(
       apiClient.getPersonAddress(any())
     ).thenThrow(
       WebClientResponseException.create(HttpStatus.NOT_FOUND.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null)
@@ -171,10 +171,10 @@ internal class PrisonerContactRegistryServiceTest {
   fun `Get Contact Returns Contact List with person WebClientResponseException`() {
     val prisonerId = "A1234AA"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(listOf(offenderContact)))
-    Mockito.`when`(
+    whenever(
       apiClient.getPersonAddress(any())
     ).thenThrow(
       WebClientResponseException.create(HttpStatus.INTERNAL_SERVER_ERROR.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null)
@@ -192,7 +192,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
     val contactType = "O"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(listOf(offenderContact)))
 
@@ -209,7 +209,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
     val contactType = "Unknown"
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(listOf(offenderContact)))
 
@@ -226,7 +226,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
     val personId: Long = 5871791
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(listOf(offenderContact)))
 
@@ -243,7 +243,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
     val personId: Long = 1234567
 
-    Mockito.`when`(
+    whenever(
       apiClient.getOffenderContacts(prisonerId)
     ).thenReturn(Contacts(listOf(offenderContact)))
 
