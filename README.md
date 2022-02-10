@@ -1,4 +1,4 @@
-# HMPPS Prisoner  Contact  Registry API
+# HMPPS Prisoner Contact Registry API
 
 [![CircleCI](https://circleci.com/gh/ministryofjustice/prisoner-contact-registry/tree/main.svg?style=shield)](https://app.circleci.com/pipelines/github/ministryofjustice/prisoner-contact-registry)
 
@@ -6,9 +6,6 @@ This is a Spring Boot application, written in Kotlin, providing prisoner contact
 
 Initially a facade over the NOMIS **Prison API** enabling access to data held in **NOMIS**
 
-Draft API Specification  [![API docs](https://img.shields.io/badge/API_docs-view-85EA2D.svg?logo=swagger)](https://editor.swagger.io/?url=https://raw.githubusercontent.com/ministryofjustice/prisoner-contact-registry/main/prisoner-contact-registry-api-specification.yaml)
-
-<!--- Draft Event Specification [![Event docs](https://img.shields.io/badge/Event_docs-view-85EA2D.svg)](https://playground.asyncapi.io/?url=https://raw.githubusercontent.com/ministryofjustice/prisoner-contact-registry/main/prisoner-contact-registry-event-specification.yaml) -->
 
 ## Building
 

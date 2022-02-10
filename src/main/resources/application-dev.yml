@@ -6,9 +6,16 @@ management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
 
-hmpps.auth.url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:local-public-key.pub
+
+hmpps.auth.url: http://localhost:8090/auth
 
 prison:
   api:
-    url: https://api-dev.prison.service.justice.gov.uk
+    url: http://localhost:8091
     timeout: 5s
