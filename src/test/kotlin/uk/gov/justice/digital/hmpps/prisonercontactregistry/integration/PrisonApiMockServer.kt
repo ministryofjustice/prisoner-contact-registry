@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import org.springframework.http.MediaType
 
-class PrisonApiMockServer : WireMockServer(8082) {
+class PrisonApiMockServer : WireMockServer(8091) {
 
   fun stubGetOffenderContactsEmpty(offenderNo: String) {
     stubFor(
