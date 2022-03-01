@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.3"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.4"
   kotlin("plugin.spring") version "1.6.10"
   idea
 }
@@ -26,17 +26,17 @@ dependencies {
   // AWS
 
   // Insights
-  agentDeps("com.microsoft.azure:applicationinsights-agent:3.2.4")
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.2.7")
 
   // DB
 
   // HMPPS Libs
 
   // Test
-  testImplementation("io.jsonwebtoken:jjwt:0.9.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.31.0")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.32.0")
+  testImplementation("io.jsonwebtoken:jjwt:0.9.1")
 }
 
 java {
