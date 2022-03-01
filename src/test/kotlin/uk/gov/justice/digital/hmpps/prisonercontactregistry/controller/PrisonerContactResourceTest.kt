@@ -29,11 +29,11 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `requires correct role OFFENDER_CONTACTS`() {
+    fun `requires correct role PRISONER_CONTACT_REGISTRY`() {
       val prisonerId = "A1234AA"
       prisonApiMockServer.stubGetOffenderContactsEmpty(prisonerId)
       webTestClient.get().uri("/prisoners/$prisonerId/contacts")
-        .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
         .exchange()
         .expectStatus().isOk
     }
@@ -48,7 +48,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     prisonApiMockServer.stubGetPersonAddressesFullAddress(personId)
 
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")
-      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -106,7 +106,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     prisonApiMockServer.stubGetPersonAddressesMinimumAddress(personId)
 
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")
-      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -135,7 +135,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     prisonApiMockServer.stubGetPersonAddressesMinimumAddress(personId)
 
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")
-      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -158,7 +158,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     prisonApiMockServer.stubGetPersonAddressesEmpty(personId)
 
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")
-      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -171,7 +171,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     val prisonerId = "A1234AA"
     prisonApiMockServer.stubGetOffenderContactsEmpty(prisonerId)
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")
-      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -183,7 +183,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     val prisonerId = "A1234AA"
     prisonApiMockServer.stubGetOffenderNotFound(prisonerId)
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")
-      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
       .expectStatus().isNotFound
   }
@@ -197,7 +197,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
     prisonApiMockServer.stubGetPersonNotFound(personId)
 
     webTestClient.get().uri("/prisoners/$prisonerId/contacts")
-      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -209,7 +209,7 @@ class PrisonerContactResourceTest : IntegrationTestBase() {
   fun `bad request`() {
     val prisonerId = "A1234AA"
     webTestClient.get().uri("/prisoners/$prisonerId/contacts?id=ABC")
-      .headers(setAuthorisation(roles = listOf("ROLE_OFFENDER_CONTACTS")))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
       .expectStatus().isBadRequest
   }
