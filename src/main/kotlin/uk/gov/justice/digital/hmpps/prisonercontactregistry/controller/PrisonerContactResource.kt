@@ -26,7 +26,7 @@ class PrisonerContactResource(
   private val contactService: PrisonerContactRegistryService
 ) {
 
-  @PreAuthorize("hasRole('OFFENDER_CONTACTS')")
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping("{prisonerId}/contacts")
   @Operation(
     summary = "Get Prisoner Contact",
