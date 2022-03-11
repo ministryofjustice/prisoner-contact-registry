@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.config
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -138,7 +139,7 @@ class PrisonerContactRegistryExceptionHandler {
   }
 
   companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 }
 
