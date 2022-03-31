@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.2"
   kotlin("plugin.spring") version "1.6.10"
   idea
 }
@@ -10,33 +10,23 @@ configurations {
 
 dependencies {
 
-  // Spring
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+  agentDeps("com.microsoft.azure:applicationinsights-agent")
+
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  // Swagger
   implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.6")
   implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.6.6")
   implementation("org.springdoc:springdoc-openapi-data-rest:1.6.6")
 
-  // AWS
-
-  // Insights
-  agentDeps("com.microsoft.azure:applicationinsights-agent")
-
-  // DB
-
-  // HMPPS Libs
-
-  // Test
   testImplementation("org.springframework.security:spring-security-test")
-  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.32.0")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
+  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
 }
 
 java {
