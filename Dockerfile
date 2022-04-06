@@ -5,7 +5,7 @@ ENV BUILD_NUMBER ${BUILD_NUMBER:-1_0_0}
 
 WORKDIR /app
 ADD . .
-RUN ./gradlew assemble -Dorg.gradle.daemon=false
+RUN ./gradlew clean assemble -Dorg.gradle.daemon=false
 
 FROM openjdk:17-slim
 LABEL maintainer="HMPPS Digital Studio <info@digital.justice.gov.uk>"
@@ -15,7 +15,7 @@ ENV BUILD_NUMBER ${BUILD_NUMBER:-1_0_0}
 
 RUN apt-get update && \
     apt-get -y upgrade && \
-    apt-get install -y curl && \
+    apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Europe/London
