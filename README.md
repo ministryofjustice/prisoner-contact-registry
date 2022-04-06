@@ -109,3 +109,9 @@ To register pre-commit check to run Ktlint format:
 ./gradlew ktlintApplyToIdea addKtlintCheckGitPreCommitHook
 ```
 
+#### Build checks
+
+To run the CircleCI trivy scan locally download and install trivy, build the prisoner-contact-registry docker image and run:
+```
+trivy image prisoner-contact-registry_prisoner-contact-registry
+```
