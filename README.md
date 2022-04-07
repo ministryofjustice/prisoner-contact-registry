@@ -30,6 +30,14 @@ Alternatively the service can be run using docker-compose.
 docker-compose up
 ```
 
+Ports
+
+Service | Port |  
+--- |------
+prisoner-contact-registry | 8080
+hmpps-auth | 8090
+prison-api | 8091
+
 To create a Token (local):
 ```
 curl --location --request POST "http://localhost:8081/auth/oauth/token?grant_type=client_credentials" --header "Authorization: Basic $(echo -n {Client}:{ClientSecret} | base64)"
