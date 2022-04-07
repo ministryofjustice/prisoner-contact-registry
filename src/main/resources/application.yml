@@ -12,21 +12,6 @@ spring:
   codec:
     max-in-memory-size: 10MB
 
-  profiles:
-    group:
-      dev:
-        - stdout
-        - dev
-      test:
-        - stdout
-        - test
-
-  jackson:
-    date-format: "yyyy-MM-dd HH:mm:ss"
-    serialization:
-      WRITE_DATES_AS_TIMESTAMPS: false
-    default-property-inclusion: non_null
-
   security:
     oauth2:
       resourceserver:
@@ -43,6 +28,13 @@ spring:
         provider:
           hmpps-auth:
             token-uri: ${hmpps.auth.url}/oauth/token
+
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    default-property-inclusion: non_null
+
 
 server:
   port: 8080
