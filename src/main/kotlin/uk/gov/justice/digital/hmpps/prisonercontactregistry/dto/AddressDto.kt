@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
 @Schema(description = "An address")
-class Address(
+class AddressDto(
   @Schema(description = "Address Type", example = "BUS", required = false) val addressType: String? = null,
   @Schema(description = "Flat", example = "3B", required = false) val flat: String? = null,
   @Schema(description = "Premise", example = "Liverpool Prison", required = false) val premise: String? = null,
@@ -19,6 +19,6 @@ class Address(
   @Schema(description = "No Fixed Address", example = "N", required = true) val noFixedAddress: Boolean,
   @Schema(description = "Date Added", example = "2000-10-31", required = false) val startDate: LocalDate? = null,
   @Schema(description = "Date ended", example = "2000-10-31", required = false) val endDate: LocalDate? = null,
-  @Schema(description = "The phone number associated with the address", required = false) val phones: List<Telephone> = listOf(),
-  @Schema(description = "The address usages/types", required = false) val addressUsages: List<AddressUsage> = listOf()
+  @Schema(description = "The phone number associated with the address", required = false) val phones: List<TelephoneDto> = listOf(),
+  @Schema(description = "The address usages/types", required = false) val addressUsages: List<AddressUsageDto> = listOf()
 )

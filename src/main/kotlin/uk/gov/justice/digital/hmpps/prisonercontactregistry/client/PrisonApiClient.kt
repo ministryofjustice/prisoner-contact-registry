@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Address
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Contacts
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import java.time.Duration
 
 @Component
@@ -17,10 +17,10 @@ class PrisonApiClient(
   @Value("\${prison.api.timeout:60s}") val apiTimeout: Duration
 ) {
 
-  private val contacts = object : ParameterizedTypeReference<Contacts>() {}
-  private val addresses = object : ParameterizedTypeReference<List<Address>>() {}
+  private val contacts = object : ParameterizedTypeReference<ContactsDto>() {}
+  private val addresses = object : ParameterizedTypeReference<List<AddressDto>>() {}
 
-  fun getOffenderContacts(offenderNo: String): Contacts? {
+  fun getOffenderContacts(offenderNo: String): ContactsDto? {
     return webClient.get()
       .uri("/api/offenders/$offenderNo/contacts")
       .retrieve()
@@ -31,7 +31,7 @@ class PrisonApiClient(
       }
   }
 
-  fun getPersonAddress(personId: Long): List<Address>? {
+  fun getPersonAddress(personId: Long): List<AddressDto>? {
     return webClient.get()
       .uri("/api/persons/$personId/addresses")
       .retrieve()

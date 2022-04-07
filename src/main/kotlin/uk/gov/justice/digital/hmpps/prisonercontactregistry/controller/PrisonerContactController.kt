@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Contact
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryService
 
 @RestController
 @Validated
 @RequestMapping(name = "Contact Resource", path = ["/prisoners"], produces = [MediaType.APPLICATION_JSON_VALUE])
-class PrisonerContactResource(
+class PrisonerContactController(
   private val contactService: PrisonerContactRegistryService
 ) {
 
@@ -71,7 +71,7 @@ class PrisonerContactResource(
       description = "Query by Person Identifier (NOMIS Person ID)",
       example = "9147510"
     ) personId: Long?
-  ): List<Contact> {
+  ): List<ContactDto> {
     log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId")
     return contactService.getContactList(prisonerId, contactType, personId)
   }

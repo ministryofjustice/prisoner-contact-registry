@@ -13,12 +13,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Address
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressUsage
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Contact
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Contacts
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Restriction
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Telephone
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressUsageDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
 import java.time.LocalDate
 
 internal class PrisonerContactRegistryServiceTest {
@@ -27,23 +27,23 @@ internal class PrisonerContactRegistryServiceTest {
 
   private val apiClient = mock<PrisonApiClient>()
 
-  private val personTelephone = Telephone(
+  private val personTelephone = TelephoneDto(
     number = "0114 2345678", type = "TEL", ext = "123"
   )
-  private val personAddressUsage = AddressUsage(
+  private val personAddressUsage = AddressUsageDto(
     addressUsage = "HDC", addressUsageDescription = "HDC Address", activeFlag = false
   )
-  private val personAddress = Address(
+  private val personAddress = AddressDto(
     addressType = "BUS", flat = "3B", premise = "Liverpool Prison", street = "Slinn Street", locality = "Brincliffe",
     town = "Liverpool", postalCode = "LI1 5TH", county = "HEREFORD", country = "ENG",
     comment = "This is a comment text", primary = false, noFixedAddress = false, startDate = LocalDate.now(),
     endDate = LocalDate.now(), phones = listOf(personTelephone), addressUsages = listOf(personAddressUsage)
   )
-  private val contactRestriction = Restriction(
+  private val contactRestriction = RestrictionDto(
     restrictionType = "123", restrictionTypeDescription = "123", startDate = LocalDate.now(),
     expiryDate = LocalDate.now(), globalRestriction = false, comment = "This is a comment text"
   )
-  private val offenderContact = Contact(
+  private val offenderContact = ContactDto(
     personId = 5871791, firstName = "John", middleName = "Mark", lastName = "Smith", dateOfBirth = LocalDate.now(),
     relationshipCode = "RO", relationshipDescription = "Responsible Officer", contactType = "O",
     contactTypeDescription = "Official", approvedVisitor = false, emergencyContact = false, nextOfKin = false,
@@ -61,7 +61,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(listOf(offenderContact)))
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId)
 
@@ -77,7 +77,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(emptyList()))
+    ).thenReturn(ContactsDto(emptyList()))
 
     val contacts = contactService.getContactList(prisonerId)
 
@@ -127,7 +127,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(listOf(offenderContact)))
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
       apiClient.getPersonAddress(any())
     ).thenReturn(listOf(personAddress))
@@ -149,7 +149,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(listOf(offenderContact)))
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
       apiClient.getPersonAddress(any())
     ).thenThrow(
@@ -173,7 +173,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(listOf(offenderContact)))
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
       apiClient.getPersonAddress(any())
     ).thenThrow(
@@ -194,7 +194,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(listOf(offenderContact)))
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, contactType = contactType)
 
@@ -211,7 +211,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(listOf(offenderContact)))
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, contactType = contactType)
 
@@ -228,7 +228,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(listOf(offenderContact)))
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, personId = personId)
 
@@ -245,7 +245,7 @@ internal class PrisonerContactRegistryServiceTest {
 
     whenever(
       apiClient.getOffenderContacts(prisonerId)
-    ).thenReturn(Contacts(listOf(offenderContact)))
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, personId = personId)
 
