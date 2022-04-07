@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 
 @Suppress("ClassName")
-class PrisonerContactResourceTest : IntegrationTestBase() {
+class PrisonerContactControllerTest : IntegrationTestBase() {
 
   @Nested
   inner class authentication {

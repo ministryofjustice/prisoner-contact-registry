@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
 @Schema(description = "A contact for a prisoner")
-class Contact(
+class ContactDto(
   @Schema(description = "Identifier for this contact (Person in NOMIS)", example = "5871791") val personId: Long? = null,
   @Schema(description = "First name", example = "John", required = true) val firstName: String,
   @Schema(description = "Middle name", example = "Mark", required = false) val middleName: String? = null,
@@ -17,7 +17,7 @@ class Contact(
   @Schema(description = "Approved Visitor Flag", required = true) val approvedVisitor: Boolean,
   @Schema(description = "Emergency Contact Flag", required = true) val emergencyContact: Boolean,
   @Schema(description = "Next of Kin Flag", required = true) val nextOfKin: Boolean,
-  @Schema(description = "List of restrictions associated with the contact", required = false) val restrictions: List<Restriction> = listOf(),
-  @Schema(description = "List of addresses associated with the contact", required = false) var addresses: List<Address> = listOf(),
+  @Schema(description = "List of restrictions associated with the contact", required = false) val restrictions: List<RestrictionDto> = listOf(),
+  @Schema(description = "List of addresses associated with the contact", required = false) var addresses: List<AddressDto> = listOf(),
   @Schema(description = "Additional Information", example = "This is a comment text", required = false) val commentText: String? = null
 )

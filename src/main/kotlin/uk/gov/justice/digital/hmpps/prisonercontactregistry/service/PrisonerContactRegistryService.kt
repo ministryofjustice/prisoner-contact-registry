@@ -6,14 +6,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Address
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.Contact
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import java.util.function.Supplier
 
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
 
-  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null): List<Contact> {
+  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null): List<ContactDto> {
     // Prisoners (Offenders) have a subset of Contacts (Persons / Visitors) which can be filtered by type and person id.
     // When filtering the offenders contacts by type of person this results in a query result (list of matching contacts
     // or empty list) If a prisoner is not found this results in a PrisonerNotFoundException (404).
@@ -42,7 +42,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   @Throws(PrisonerNotFoundException::class)
-  private fun getContactById(id: String): List<Contact> {
+  private fun getContactById(id: String): List<ContactDto> {
     try {
       return prisonApiClient.getOffenderContacts(id)!!.offenderContacts
     } catch (e: WebClientResponseException) {
@@ -53,7 +53,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   @Throws(PersonNotFoundException::class)
-  private fun getAddressesById(id: Long): List<Address> {
+  private fun getAddressesById(id: Long): List<AddressDto> {
     try {
       return prisonApiClient.getPersonAddress(id)!!
     } catch (e: WebClientResponseException) {
@@ -63,11 +63,11 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     }
   }
 
-  private fun filterByPersonId(contacts: List<Contact>?, personId: Long): List<Contact> {
+  private fun filterByPersonId(contacts: List<ContactDto>?, personId: Long): List<ContactDto> {
     return contacts?.filter { it.personId == personId } ?: emptyList()
   }
 
-  private fun filterByContactType(contacts: List<Contact>?, contactType: String): List<Contact> {
+  private fun filterByContactType(contacts: List<ContactDto>?, contactType: String): List<ContactDto> {
     return contacts?.filter { it.contactType.equals(contactType, true) } ?: emptyList()
   }
 
