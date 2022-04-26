@@ -72,6 +72,14 @@ workflows:
             - validate
             - build_docker
             - helm_lint
+      - hmpps/deploy_env:
+          name: deploy_staging
+          env: "staging"
+          context:
+            - prisoner-contact-registry-staging
+            - hmpps-common-vars
+          requires:
+            - deploy_dev
       - request-preprod-approval:
           type: approval
           requires:
