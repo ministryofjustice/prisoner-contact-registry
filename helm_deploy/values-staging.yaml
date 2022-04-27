@@ -5,7 +5,7 @@ generic-service:
 
   ingress:
     host: prisoner-contact-registry-staging.hmpps.service.justice.gov.uk
-    contextColour: blue
+    contextColour: green
 
   env:
     SPRING_PROFILES_ACTIVE: "stdout"
