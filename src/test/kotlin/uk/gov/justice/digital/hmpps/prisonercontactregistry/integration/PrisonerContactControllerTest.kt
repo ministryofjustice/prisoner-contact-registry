@@ -1,8 +1,7 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry.controller
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration
 
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 
 @Suppress("ClassName")
 class PrisonerContactControllerTest : IntegrationTestBase() {

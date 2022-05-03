@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry.resource
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.swagger
 
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType

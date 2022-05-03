@@ -35,7 +35,7 @@ class PrisonerContactRegistryExceptionHandler {
     if (e.statusCode.is4xxClientError) {
       log.info("Unexpected client exception with message {}", e.message)
     } else {
-      log.error("Unexpected server exception {}", e)
+      log.error("Unexpected server exception", e)
     }
     return ResponseEntity
       .status(e.rawStatusCode)
@@ -44,7 +44,7 @@ class PrisonerContactRegistryExceptionHandler {
 
   @ExceptionHandler(WebClientException::class)
   fun handleWebClientException(e: WebClientException): ResponseEntity<ErrorResponse> {
-    log.error("Unexpected exception {}", e)
+    log.error("Unexpected exception", e)
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(
@@ -127,7 +127,7 @@ class PrisonerContactRegistryExceptionHandler {
 
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
-    log.error("Unexpected exception {}", e)
+    log.error("Unexpected exception", e)
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(
@@ -147,15 +147,13 @@ data class ErrorResponse(
   val status: Int,
   val errorCode: Int? = null,
   val userMessage: String? = null,
-  val developerMessage: String? = null,
-  val moreInfo: String? = null
+  val developerMessage: String? = null
 ) {
   constructor(
     status: HttpStatus,
     errorCode: Int? = null,
     userMessage: String? = null,
-    developerMessage: String? = null,
-    moreInfo: String? = null
+    developerMessage: String? = null
   ) :
-    this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
+    this(status.value(), errorCode, userMessage, developerMessage)
 }
