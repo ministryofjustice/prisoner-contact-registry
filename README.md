@@ -32,11 +32,11 @@ docker-compose up
 
 Ports
 
-Service | Port |  
---- |------
-prisoner-contact-registry | 8080
-hmpps-auth | 8090
-prison-api | 8091
+| Service                   | Port |  
+|---------------------------|------|
+| prisoner-contact-registry | 8080 |
+| hmpps-auth                | 8090 |
+| prison-api                | 8091 |
 
 To create a Token (local):
 ```

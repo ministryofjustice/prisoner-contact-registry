@@ -1,11 +1,11 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import org.springframework.http.MediaType
 
-class PrisonApiMockServer : WireMockServer(8091) {
+class PrisonApiMockServer : WireMockServer(8092) {
 
   fun stubGetOffenderContactsEmpty(offenderNo: String) {
     stubFor(
