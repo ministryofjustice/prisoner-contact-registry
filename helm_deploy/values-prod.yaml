@@ -5,7 +5,7 @@ generic-service:
   replicaCount: 4
 
   ingress:
-    host: prisoner-contact-registry.hmpps.service.justice.gov.uk
+    host: prisoner-contact-registry.prison.service.justice.gov.uk
     contextColour: green
 
   env:
