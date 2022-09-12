@@ -73,7 +73,11 @@ class PrisonerContactController(
     ) personId: Long?
   ): List<ContactDto> {
     log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId")
-    return contactService.getContactList(prisonerId, contactType, personId)
+    return orderByLastNameAndThenFirstName(contactService.getContactList(prisonerId, contactType, personId))
+  }
+
+  private fun orderByLastNameAndThenFirstName(contactList: List<ContactDto>): List<ContactDto> {
+    return contactList.sortedWith(compareBy({ it.lastName }, { it.firstName }))
   }
 
   companion object {
