@@ -73,11 +73,9 @@ workflows:
       - hmpps/deploy_env:
           name: deploy_staging
           env: "staging"
-          context: hmpps-common-vars
-          filters:
-            branches:
-              only:
-                - main
+          context:
+            - prisoner-contact-registry-staging
+            - hmpps-common-vars
           requires:
             - request-staging-approval
       - request-preprod-approval:
