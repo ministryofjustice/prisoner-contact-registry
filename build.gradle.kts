@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.5"
-  kotlin("jvm") version "1.7.10"
-  kotlin("plugin.spring") version "1.7.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.6"
+  kotlin("jvm") version "1.7.20"
+  kotlin("plugin.spring") version "1.7.20"
   idea
 }
 
@@ -18,10 +18,10 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.11")
+  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.12")
 
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
