@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@5.1
+  hmpps: ministryofjustice/hmpps@6.2
 
 parameters:
   alerts-slack-channel:
@@ -66,10 +66,22 @@ workflows:
             - validate
             - build_docker
             - helm_lint
-      - request-preprod-approval:
+      - request-staging-approval:
           type: approval
           requires:
             - deploy_dev
+      - hmpps/deploy_env:
+          name: deploy_staging
+          env: "staging"
+          context:
+            - prisoner-contact-registry-stage
+            - hmpps-common-vars
+          requires:
+            - request-staging-approval
+      - request-preprod-approval:
+          type: approval
+          requires:
+            - deploy_staging
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"

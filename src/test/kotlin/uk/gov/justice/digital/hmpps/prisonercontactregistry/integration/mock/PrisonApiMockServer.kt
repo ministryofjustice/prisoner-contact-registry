@@ -114,6 +114,95 @@ class PrisonApiMockServer : WireMockServer(8092) {
     )
   }
 
+  fun stubGetOffenderContactsForOrderingByNames(offenderNo: String) {
+    stubFor(
+      get("/api/offenders/$offenderNo/contacts")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .withStatus(200)
+            .withBody(
+              """
+                {
+                "offenderContacts": [
+                  {
+                    "lastName": "Gwyn",
+                    "firstName": "Wyn",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  },
+                  {
+                    "lastName": "Gwyn",
+                    "firstName": "Aeron",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  },
+                  {
+                    "lastName": "Gwyn",
+                    "firstName": "Cynog",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  },
+                  {
+                    "lastName": "Llywelyn",
+                    "firstName": "Gruffydd",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  },                  
+                  {
+                    "lastName": "Aled",
+                    "firstName": "Cynog",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  },
+                  {
+                    "lastName": "Aled",
+                    "firstName": "Wyn",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  },
+                  {
+                    "lastName": "Aled",
+                    "firstName": "Aeron",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  }
+                ]
+                }
+              """.trimIndent()
+            )
+        )
+    )
+  }
+
   fun stubGetOffenderNotFound(offenderNo: String) {
     stubFor(
       get("/api/offenders/$offenderNo/contacts")

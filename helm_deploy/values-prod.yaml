@@ -3,6 +3,8 @@
 
 generic-service:
   replicaCount: 4
+  v1_2_enabled: true
+  v0_47_enabled: false
 
   ingress:
     host: prisoner-contact-registry.prison.service.justice.gov.uk

@@ -166,6 +166,38 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `prisoner has contacts in expected order`() {
+    // Given
+    val prisonerId = "A1234AA"
+
+    prisonApiMockServer.stubGetOffenderContactsForOrderingByNames(prisonerId)
+
+    // When
+    val response = webTestClient.get().uri("/prisoners/$prisonerId/contacts")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+      .exchange()
+
+    // then
+    response.expectStatus().isOk
+      .expectBody()
+      .jsonPath("$.length()").isEqualTo(7)
+      .jsonPath("$[0].lastName").isEqualTo("Aled")
+      .jsonPath("$[0].firstName").isEqualTo("Aeron")
+      .jsonPath("$[1].lastName").isEqualTo("Aled")
+      .jsonPath("$[1].firstName").isEqualTo("Cynog")
+      .jsonPath("$[2].lastName").isEqualTo("Aled")
+      .jsonPath("$[2].firstName").isEqualTo("Wyn")
+      .jsonPath("$[3].lastName").isEqualTo("Gwyn")
+      .jsonPath("$[3].firstName").isEqualTo("Aeron")
+      .jsonPath("$[4].lastName").isEqualTo("Gwyn")
+      .jsonPath("$[4].firstName").isEqualTo("Cynog")
+      .jsonPath("$[5].lastName").isEqualTo("Gwyn")
+      .jsonPath("$[5].firstName").isEqualTo("Wyn")
+      .jsonPath("$[6].lastName").isEqualTo("Llywelyn")
+      .jsonPath("$[6].firstName").isEqualTo("Gruffydd")
+  }
+
+  @Test
   fun `prisoner has no contacts`() {
     val prisonerId = "A1234AA"
     prisonApiMockServer.stubGetOffenderContactsEmpty(prisonerId)
