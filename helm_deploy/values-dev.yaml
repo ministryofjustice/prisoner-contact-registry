@@ -8,6 +8,8 @@ generic-service:
   ingress:
     host: prisoner-contact-registry-dev.prison.service.justice.gov.uk
     contextColour: green
+    v1_2_enabled: true
+    v0_47_enabled: false
 
   env:
     SPRING_PROFILES_ACTIVE: "stdout"
