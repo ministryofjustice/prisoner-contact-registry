@@ -28,26 +28,46 @@ internal class PrisonerContactRegistryServiceTest {
   private val apiClient = mock<PrisonApiClient>()
 
   private val personTelephone = TelephoneDto(
-    number = "0114 2345678", type = "TEL", ext = "123"
+    number = "0114 2345678",
+    type = "TEL",
+    ext = "123",
   )
   private val personAddressUsage = AddressUsageDto(
-    addressUsage = "HDC", addressUsageDescription = "HDC Address", activeFlag = false
+    addressUsage = "HDC",
+    addressUsageDescription = "HDC Address",
+    activeFlag = false,
   )
   private val personAddress = AddressDto(
-    addressType = "BUS", flat = "3B", premise = "Liverpool Prison", street = "Slinn Street", locality = "Brincliffe",
-    town = "Liverpool", postalCode = "LI1 5TH", county = "HEREFORD", country = "ENG",
-    comment = "This is a comment text", primary = false, noFixedAddress = false, startDate = LocalDate.now(),
-    endDate = LocalDate.now(), phones = listOf(personTelephone), addressUsages = listOf(personAddressUsage)
+    addressType = "BUS",
+    flat = "3B",
+    premise = "Liverpool Prison",
+    street = "Slinn Street",
+    locality = "Brincliffe",
+    town = "Liverpool",
+    postalCode = "LI1 5TH",
+    county = "HEREFORD",
+    country = "ENG",
+    comment = "This is a comment text",
+    primary = false,
+    noFixedAddress = false,
+    startDate = LocalDate.now(),
+    endDate = LocalDate.now(),
+    phones = listOf(personTelephone),
+    addressUsages = listOf(personAddressUsage),
   )
   private val contactRestriction = RestrictionDto(
-    restrictionType = "123", restrictionTypeDescription = "123", startDate = LocalDate.now(),
-    expiryDate = LocalDate.now(), globalRestriction = false, comment = "This is a comment text"
+    restrictionType = "123",
+    restrictionTypeDescription = "123",
+    startDate = LocalDate.now(),
+    expiryDate = LocalDate.now(),
+    globalRestriction = false,
+    comment = "This is a comment text",
   )
   private val offenderContact = ContactDto(
     personId = 5871791, firstName = "John", middleName = "Mark", lastName = "Smith", dateOfBirth = LocalDate.now(),
     relationshipCode = "RO", relationshipDescription = "Responsible Officer", contactType = "O",
     contactTypeDescription = "Official", approvedVisitor = false, emergencyContact = false, nextOfKin = false,
-    restrictions = listOf(contactRestriction), addresses = listOf(personAddress), commentText = "This is a comment text"
+    restrictions = listOf(contactRestriction), addresses = listOf(personAddress), commentText = "This is a comment text",
   )
 
   @BeforeEach
@@ -60,7 +80,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId)
@@ -76,7 +96,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(emptyList()))
 
     val contacts = contactService.getContactList(prisonerId)
@@ -92,9 +112,9 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenThrow(
-      WebClientResponseException.create(HttpStatus.NOT_FOUND.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null)
+      WebClientResponseException.create(HttpStatus.NOT_FOUND.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null),
     )
 
     assertThrows<PrisonerNotFoundException> {
@@ -109,9 +129,9 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenThrow(
-      WebClientResponseException.create(HttpStatus.INTERNAL_SERVER_ERROR.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null)
+      WebClientResponseException.create(HttpStatus.INTERNAL_SERVER_ERROR.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null),
     )
 
     assertThrows<WebClientResponseException> {
@@ -126,10 +146,10 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
-      apiClient.getPersonAddress(any())
+      apiClient.getPersonAddress(any()),
     ).thenReturn(listOf(personAddress))
 
     val contacts = contactService.getContactList(prisonerId)
@@ -148,12 +168,12 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
-      apiClient.getPersonAddress(any())
+      apiClient.getPersonAddress(any()),
     ).thenThrow(
-      WebClientResponseException.create(HttpStatus.NOT_FOUND.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null)
+      WebClientResponseException.create(HttpStatus.NOT_FOUND.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null),
     )
 
     val contacts = contactService.getContactList(prisonerId)
@@ -172,12 +192,12 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
-      apiClient.getPersonAddress(any())
+      apiClient.getPersonAddress(any()),
     ).thenThrow(
-      WebClientResponseException.create(HttpStatus.INTERNAL_SERVER_ERROR.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null)
+      WebClientResponseException.create(HttpStatus.INTERNAL_SERVER_ERROR.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null),
     )
 
     assertThrows<WebClientResponseException> {
@@ -193,7 +213,7 @@ internal class PrisonerContactRegistryServiceTest {
     val contactType = "O"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, contactType = contactType)
@@ -210,7 +230,7 @@ internal class PrisonerContactRegistryServiceTest {
     val contactType = "Unknown"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, contactType = contactType)
@@ -227,7 +247,7 @@ internal class PrisonerContactRegistryServiceTest {
     val personId: Long = 5871791
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, personId = personId)
@@ -244,7 +264,7 @@ internal class PrisonerContactRegistryServiceTest {
     val personId: Long = 1234567
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId)
+      apiClient.getOffenderContacts(prisonerId),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, personId = personId)

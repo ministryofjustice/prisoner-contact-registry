@@ -13,8 +13,10 @@ import java.time.Duration
 
 @Component
 class PrisonApiClient(
-  @Qualifier("prisonApiWebClient") private val webClient: WebClient,
-  @Value("\${prison.api.timeout:60s}") val apiTimeout: Duration
+  @Qualifier("prisonApiWebClient")
+  private val webClient: WebClient,
+  @Value("\${prison.api.timeout:60s}")
+  val apiTimeout: Duration,
 ) {
 
   private val contacts = object : ParameterizedTypeReference<ContactsDto>() {}

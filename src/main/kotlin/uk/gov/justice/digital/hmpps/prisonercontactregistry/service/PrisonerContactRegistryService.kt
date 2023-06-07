@@ -46,8 +46,9 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     try {
       return prisonApiClient.getOffenderContacts(id)!!.offenderContacts
     } catch (e: WebClientResponseException) {
-      if (e.statusCode == HttpStatus.NOT_FOUND)
+      if (e.statusCode == HttpStatus.NOT_FOUND) {
         throw PrisonerNotFoundException(e.message, e)
+      }
       throw e
     }
   }
@@ -57,8 +58,9 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     try {
       return prisonApiClient.getPersonAddress(id)!!
     } catch (e: WebClientResponseException) {
-      if (e.statusCode == HttpStatus.NOT_FOUND)
+      if (e.statusCode == HttpStatus.NOT_FOUND) {
         throw PersonNotFoundException(e.message, e)
+      }
       throw e
     }
   }
