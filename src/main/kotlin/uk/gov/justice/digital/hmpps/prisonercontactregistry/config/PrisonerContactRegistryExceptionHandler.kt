@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.config
 
+import jakarta.validation.ValidationException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -13,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerNotFoundException
-import javax.validation.ValidationException
 
 @RestControllerAdvice
 class PrisonerContactRegistryExceptionHandler {
@@ -26,7 +26,7 @@ class PrisonerContactRegistryExceptionHandler {
         ErrorResponse(
           status = HttpStatus.FORBIDDEN,
           userMessage = "Access denied",
-        )
+        ),
       )
   }
 
@@ -38,7 +38,7 @@ class PrisonerContactRegistryExceptionHandler {
       log.error("Unexpected server exception", e)
     }
     return ResponseEntity
-      .status(e.rawStatusCode)
+      .status(e.statusCode)
       .body(e.responseBodyAsByteArray)
   }
 
@@ -50,8 +50,8 @@ class PrisonerContactRegistryExceptionHandler {
       .body(
         ErrorResponse(
           status = HttpStatus.INTERNAL_SERVER_ERROR,
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -64,8 +64,8 @@ class PrisonerContactRegistryExceptionHandler {
         ErrorResponse(
           status = HttpStatus.BAD_REQUEST,
           userMessage = "Validation failure: ${e.cause?.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -78,8 +78,8 @@ class PrisonerContactRegistryExceptionHandler {
         ErrorResponse(
           status = (HttpStatus.BAD_REQUEST),
           userMessage = "Missing Request Parameter: ${e.cause?.message}",
-          developerMessage = (e.message)
-        )
+          developerMessage = (e.message),
+        ),
       )
   }
 
@@ -92,8 +92,8 @@ class PrisonerContactRegistryExceptionHandler {
         ErrorResponse(
           status = HttpStatus.BAD_REQUEST,
           userMessage = "Invalid Argument: ${e.cause?.message}",
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -106,8 +106,8 @@ class PrisonerContactRegistryExceptionHandler {
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
           userMessage = "Prisoner not found: ${e.cause?.message}", //
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -120,8 +120,8 @@ class PrisonerContactRegistryExceptionHandler {
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
           userMessage = "Person not found: ${e.cause?.message}", //
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -133,8 +133,8 @@ class PrisonerContactRegistryExceptionHandler {
       .body(
         ErrorResponse(
           status = HttpStatus.INTERNAL_SERVER_ERROR,
-          developerMessage = e.message
-        )
+          developerMessage = e.message,
+        ),
       )
   }
 
@@ -147,13 +147,13 @@ data class ErrorResponse(
   val status: Int,
   val errorCode: Int? = null,
   val userMessage: String? = null,
-  val developerMessage: String? = null
+  val developerMessage: String? = null,
 ) {
   constructor(
     status: HttpStatus,
     errorCode: Int? = null,
     userMessage: String? = null,
-    developerMessage: String? = null
+    developerMessage: String? = null,
   ) :
     this(status.value(), errorCode, userMessage, developerMessage)
 }

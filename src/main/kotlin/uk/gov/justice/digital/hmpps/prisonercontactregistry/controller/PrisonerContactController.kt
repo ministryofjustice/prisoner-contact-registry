@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerCont
 @Validated
 @RequestMapping(name = "Contact Resource", path = ["/prisoners"], produces = [MediaType.APPLICATION_JSON_VALUE])
 class PrisonerContactController(
-  private val contactService: PrisonerContactRegistryService
+  private val contactService: PrisonerContactRegistryService,
 ) {
 
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
@@ -34,43 +34,40 @@ class PrisonerContactController(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Prisoner Contacts Information Returned"
+        description = "Prisoner Contacts Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect request to Get Prisoner Contacts for Prisoner Identifier",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions retrieve a Prisoner Contacts",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "404",
         description = "Prisoner not found",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
-    ]
+    ],
   )
   fun getPrisonerContact(
     @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
-    @PathVariable prisonerId: String,
+    @PathVariable
+    prisonerId: String,
     @RequestParam(value = "type", required = false)
-    @Parameter(
-      description = "Query by Type (NOMIS Contact Type)",
-      example = "S"
-    ) contactType: String?,
+    @Parameter(description = "Query by Type (NOMIS Contact Type)", example = "S")
+    contactType: String?,
     @RequestParam(value = "id", required = false)
-    @Parameter(
-      description = "Query by Person Identifier (NOMIS Person ID)",
-      example = "9147510"
-    ) personId: Long?
+    @Parameter(description = "Query by Person Identifier (NOMIS Person ID)", example = "9147510")
+    personId: Long?,
   ): List<ContactDto> {
     log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId")
     return orderByLastNameAndThenFirstName(contactService.getContactList(prisonerId, contactType, personId))

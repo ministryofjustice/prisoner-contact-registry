@@ -19,9 +19,9 @@ class PrisonApiMockServer : WireMockServer(8092) {
                 {
                 "offenderContacts": []
                 }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -70,9 +70,9 @@ class PrisonApiMockServer : WireMockServer(8092) {
                   }
                 ]
                 }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -108,9 +108,9 @@ class PrisonApiMockServer : WireMockServer(8092) {
                   }
                 ]
                 }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -197,9 +197,9 @@ class PrisonApiMockServer : WireMockServer(8092) {
                   }
                 ]
                 }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -209,8 +209,8 @@ class PrisonApiMockServer : WireMockServer(8092) {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(404)
-        )
+            .withStatus(404),
+        ),
     )
   }
 
@@ -224,9 +224,9 @@ class PrisonApiMockServer : WireMockServer(8092) {
             .withBody(
               """
                 []
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -274,9 +274,9 @@ class PrisonApiMockServer : WireMockServer(8092) {
                       ]
                   }
               ]
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -307,9 +307,9 @@ class PrisonApiMockServer : WireMockServer(8092) {
                       ]
                   }
               ]
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -319,8 +319,8 @@ class PrisonApiMockServer : WireMockServer(8092) {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(404)
-        )
+            .withStatus(404),
+        ),
     )
   }
 }
