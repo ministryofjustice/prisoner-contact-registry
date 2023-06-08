@@ -1,4 +1,4 @@
-FROM openjdk:17-slim AS builder
+FROM eclipse-temurin:19-jre-jammy AS builder
 
 ARG BUILD_NUMBER
 ENV BUILD_NUMBER ${BUILD_NUMBER:-1_0_0}
@@ -7,7 +7,7 @@ WORKDIR /app
 ADD . .
 RUN ./gradlew clean assemble -Dorg.gradle.daemon=false
 
-FROM openjdk:17-slim
+FROM eclipse-temurin:19-jre-jammy
 LABEL maintainer="HMPPS Digital Studio <info@digital.justice.gov.uk>"
 
 ARG BUILD_NUMBER
@@ -15,7 +15,6 @@ ENV BUILD_NUMBER ${BUILD_NUMBER:-1_0_0}
 
 RUN apt-get update && \
     apt-get -y upgrade && \
-    apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Europe/London
@@ -32,4 +31,4 @@ COPY --from=builder --chown=appuser:appgroup /app/applicationinsights.dev.json /
 
 USER 2000
 
-ENTRYPOINT ["java", "-javaagent:/app/agent.jar", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:+AlwaysActAsServerClassMachine", "-javaagent:/app/agent.jar", "-jar", "/app/app.jar"]
