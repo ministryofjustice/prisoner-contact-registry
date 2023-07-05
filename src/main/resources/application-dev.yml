@@ -6,13 +6,6 @@ management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
 
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          public-key-location: classpath:local-public-key.pub
-
 hmpps.auth.url: http://localhost:8090/auth
 
 prison:
