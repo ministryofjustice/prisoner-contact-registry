@@ -68,9 +68,12 @@ class PrisonerContactController(
     @RequestParam(value = "id", required = false)
     @Parameter(description = "Query by Person Identifier (NOMIS Person ID)", example = "9147510")
     personId: Long?,
+    @RequestParam(value = "withAddress", required = false)
+    @Parameter(description = "Whether the contact details should be returned with address", example = "false")
+    withAddress: Boolean? = true,
   ): List<ContactDto> {
     log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId")
-    return orderByLastNameAndThenFirstName(contactService.getContactList(prisonerId, contactType, personId))
+    return orderByLastNameAndThenFirstName(contactService.getContactList(prisonerId, contactType, personId, withAddress))
   }
 
   private fun orderByLastNameAndThenFirstName(contactList: List<ContactDto>): List<ContactDto> {
