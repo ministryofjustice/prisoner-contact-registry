@@ -72,7 +72,7 @@ class PrisonerContactController(
     @Parameter(description = "by default returns addresses for all contacts, set to false if contact addresses not needed.", example = "false")
     withAddress: Boolean? = true,
   ): List<ContactDto> {
-    log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId")
+    log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId, withAddress = $withAddress")
     return orderByLastNameAndThenFirstName(contactService.getContactList(prisonerId, contactType, personId, withAddress))
   }
 
