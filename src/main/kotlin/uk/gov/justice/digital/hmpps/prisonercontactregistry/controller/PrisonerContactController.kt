@@ -69,7 +69,7 @@ class PrisonerContactController(
     @Parameter(description = "Query by Person Identifier (NOMIS Person ID)", example = "9147510")
     personId: Long?,
     @RequestParam(value = "withAddress", required = false)
-    @Parameter(description = "Whether the contact details should be returned with address", example = "false")
+    @Parameter(description = "by default returns addresses for all contacts, set to false if contact addresses not needed.", example = "false")
     withAddress: Boolean? = true,
   ): List<ContactDto> {
     log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId")
