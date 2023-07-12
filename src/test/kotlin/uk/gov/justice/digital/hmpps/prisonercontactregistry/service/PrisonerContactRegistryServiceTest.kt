@@ -164,6 +164,52 @@ internal class PrisonerContactRegistryServiceTest {
   }
 
   @Test
+  fun `get contact returns addresses when withAddress is true`() {
+    val prisonerId = "A1234AA"
+
+    whenever(
+      apiClient.getOffenderContacts(prisonerId),
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
+    whenever(
+      apiClient.getPersonAddress(any()),
+    ).thenReturn(listOf(personAddress))
+
+    val contacts = contactService.getContactList(prisonerId, withAddress = true)
+
+    assertThat(contacts).isNotNull
+    assertThat(contacts).isNotEmpty
+    assertThat(contacts[0]).isNotNull
+    assertThat(contacts[0].addresses).isNotNull
+    assertThat(contacts[0].addresses).isNotEmpty
+
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+  }
+
+  @Test
+  fun `get contact returns addresses when withAddress is false`() {
+    val prisonerId = "A1234AA"
+    offenderContact.addresses = emptyList()
+
+    whenever(
+      apiClient.getOffenderContacts(prisonerId),
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
+
+    whenever(
+      apiClient.getPersonAddress(any()),
+    ).thenReturn(listOf(personAddress))
+
+    val contacts = contactService.getContactList(prisonerId, withAddress = false)
+
+    assertThat(contacts).isNotNull
+    assertThat(contacts).isNotEmpty
+    assertThat(contacts[0]).isNotNull
+    assertThat(contacts[0].addresses).isEmpty()
+
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(0)).getPersonAddress(any())
+  }
+
+  @Test
   fun `Get Contact Returns Contact List with person Not Found`() {
     val prisonerId = "A1234AA"
 

@@ -13,7 +13,7 @@ import java.util.function.Supplier
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
 
-  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null): List<ContactDto> {
+  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null, withAddress: Boolean? = true): List<ContactDto> {
     // Prisoners (Offenders) have a subset of Contacts (Persons / Visitors) which can be filtered by type and person id.
     // When filtering the offenders contacts by type of person this results in a query result (list of matching contacts
     // or empty list) If a prisoner is not found this results in a PrisonerNotFoundException (404).
@@ -28,14 +28,18 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
       contacts = filterByContactType(contacts, contactType)
     }
 
-    contacts.forEach {
-      try {
-        // In NOMIS a contact does not require a personId
-        it.addresses = it.personId?.let { id -> getAddressesById(id) } ?: emptyList()
-      } catch (e: PersonNotFoundException) {
-        // Nomis data quality issue - treat as no address data available
-        log.warn("Person not found for prisoner $prisonerId contact ${it.personId}")
-        it.addresses = emptyList()
+    // only get contacts address if needed, true by default
+    val getAddresses = withAddress ?: true
+    if (getAddresses) {
+      contacts.forEach {
+        try {
+          // In NOMIS a contact does not require a personId
+          it.addresses = it.personId?.let { id -> getAddressesById(id) } ?: emptyList()
+        } catch (e: PersonNotFoundException) {
+          // Nomis data quality issue - treat as no address data available
+          log.warn("Person not found for prisoner $prisonerId contact ${it.personId}")
+          it.addresses = emptyList()
+        }
       }
     }
     return contacts
