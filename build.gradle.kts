@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.2"
-  kotlin("plugin.spring") version "1.8.22"
-  id("org.jetbrains.kotlin.plugin.noarg") version "1.8.22"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.3.0-beta"
+  kotlin("plugin.spring") version "1.9.0"
+  id("org.jetbrains.kotlin.plugin.noarg") version "1.9.0"
 }
 
 configurations {
@@ -23,7 +23,7 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.27.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.28.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
