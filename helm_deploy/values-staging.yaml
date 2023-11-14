@@ -2,14 +2,9 @@
 # Per environment values which override defaults in prisoner-contact-registry/values.yaml
 generic-service:
   replicaCount: 2
-  v1_2_enabled: true
-  v0_47_enabled: false
 
   ingress:
     host: prisoner-contact-registry-staging.prison.service.justice.gov.uk
-    contextColour: green
-    v1_2_enabled: true
-    v0_47_enabled: false
 
   env:
     SPRING_PROFILES_ACTIVE: "stdout"
