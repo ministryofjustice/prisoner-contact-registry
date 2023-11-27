@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.7.0"
-  kotlin("plugin.spring") version "1.9.10"
-  id("org.jetbrains.kotlin.plugin.noarg") version "1.9.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.10.0"
+  kotlin("plugin.spring") version "1.9.21"
+  id("org.jetbrains.kotlin.plugin.noarg") version "1.9.21"
 }
 
 configurations {
@@ -23,13 +23,13 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.31.0")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.32.0")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.18")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.19")
   testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
   testImplementation("org.mockito:mockito-inline:5.2.0")
   testImplementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
