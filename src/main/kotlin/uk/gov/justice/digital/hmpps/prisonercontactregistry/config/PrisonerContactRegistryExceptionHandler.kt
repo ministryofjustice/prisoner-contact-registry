@@ -105,7 +105,7 @@ class PrisonerContactRegistryExceptionHandler {
       .body(
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
-          userMessage = "Prisoner not found: ${e.cause?.message}", //
+          userMessage = "Prisoner not found: ${e.cause?.message}",
           developerMessage = e.message,
         ),
       )
@@ -119,7 +119,7 @@ class PrisonerContactRegistryExceptionHandler {
       .body(
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
-          userMessage = "Person not found: ${e.cause?.message}", //
+          userMessage = "Person not found: ${e.cause?.message}",
           developerMessage = e.message,
         ),
       )
