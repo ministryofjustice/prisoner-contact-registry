@@ -6,10 +6,10 @@ orbs:
 parameters:
   alerts-slack-channel:
     type: string
-    default: dps_alerts_security
+    default: prison-visit-booking-alerts
   releases-slack-channel:
     type: string
-    default: dps-releases
+    default: prison-visit-booking-alerts
 
 jobs:
   validate:
