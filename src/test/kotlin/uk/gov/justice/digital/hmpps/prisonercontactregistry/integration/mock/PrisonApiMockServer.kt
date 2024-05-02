@@ -9,7 +9,7 @@ class PrisonApiMockServer : WireMockServer(8092) {
 
   fun stubGetOffenderContactsEmpty(offenderNo: String) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts")
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -27,7 +27,7 @@ class PrisonApiMockServer : WireMockServer(8092) {
 
   fun stubGetOffenderContactFullContact(offenderNo: String) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts")
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -78,7 +78,7 @@ class PrisonApiMockServer : WireMockServer(8092) {
 
   fun stubGetOffenderContactMinimumContact(offenderNo: String) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts")
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -116,7 +116,7 @@ class PrisonApiMockServer : WireMockServer(8092) {
 
   fun stubGetOffenderContactsForOrderingByNames(offenderNo: String) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts")
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -205,7 +205,7 @@ class PrisonApiMockServer : WireMockServer(8092) {
 
   fun stubGetOffenderNotFound(offenderNo: String) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts")
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)

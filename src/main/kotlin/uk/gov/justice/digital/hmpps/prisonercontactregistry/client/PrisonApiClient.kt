@@ -24,7 +24,7 @@ class PrisonApiClient(
 
   fun getOffenderContacts(offenderNo: String): ContactsDto? {
     return webClient.get()
-      .uri("/api/offenders/$offenderNo/contacts")
+      .uri("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
       .retrieve()
       .bodyToMono(contacts)
       .block(apiTimeout)
