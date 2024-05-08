@@ -86,7 +86,8 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     notBannedBeforeDate: LocalDate? = null,
     withAddress: Boolean? = null,
   ): WebTestClient.ResponseSpec {
-    return webTestClient.get().uri("/prisoners/$prisonerId/approved/social/contacts?${getContactsQueryParams(personId, hasDateOfBirth, notBannedBeforeDate, withAddress)}")
+    val uri = "/prisoners/$prisonerId/approved/social/contacts?${getContactsQueryParams(personId, hasDateOfBirth, notBannedBeforeDate, withAddress)}"
+    return webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
   }
@@ -183,6 +184,24 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts).isEmpty()
+
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
+    verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
+  }
+
+  @Test
+  fun `when person id is passed only one contact is returned`() {
+    val prisonerId = "A1234AA"
+
+    prisonApiMockServer.stubGetApprovedOffenderContacts(prisonerId, contacts = ContactsDto(listOf(socialContactWithNoDOB, socialContactWithExpiredBannedRestriction, socialContactWithCurrentBannedRestriction)))
+
+    val returnResult = callGetSocialContacts(prisonerId, personId = socialContactWithCurrentBannedRestriction.personId, withAddress = false)
+      .expectStatus().isOk
+      .expectBody()
+
+    val contacts = getContactResults(returnResult)
+    assertThat(contacts.size).isEqualTo(1)
+    assertContact(contacts[0], socialContactWithCurrentBannedRestriction)
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
@@ -514,7 +533,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   ): String {
     val queryParams = ArrayList<String>()
     personId?.let {
-      queryParams.add("personId=$it")
+      queryParams.add("id=$it")
     }
     hasDateOfBirth?.let {
       queryParams.add("hasDateOfBirth=$it")

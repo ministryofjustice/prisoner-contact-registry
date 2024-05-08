@@ -131,7 +131,7 @@ class PrisonerContactController(
     @Parameter(description = "by default returns addresses for all contacts, set to false if contact addresses not needed.", example = "false")
     withAddress: Boolean? = true,
   ): List<ContactDto> {
-    log.debug("getPrisonersSocialContacts called with params : Prisoner: {}, personId : {}, hasDateOfBirth = {}, notBannedBeforeDate = {}, withAddress = {}", prisonerId, personId, hasDateOfBirth, notBannedBeforeDate, withAddress)
+    log.debug("getPrisonersApprovedSocialContacts called with params : Prisoner: {}, id : {}, hasDateOfBirth = {}, notBannedBeforeDate = {}, withAddress = {}", prisonerId, personId, hasDateOfBirth, notBannedBeforeDate, withAddress)
 
     return contactService.getApprovedSocialContactList(
       prisonerId = prisonerId,
