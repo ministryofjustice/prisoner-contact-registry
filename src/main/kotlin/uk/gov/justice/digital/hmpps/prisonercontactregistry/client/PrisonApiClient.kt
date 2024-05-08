@@ -22,14 +22,20 @@ class PrisonApiClient(
   private val contacts = object : ParameterizedTypeReference<ContactsDto>() {}
   private val addresses = object : ParameterizedTypeReference<List<AddressDto>>() {}
 
-  fun getOffenderContacts(offenderNo: String): ContactsDto? {
+  fun getOffenderContacts(offenderNo: String, approvedVisitorsOnly: Boolean? = null): ContactsDto? {
+    var uri = "/api/offenders/$offenderNo/contacts"
+
+    if (approvedVisitorsOnly != null && approvedVisitorsOnly) {
+      uri += "?approvedVisitorsOnly=true"
+    }
+
     return webClient.get()
-      .uri("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
+      .uri(uri)
       .retrieve()
       .bodyToMono(contacts)
       .block(apiTimeout)
       .also {
-        log.debug("Get offender contact called for $offenderNo")
+        log.debug("Get offender contacts called for {}, approvedVisitorsOnly - {}", offenderNo, approvedVisitorsOnly)
       }
   }
 

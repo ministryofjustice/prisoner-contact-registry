@@ -1,122 +1,53 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 
 class PrisonApiMockServer : WireMockServer(8092) {
-
-  fun stubGetOffenderContactsEmpty(offenderNo: String) {
+  fun stubGetOffenderContacts(offenderNo: String, contacts: ContactsDto) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
+      get("/api/offenders/$offenderNo/contacts")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .withStatus(200)
-            .withBody(
-              """
-                {
-                "offenderContacts": []
-                }
-              """.trimIndent(),
-            ),
+            .withBody(getJsonString(contacts)),
         ),
     )
   }
 
-  fun stubGetOffenderContactFullContact(offenderNo: String) {
+  fun stubGetApprovedOffenderContacts(
+    offenderNo: String,
+    contacts: ContactsDto?,
+    httpStatus: HttpStatus = HttpStatus.NOT_FOUND,
+  ) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true")
         .willReturn(
-          aResponse()
-            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(200)
-            .withBody(
-              """
-                {
-                "offenderContacts": [
-                  {
-                    "lastName": "Ireron",
-                    "middleName": "Danger",
-                    "firstName": "Ehicey",
-                    "dateOfBirth": "1912-09-13",
-                    "contactType": "O",
-                    "contactTypeDescription": "Official",
-                    "relationshipCode": "PROB",
-                    "relationshipDescription": "Probation Officer",
-                    "commentText": "Comment Here",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "personId": 2187521,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405,
-                    "emails": [
-                        {
-                            "email": "yucSZp.RwyKbcLgEL@VED.sOt.upz.Lc"
-                        }
-                    ],
-                    "restrictions": [
-                      {
-                          "restrictionId": 22022,
-                          "comment": "Comment Here",
-                          "restrictionType": "BAN",
-                          "restrictionTypeDescription": "Banned",
-                          "startDate": "2012-09-13",
-                          "expiryDate": "2014-09-13",
-                          "globalRestriction": false
-                      }
-                    ]
-                  }
-                ]
-                }
-              """.trimIndent(),
-            ),
-        ),
-    )
-  }
-
-  fun stubGetOffenderContactMinimumContact(offenderNo: String) {
-    stubFor(
-      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(200)
-            .withBody(
-              """
-                {
-                "offenderContacts": [
-                  {
-                    "lastName": "Ireron",
-                    "firstName": "Ehicey",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405,
-                    "restrictions": [
-                      {
-                          "restrictionId": 22022,
-                          "restrictionType": "BAN",
-                          "restrictionTypeDescription": "Banned",
-                          "startDate": "2012-09-13",
-                          "globalRestriction": false
-                      }
-                    ]
-                  }
-                ]
-                }
-              """.trimIndent(),
-            ),
+          if (contacts != null) {
+            aResponse()
+              .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+              .withStatus(200)
+              .withBody(getJsonString(contacts))
+          } else {
+            aResponse()
+              .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+              .withStatus(httpStatus.value())
+          },
         ),
     )
   }
 
   fun stubGetOffenderContactsForOrderingByNames(offenderNo: String) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
+      get("/api/offenders/$offenderNo/contacts")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -205,7 +136,7 @@ class PrisonApiMockServer : WireMockServer(8092) {
 
   fun stubGetOffenderNotFound(offenderNo: String) {
     stubFor(
-      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true&activeOnly=true")
+      get("/api/offenders/$offenderNo/contacts")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -322,5 +253,14 @@ class PrisonApiMockServer : WireMockServer(8092) {
             .withStatus(404),
         ),
     )
+  }
+
+  private fun getJsonString(obj: Any): String {
+    return ObjectMapper()
+      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .registerModule(JavaTimeModule())
+      .writer()
+      .withDefaultPrettyPrinter()
+      .writeValueAsString(obj)
   }
 }
