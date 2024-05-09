@@ -78,7 +78,7 @@ class PrisonerContactController(
     withAddress: Boolean? = true,
   ): List<ContactDto> {
     log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId, withAddress = $withAddress")
-    return contactService.getContactList(prisonerId, contactType, personId, withAddress)
+    return contactService.getContactList(prisonerId, contactType, personId, withAddress, approvedVisitorsOnly = false)
       .sortedWith(getDefaultSortOrder())
   }
 
@@ -94,7 +94,7 @@ class PrisonerContactController(
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Incorrect request to Get Prisoner Contacts for Prisoner Identifier",
+        description = "Incorrect request to retrieve prisoner's approved social contacts",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -104,7 +104,7 @@ class PrisonerContactController(
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Incorrect permissions retrieve a Prisoner Contacts",
+        description = "Incorrect permissions to retrieve prisoner's approved social contacts",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(

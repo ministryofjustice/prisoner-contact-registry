@@ -19,7 +19,9 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     const val BANNED_RESTRICTION_TYPE = "BAN"
   }
 
-  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null, withAddress: Boolean? = true, approvedVisitorsOnly: Boolean? = null): List<ContactDto> {
+  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null, withAddress: Boolean? = true, approvedVisitorsOnly: Boolean = false): List<ContactDto> {
+    log.debug("getContactList called with parameters : prisonerId - {}, contactType - {}, personId - {}, withAddress - {}, approvedVisitorsOnly - {}", prisonerId, contactType, personId, withAddress, approvedVisitorsOnly)
+
     // Prisoners (Offenders) have a subset of Contacts (Persons / Visitors) which can be filtered by type and person id.
     // When filtering the offenders contacts by type of person this results in a query result (list of matching contacts
     // or empty list) If a prisoner is not found this results in a PrisonerNotFoundException (404).
@@ -58,7 +60,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     hasDateOfBirth: Boolean? = null,
     notBannedBeforeDate: LocalDate? = null,
   ): List<ContactDto> {
-    log.debug("getContactList called with parameters : prisonerId - {}, personId - {}, withAddress - {}, hasDateOfBirth - {}, notBannedBeforeDate - {}", prisonerId, personId, withAddress, hasDateOfBirth, notBannedBeforeDate)
+    log.debug("getApprovedSocialContactList called with parameters : prisonerId - {}, personId - {}, withAddress - {}, hasDateOfBirth - {}, notBannedBeforeDate - {}", prisonerId, personId, withAddress, hasDateOfBirth, notBannedBeforeDate)
     var contacts = getContactList(prisonerId = prisonerId, contactType = "S", personId = personId, withAddress = withAddress, approvedVisitorsOnly = true)
 
     if (hasDateOfBirth != null && hasDateOfBirth) {
@@ -73,7 +75,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   @Throws(PrisonerNotFoundException::class)
-  private fun getContactById(id: String, approvedVisitorsOnly: Boolean?): List<ContactDto> {
+  private fun getContactById(id: String, approvedVisitorsOnly: Boolean): List<ContactDto> {
     try {
       return prisonApiClient.getOffenderContacts(id, approvedVisitorsOnly)!!.offenderContacts
     } catch (e: WebClientResponseException) {

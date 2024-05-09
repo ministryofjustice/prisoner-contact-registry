@@ -80,7 +80,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId)
@@ -88,7 +88,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts).isNotNull
     assertThat(contacts).isNotEmpty
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -96,7 +96,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(emptyList()))
 
     val contacts = contactService.getContactList(prisonerId)
@@ -104,7 +104,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts).isNotNull
     assertThat(contacts).isEmpty()
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -112,16 +112,16 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenThrow(
       WebClientResponseException.create(HttpStatus.NOT_FOUND.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null),
     )
 
     assertThrows<PrisonerNotFoundException> {
-      contactService.getContactList(prisonerId)
+      contactService.getContactList(prisonerId, approvedVisitorsOnly = false)
     }
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -129,7 +129,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenThrow(
       WebClientResponseException.create(HttpStatus.INTERNAL_SERVER_ERROR.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null),
     )
@@ -138,7 +138,7 @@ internal class PrisonerContactRegistryServiceTest {
       contactService.getContactList(prisonerId)
     }
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -146,7 +146,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
       apiClient.getPersonAddress(any()),
@@ -160,7 +160,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts[0].addresses).isNotNull
     assertThat(contacts[0].addresses).isNotEmpty
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -168,7 +168,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
       apiClient.getPersonAddress(any()),
@@ -182,7 +182,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts[0].addresses).isNotNull
     assertThat(contacts[0].addresses).isNotEmpty
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -191,7 +191,7 @@ internal class PrisonerContactRegistryServiceTest {
     offenderContact.addresses = emptyList()
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     whenever(
@@ -205,7 +205,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts[0]).isNotNull
     assertThat(contacts[0].addresses).isEmpty()
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
     verify(apiClient, times(0)).getPersonAddress(any())
   }
 
@@ -214,7 +214,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
       apiClient.getPersonAddress(any()),
@@ -230,7 +230,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts[0].addresses).isNotNull
     assertThat(contacts[0].addresses).isEmpty()
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -238,7 +238,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
     whenever(
       apiClient.getPersonAddress(any()),
@@ -250,7 +250,7 @@ internal class PrisonerContactRegistryServiceTest {
       contactService.getContactList(prisonerId)
     }
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -259,7 +259,7 @@ internal class PrisonerContactRegistryServiceTest {
     val contactType = "O"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, contactType = contactType)
@@ -267,7 +267,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts).isNotNull
     assertThat(contacts).isNotEmpty
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -276,7 +276,7 @@ internal class PrisonerContactRegistryServiceTest {
     val contactType = "Unknown"
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, contactType = contactType)
@@ -284,7 +284,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts).isNotNull
     assertThat(contacts).isEmpty()
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -293,7 +293,7 @@ internal class PrisonerContactRegistryServiceTest {
     val personId: Long = 5871791
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, personId = personId)
@@ -301,7 +301,7 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts).isNotNull
     assertThat(contacts).isNotEmpty
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 
   @Test
@@ -310,7 +310,7 @@ internal class PrisonerContactRegistryServiceTest {
     val personId: Long = 1234567
 
     whenever(
-      apiClient.getOffenderContacts(prisonerId),
+      apiClient.getOffenderContacts(prisonerId, false),
     ).thenReturn(ContactsDto(listOf(offenderContact)))
 
     val contacts = contactService.getContactList(prisonerId = prisonerId, personId = personId)
@@ -318,6 +318,6 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts).isNotNull
     assertThat(contacts).isEmpty()
 
-    verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+    verify(apiClient, times(1)).getOffenderContacts(prisonerId, false)
   }
 }
