@@ -78,7 +78,6 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
         }
       } ?: run {
         // If an expiry date is found to be null, it is classed as an "open-ended" ban. Thus, no suitable date range can be given.
-        // Replace with new DateRangeNotFoundException.
         throw DateRangeNotFoundException(message = "Found visitor with restriction of 'BAN' with no expiry date, no date range possible")
       }
     }
