@@ -82,16 +82,16 @@ class PrisonerContactController(
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping("{prisonerId}/approved/social/contacts/restrictions/banned/dateRange")
   @Operation(
-    summary = "Get banned date range for prisoner contacts",
-    description = "Returns a banned date range for given list of prisoner contacts",
+    summary = "Get date range for visitors with ban restriction can visit a prisoner",
+    description = "Returns a date range for visitors with ban restriction can visit a prisoner",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Banned date range returned",
+        description = "Date range returned",
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Incorrect request to Get banned date range for prisoner contacts",
+        description = "Incorrect request to Get date range for prisoner visitors",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -101,17 +101,17 @@ class PrisonerContactController(
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Incorrect permissions to Get banned date range for prisoner contacts",
+        description = "Incorrect permissions to Get date range for prisoner visitors",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Date range not found",
+        description = "Prisoner, Visitor or Date range not found",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
   )
-  fun getBannedDateRangeForPrisonerContacts(
+  fun getDateRangeForPrisonerVisitorsWithBanRestrictions(
     @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
     @PathVariable
     prisonerId: String,
