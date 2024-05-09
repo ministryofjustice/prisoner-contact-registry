@@ -204,7 +204,6 @@ class PrisonApiMockServer : WireMockServer(8092) {
     )
   }
 
-
   fun stubGetOffenderContactsForOrderingByNames(offenderNo: String) {
     stubFor(
       get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true")

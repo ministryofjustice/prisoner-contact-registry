@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClie
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
@@ -64,15 +65,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   ): DateRangeDto {
     val dateRange = DateRangeDto(fromDate, toDate)
 
-    val contacts = getContactById(prisonerId)
-    val visitors = contacts.filter { visitorIds.contains(it.personId) }
-    if (visitors.size != visitorIds.size) {
-      throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
-    }
-
-    val visitorBanRestrictions = visitors
-      .flatMap { it.restrictions }
-      .filter { it.restrictionType == "BAN" }
+    val visitorBanRestrictions = getVisitorBanRestrictions(prisonerId, visitorIds)
 
     for (restriction in visitorBanRestrictions) {
       restriction.expiryDate?.let { expiryDate ->
@@ -123,6 +116,21 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
   private fun filterByContactType(contacts: List<ContactDto>?, contactType: String): List<ContactDto> {
     return contacts?.filter { it.contactType.equals(contactType, true) } ?: emptyList()
+  }
+
+  private fun getVisitorBanRestrictions(prisonerId: String, visitorIds: List<Long>): List<RestrictionDto> {
+    val contacts = getContactById(prisonerId)
+
+    val visitors = contacts.filter { visitorIds.contains(it.personId) }
+    if (visitors.size != visitorIds.size) {
+      throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
+    }
+
+    val visitorBanRestrictions = visitors
+      .flatMap { it.restrictions }
+      .filter { it.restrictionType == "BAN" }
+
+    return visitorBanRestrictions
   }
 
   companion object {
