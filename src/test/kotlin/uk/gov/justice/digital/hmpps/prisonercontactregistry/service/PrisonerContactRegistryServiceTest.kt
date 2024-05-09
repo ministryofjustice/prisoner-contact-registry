@@ -114,7 +114,7 @@ internal class PrisonerContactRegistryServiceTest {
     whenever(
       apiClient.getOffenderContacts(prisonerId, false),
     ).thenThrow(
-      WebClientResponseException.create(HttpStatus.NOT_FOUND.value(), "", HttpHeaders.EMPTY, byteArrayOf(), null),
+      PrisonerNotFoundException(),
     )
 
     assertThrows<PrisonerNotFoundException> {

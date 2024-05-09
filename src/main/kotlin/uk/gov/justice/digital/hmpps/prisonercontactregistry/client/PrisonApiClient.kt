@@ -30,7 +30,7 @@ class PrisonApiClient(
   private val contacts = object : ParameterizedTypeReference<ContactsDto>() {}
   private val addresses = object : ParameterizedTypeReference<List<AddressDto>>() {}
 
-  fun getOffenderContacts(offenderNo: String, approvedVisitorsOnly: Boolean): ContactsDto? {
+  fun getOffenderContacts(offenderNo: String, approvedVisitorsOnly: Boolean): ContactsDto {
     var uri = "/api/offenders/$offenderNo/contacts"
 
     if (approvedVisitorsOnly) {

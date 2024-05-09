@@ -77,7 +77,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   @Throws(PrisonerNotFoundException::class)
   private fun getContactById(id: String, approvedVisitorsOnly: Boolean): List<ContactDto> {
     try {
-      return prisonApiClient.getOffenderContacts(id, approvedVisitorsOnly)!!.offenderContacts
+      return prisonApiClient.getOffenderContacts(id, approvedVisitorsOnly).offenderContacts
     } catch (e: WebClientResponseException) {
       if (e.statusCode == HttpStatus.NOT_FOUND) {
         throw PrisonerNotFoundException(e.message, e)

@@ -8,8 +8,10 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import java.time.LocalDate
@@ -469,11 +471,12 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
 
     prisonApiMockServer.stubGetApprovedOffenderContacts(prisonerId, contacts = null)
 
-    callGetSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
+    val responseSpec = callGetSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
       .expectStatus().isNotFound
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
+    assertErrorResult(responseSpec, HttpStatus.NOT_FOUND, "Contacts not found for - $prisonerId on prison-api")
   }
 
   @Test
@@ -510,6 +513,19 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(any())
+  }
+
+  private fun assertErrorResult(
+    responseSpec: WebTestClient.ResponseSpec,
+    httpStatusCode: HttpStatusCode = HttpStatusCode.valueOf(org.apache.http.HttpStatus.SC_BAD_REQUEST),
+    errorMessage: String? = null,
+  ) {
+    responseSpec.expectStatus().isEqualTo(httpStatusCode)
+    errorMessage?.let {
+      val errorResponse =
+        objectMapper.readValue(responseSpec.expectBody().returnResult().responseBody, ErrorResponse::class.java)
+      assertThat(errorResponse.developerMessage).isEqualTo(errorMessage)
+    }
   }
 
   @Test
