@@ -161,7 +161,7 @@ class PrisonApiMockServer : WireMockServer(8092) {
                           "restrictionType": "BAN",
                           "restrictionTypeDescription": "Banned",
                           "startDate": "2024-05-09",
-                          "startDate": "2034-05-09",
+                          "expiryDate": "2034-05-09",
                           "globalRestriction": false
                       }
                     ]
@@ -173,6 +173,37 @@ class PrisonApiMockServer : WireMockServer(8092) {
         ),
     )
   }
+
+  fun stubGetOffenderContactWithNoRestrictions(offenderNo: String) {
+    stubFor(
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .withStatus(200)
+            .withBody(
+              """
+                {
+                "offenderContacts": [
+                  {
+                    "personId": 2187525,
+                    "lastName": "Ireron",
+                    "firstName": "Ehicey",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  }
+                ]
+                }
+              """.trimIndent(),
+            ),
+        ),
+    )
+  }
+
 
   fun stubGetOffenderContactsForOrderingByNames(offenderNo: String) {
     stubFor(

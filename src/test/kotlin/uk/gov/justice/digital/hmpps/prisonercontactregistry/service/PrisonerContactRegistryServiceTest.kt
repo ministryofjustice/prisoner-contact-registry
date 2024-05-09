@@ -327,7 +327,7 @@ internal class PrisonerContactRegistryServiceTest {
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(5871791)
     val fromDate: LocalDate = LocalDate.now().minusDays(2)
-    val toDate: LocalDate = LocalDate.now().minusDays(2)
+    val toDate: LocalDate = LocalDate.now().plusDays(28)
 
     whenever(
       apiClient.getOffenderContacts(prisonerId),
@@ -335,6 +335,6 @@ internal class PrisonerContactRegistryServiceTest {
 
     val dateRange = contactService.getBannedDateRangeForPrisonerContacts(prisonerId, visitorIds, fromDate, toDate)
 
-    assertThat(dateRange.toDate).isEqualTo(offenderContact.restrictions[0].expiryDate)
+    assertThat(dateRange.fromDate).isEqualTo(offenderContact.restrictions[0].expiryDate)
   }
 }
