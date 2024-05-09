@@ -328,7 +328,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.now().minusDays(2)
     val toDate: LocalDate = LocalDate.now().minusDays(2)
-    val uri = "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate";
+    val uri = "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
@@ -345,7 +345,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.now().minusDays(2)
     val toDate: LocalDate = LocalDate.now().minusDays(2)
-    val uri = "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate";
+    val uri = "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 

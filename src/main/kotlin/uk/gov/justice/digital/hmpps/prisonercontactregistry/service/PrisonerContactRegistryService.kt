@@ -18,7 +18,12 @@ import java.time.LocalDate
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
 
-  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null, withAddress: Boolean? = true): List<ContactDto> {
+  fun getContactList(
+    prisonerId: String,
+    contactType: String? = null,
+    personId: Long? = null,
+    withAddress: Boolean? = true,
+  ): List<ContactDto> {
     // Prisoners (Offenders) have a subset of Contacts (Persons / Visitors) which can be filtered by type and person id.
     // When filtering the offenders contacts by type of person this results in a query result (list of matching contacts
     // or empty list) If a prisoner is not found this results in a PrisonerNotFoundException (404).
@@ -51,10 +56,12 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   @Throws(VisitorNotFoundException::class, DateRangeNotFoundException::class)
-  fun getBannedDateRangeForPrisonerContacts(prisonerId: String,
-                                            visitorIds: List<Long>,
-                                            fromDate: LocalDate,
-                                            toDate: LocalDate): DateRangeDto {
+  fun getBannedDateRangeForPrisonerContacts(
+    prisonerId: String,
+    visitorIds: List<Long>,
+    fromDate: LocalDate,
+    toDate: LocalDate,
+  ): DateRangeDto {
     val dateRange = DateRangeDto(fromDate, toDate)
 
     val contacts = getContactById(prisonerId)
@@ -68,8 +75,8 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
       .filter { it.restrictionType == "BAN" }
 
     for (restriction in visitorBanRestrictions) {
-      restriction.expiryDate?.let {
-        expiryDate -> if (expiryDate.isAfter(dateRange.toDate)) {
+      restriction.expiryDate?.let { expiryDate ->
+        if (expiryDate.isAfter(dateRange.toDate)) {
           dateRange.toDate = expiryDate
         }
       } ?: run {
@@ -79,7 +86,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
       }
     }
 
-    return dateRange;
+    return dateRange
   }
 
   @Throws(PrisonerNotFoundException::class)
