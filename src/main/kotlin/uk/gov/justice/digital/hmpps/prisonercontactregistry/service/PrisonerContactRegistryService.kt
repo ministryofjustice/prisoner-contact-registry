@@ -8,7 +8,12 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
-import java.util.function.Supplier
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
+import java.time.LocalDate
 
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
@@ -45,6 +50,38 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     return contacts
   }
 
+  @Throws(VisitorNotFoundException::class, DateRangeNotFoundException::class)
+  fun getBannedDateRangeForPrisonerContacts(prisonerId: String,
+                                            visitorIds: List<Long>,
+                                            fromDate: LocalDate,
+                                            toDate: LocalDate): DateRangeDto {
+    val dateRange = DateRangeDto(fromDate, toDate)
+
+    val contacts = getContactById(prisonerId)
+    val visitors = contacts.filter { visitorIds.contains(it.personId) }
+    if (visitors.size != visitorIds.size) {
+      throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
+    }
+
+    val visitorBanRestrictions = visitors
+      .flatMap { it.restrictions }
+      .filter { it.restrictionType == "BAN" }
+
+    for (restriction in visitorBanRestrictions) {
+      restriction.expiryDate?.let {
+        expiryDate -> if (expiryDate.isAfter(dateRange.toDate)) {
+          dateRange.toDate = expiryDate
+        }
+      } ?: run {
+        // If an expiry date is found to be null, it is classed as an "open-ended" ban. Thus, no suitable date range can be given.
+        // Replace with new DateRangeNotFoundException.
+        throw DateRangeNotFoundException(message = "Found visitor with restriction of 'BAN' with no expiry date, no date range possible")
+      }
+    }
+
+    return dateRange;
+  }
+
   @Throws(PrisonerNotFoundException::class)
   private fun getContactById(id: String): List<ContactDto> {
     try {
@@ -79,21 +116,5 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
-  }
-}
-
-class PrisonerNotFoundException(message: String? = null, cause: Throwable? = null) :
-  RuntimeException(message, cause),
-  Supplier<PrisonerNotFoundException> {
-  override fun get(): PrisonerNotFoundException {
-    return PrisonerNotFoundException(message, cause)
-  }
-}
-
-class PersonNotFoundException(message: String? = null, cause: Throwable? = null) :
-  RuntimeException(message, cause),
-  Supplier<PersonNotFoundException> {
-  override fun get(): PersonNotFoundException {
-    return PersonNotFoundException(message, cause)
   }
 }
