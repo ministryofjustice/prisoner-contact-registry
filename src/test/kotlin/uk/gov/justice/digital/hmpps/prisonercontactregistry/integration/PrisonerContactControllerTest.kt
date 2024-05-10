@@ -332,14 +332,20 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // When
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
-    // Then
-    webTestClient.get().uri(uri)
+    // When
+    val result = webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
-      .expectStatus().isNotFound
+
+    // Then
+    result.expectStatus().isNotFound
+    result.expectBody()
+      .jsonPath("$.userMessage")
+      .isEqualTo("One of the visitors provided could not found")
+      .jsonPath("$.developerMessage")
+      .isEqualTo("Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
   }
 
   @Test
@@ -353,14 +359,20 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // When
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
-    // Then
-    webTestClient.get().uri(uri)
+    // When
+    val result = webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
-      .expectStatus().isNotFound
+
+    // Then
+    result.expectStatus().isNotFound
+    result.expectBody()
+      .jsonPath("$.userMessage")
+      .isEqualTo("One of the visitors provided has a BAN restriction, no suitable date range found")
+      .jsonPath("$.developerMessage")
+      .isEqualTo("Found visitor with restriction of 'BAN' with no expiry date, no date range possible")
   }
 
   @Test
@@ -374,14 +386,20 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // When
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
-    // Then
-    webTestClient.get().uri(uri)
+    // When
+    val result = webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
-      .expectStatus().isNotFound
+
+    // Then
+    result.expectStatus().isNotFound
+    result.expectBody()
+      .jsonPath("$.userMessage")
+      .isEqualTo("One of the visitors provided has a BAN restriction, no suitable date range found")
+      .jsonPath("$.developerMessage")
+      .isEqualTo("Found visitor with restriction of 'BAN' with expiry date after our endDate, no date range possible")
   }
 
   @Test
@@ -395,14 +413,20 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // When
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
-    // Then
-    webTestClient.get().uri(uri)
+    // When
+    val result = webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
-      .expectStatus().isNotFound
+
+    // Then
+    result.expectStatus().isNotFound
+    result.expectBody()
+      .jsonPath("$.userMessage")
+      .isEqualTo("One of the visitors provided has a BAN restriction, no suitable date range found")
+      .jsonPath("$.developerMessage")
+      .isEqualTo("Found visitor with restriction of 'BAN' with expiry date after our endDate, no date range possible")
   }
 
   @Test
@@ -416,13 +440,14 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // When
     prisonApiMockServer.stubGetOffenderContactWithNoRestrictions(prisonerId)
 
-    // Then
-    webTestClient.get().uri(uri)
+    // When
+    val result = webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
-      .expectStatus().isOk
+
+    // Then
+    result.expectStatus().isOk
   }
 }
