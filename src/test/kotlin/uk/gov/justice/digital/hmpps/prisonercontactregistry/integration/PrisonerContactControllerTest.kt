@@ -323,7 +323,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
   @Test
   fun `visitorId not found within list of prisoner contacts`() {
-    // GIVEN
+    // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187524, 2187525)
     val visitorIdsString = visitorIds.joinToString(",")
@@ -332,10 +332,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // WHEN
+    // When
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
-    // THEN
+    // Then
     webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
@@ -344,7 +344,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
   @Test
   fun `No applicable date range found due to visitor having open ended BAN restriction`() {
-    // GIVEN
+    // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187525, 2187526)
     val visitorIdsString = visitorIds.joinToString(",")
@@ -353,10 +353,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // WHEN
+    // When
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
-    // THEN
+    // Then
     webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
@@ -365,7 +365,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
   @Test
   fun `No applicable date range found due to visitor having BAN restriction expiring after our endDate`() {
-    // GIVEN
+    // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187526)
     val visitorIdsString = visitorIds.joinToString(",")
@@ -374,10 +374,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // WHEN
+    // When
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
-    // THEN
+    // Then
     webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
@@ -386,7 +386,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
   @Test
   fun `No applicable date range found due to visitor having BAN restriction expiring on our endDate`() {
-    // GIVEN
+    // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187529)
     val visitorIdsString = visitorIds.joinToString(",")
@@ -395,10 +395,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // WHEN
+    // When
     prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
 
-    // THEN
+    // Then
     webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
@@ -407,7 +407,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
   @Test
   fun `Date range is returned successfully when visitors have no BAN restrictions`() {
-    // GIVEN
+    // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187525)
     val visitorIdsString = visitorIds.joinToString(",")
@@ -416,10 +416,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
-    // WHEN
+    // When
     prisonApiMockServer.stubGetOffenderContactWithNoRestrictions(prisonerId)
 
-    // THEN
+    // Then
     webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
