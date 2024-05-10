@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClie
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.BANNED_RESTRICTION_TYPE
 import java.time.LocalDate
 
 @Suppress("ClassName")
@@ -21,7 +22,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
   private val expiredBannedRestriction = RestrictionDto(
     comment = "Comment Here",
-    restrictionType = "BAN",
+    restrictionType = BANNED_RESTRICTION_TYPE,
     restrictionTypeDescription = "Banned",
     startDate = LocalDate.of(2012, 9, 13),
     expiryDate = LocalDate.of(2014, 9, 13),
@@ -223,11 +224,19 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `prisoner has contacts in expected order`() {
+  fun `prisoner has contacts in expected order of last name and then first name`() {
     // Given
     val prisonerId = "A1234AA"
+    val contacts = ContactsDto(
+      listOf(
+        createContactsDto("a", "z"),
+        createContactsDto("a", "a"),
+        createContactsDto("c", "b"),
+        createContactsDto("z", "a"),
+      ),
+    )
 
-    prisonApiMockServer.stubGetOffenderContactsForOrderingByNames(prisonerId)
+    prisonApiMockServer.stubGetOffenderContacts(prisonerId, contacts)
 
     // When
     val response = webTestClient.get().uri("/prisoners/$prisonerId/contacts")
@@ -237,21 +246,15 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     // then
     response.expectStatus().isOk
       .expectBody()
-      .jsonPath("$.length()").isEqualTo(7)
-      .jsonPath("$[0].lastName").isEqualTo("Aled")
-      .jsonPath("$[0].firstName").isEqualTo("Aeron")
-      .jsonPath("$[1].lastName").isEqualTo("Aled")
-      .jsonPath("$[1].firstName").isEqualTo("Cynog")
-      .jsonPath("$[2].lastName").isEqualTo("Aled")
-      .jsonPath("$[2].firstName").isEqualTo("Wyn")
-      .jsonPath("$[3].lastName").isEqualTo("Gwyn")
-      .jsonPath("$[3].firstName").isEqualTo("Aeron")
-      .jsonPath("$[4].lastName").isEqualTo("Gwyn")
-      .jsonPath("$[4].firstName").isEqualTo("Cynog")
-      .jsonPath("$[5].lastName").isEqualTo("Gwyn")
-      .jsonPath("$[5].firstName").isEqualTo("Wyn")
-      .jsonPath("$[6].lastName").isEqualTo("Llywelyn")
-      .jsonPath("$[6].firstName").isEqualTo("Gruffydd")
+      .jsonPath("$.length()").isEqualTo(4)
+      .jsonPath("$[0].firstName").isEqualTo("a")
+      .jsonPath("$[0].lastName").isEqualTo("a")
+      .jsonPath("$[1].firstName").isEqualTo("z")
+      .jsonPath("$[1].lastName").isEqualTo("a")
+      .jsonPath("$[2].firstName").isEqualTo("c")
+      .jsonPath("$[2].lastName").isEqualTo("b")
+      .jsonPath("$[3].firstName").isEqualTo("a")
+      .jsonPath("$[3].lastName").isEqualTo("z")
   }
 
   @Test
@@ -319,10 +322,12 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.now().minusDays(2)
     val toDate: LocalDate = LocalDate.now().minusDays(2)
-    val uri =
-      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
+      prisonerId,
+      contacts = ContactsDto(listOf(contactWithMinimumDetails)),
+    )
 
     // When
     val result = webTestClient.get().uri(uri)
@@ -342,14 +347,35 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
   fun `No applicable date range found due to visitor having open ended BAN restriction`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187525, 2187526)
+    val visitorIds: List<Long> = listOf(2187529L, 2187526)
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.now().minusDays(2)
-    val toDate: LocalDate = LocalDate.now().minusDays(2)
-    val uri =
-      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+    val toDate: LocalDate = LocalDate.now().plusDays(2)
+    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
+    val restrictions = listOf<RestrictionDto>(
+      RestrictionDto(
+        comment = "Comment Here",
+        restrictionType = BANNED_RESTRICTION_TYPE,
+        restrictionTypeDescription = "Banned",
+        startDate = fromDate,
+        expiryDate = null,
+        globalRestriction = false,
+      ),
+      RestrictionDto(
+        comment = "Comment Here",
+        restrictionType = BANNED_RESTRICTION_TYPE,
+        restrictionTypeDescription = "Banned",
+        startDate = fromDate,
+        expiryDate = toDate.plusDays(1),
+        globalRestriction = false,
+      ),
+    )
+
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
+      prisonerId,
+      contacts = createContactsDto(restrictions, visitorIds),
+    )
 
     // When
     val result = webTestClient.get().uri(uri)
@@ -373,10 +399,23 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.of(2024, 5, 1)
     val toDate: LocalDate = LocalDate.of(2024, 5, 10)
-    val uri =
-      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
+    val restrictions = listOf<RestrictionDto>(
+      RestrictionDto(
+        comment = "Comment Here",
+        restrictionType = BANNED_RESTRICTION_TYPE,
+        restrictionTypeDescription = "Banned",
+        startDate = fromDate,
+        expiryDate = toDate.plusDays(1),
+        globalRestriction = false,
+      ),
+    )
+
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
+      prisonerId,
+      contacts = createContactsDto(restrictions, visitorIds),
+    )
 
     // When
     val result = webTestClient.get().uri(uri)
@@ -396,14 +435,28 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
   fun `No applicable date range found due to visitor having BAN restriction expiring on our endDate`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187529)
+    val visitorId = 2187529L
+    val visitorIds: List<Long> = listOf(visitorId)
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.of(2024, 5, 9)
     val toDate: LocalDate = LocalDate.of(2024, 5, 10)
-    val uri =
-      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
+    val restrictions = listOf<RestrictionDto>(
+      RestrictionDto(
+        comment = "Comment Here",
+        restrictionType = BANNED_RESTRICTION_TYPE,
+        restrictionTypeDescription = "Banned",
+        startDate = fromDate,
+        expiryDate = toDate,
+        globalRestriction = false,
+      ),
+    )
+
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
+      prisonerId,
+      contacts = createContactsDto(restrictions, visitorIds),
+    )
 
     // When
     val result = webTestClient.get().uri(uri)
@@ -427,10 +480,12 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.now()
     val toDate: LocalDate = LocalDate.now()
-    val uri =
-      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    prisonApiMockServer.stubGetOffenderContactWithNoRestrictions(prisonerId)
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
+      prisonerId,
+      contacts = createContactsDto(listOf(), visitorIds),
+    )
 
     // When
     val result = webTestClient.get().uri(uri)
@@ -439,5 +494,55 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
     // Then
     result.expectStatus().isOk
+  }
+
+  private fun createDateRangeBanUri(
+    prisonerId: String,
+    visitorIdsString: String,
+    fromDate: LocalDate,
+    toDate: LocalDate,
+  ): String {
+    return "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+  }
+
+  fun createContactsDto(restrictions: List<RestrictionDto> = listOf(), visitorsId: List<Long>): ContactsDto {
+    val contacts = visitorsId.mapIndexed { index: Int, visitorId: Long ->
+      ContactDto(
+        lastName = "Ireron",
+        middleName = "Danger",
+        firstName = "Ehicey",
+        dateOfBirth = LocalDate.of(1912, 9, 13),
+        contactType = "S",
+        contactTypeDescription = "Social",
+        relationshipCode = "PROB",
+        relationshipDescription = "Probation Officer",
+        commentText = "Comment Here",
+        emergencyContact = false,
+        nextOfKin = false,
+        personId = visitorId,
+        approvedVisitor = false,
+        restrictions = if (restrictions.isNotEmpty()) listOf(restrictions[index]) else listOf(),
+      )
+    }
+
+    return ContactsDto(contacts)
+  }
+
+  fun createContactsDto(firstName: String, lastName: String, visitorId: Long = 1): ContactDto {
+    return ContactDto(
+      lastName = lastName,
+      middleName = "Danger",
+      firstName = firstName,
+      dateOfBirth = LocalDate.of(1912, 9, 13),
+      contactType = "S",
+      contactTypeDescription = "Social",
+      relationshipCode = "PROB",
+      relationshipDescription = "Probation Officer",
+      commentText = "Comment Here",
+      emergencyContact = false,
+      nextOfKin = false,
+      personId = visitorId,
+      approvedVisitor = false,
+    )
   }
 }

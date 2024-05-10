@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 
@@ -25,8 +26,8 @@ class PrisonApiMockServer : WireMockServer(8092) {
 
   fun stubGetApprovedOffenderContacts(
     offenderNo: String,
-    contacts: ContactsDto?,
-    httpStatus: HttpStatus = HttpStatus.NOT_FOUND,
+    contacts: ContactsDto? = null,
+    httpStatus: HttpStatus = NOT_FOUND,
   ) {
     stubFor(
       get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true")
@@ -41,206 +42,6 @@ class PrisonApiMockServer : WireMockServer(8092) {
               .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
               .withStatus(httpStatus.value())
           },
-        ),
-    )
-  }
-
-  fun stubGetOffenderMultipleContacts(offenderNo: String) {
-    stubFor(
-      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true")
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(200)
-            .withBody(
-              """
-                {
-                "offenderContacts": [
-                  {
-                    "personId": 2187525,
-                    "lastName": "Ireron",
-                    "firstName": "Ehicey",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405,
-                    "restrictions": [
-                      {
-                          "restrictionId": 22022,
-                          "restrictionType": "BAN",
-                          "restrictionTypeDescription": "Banned",
-                          "startDate": "2024-05-09",
-                          "globalRestriction": false
-                      }
-                    ]
-                  },
-                  {
-                    "personId": 2187526,
-                    "lastName": "Gwyn",
-                    "firstName": "Wyn",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405,
-                    "restrictions": [
-                      {
-                          "restrictionId": 22022,
-                          "restrictionType": "BAN",
-                          "restrictionTypeDescription": "Banned",
-                          "startDate": "2024-05-09",
-                          "expiryDate": "2034-05-09",
-                          "globalRestriction": false
-                      }
-                    ]
-                  },
-                  {
-                    "personId": 2187529,
-                    "lastName": "Ajdit",
-                    "firstName": "Wyn",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405,
-                    "restrictions": [
-                      {
-                          "restrictionId": 22022,
-                          "restrictionType": "BAN",
-                          "restrictionTypeDescription": "Banned",
-                          "startDate": "2024-05-09",
-                          "expiryDate": "2024-05-10",
-                          "globalRestriction": false
-                      }
-                    ]
-                  }
-                ]
-                }
-              """.trimIndent(),
-            ),
-        ),
-    )
-  }
-
-  fun stubGetOffenderContactWithNoRestrictions(offenderNo: String) {
-    stubFor(
-      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true")
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(200)
-            .withBody(
-              """
-                {
-                "offenderContacts": [
-                  {
-                    "personId": 2187525,
-                    "lastName": "Ireron",
-                    "firstName": "Ehicey",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405
-                  }
-                ]
-                }
-              """.trimIndent(),
-            ),
-        ),
-    )
-  }
-
-  fun stubGetOffenderContactsForOrderingByNames(offenderNo: String) {
-    stubFor(
-      get("/api/offenders/$offenderNo/contacts")
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(200)
-            .withBody(
-              """
-                {
-                "offenderContacts": [
-                  {
-                    "lastName": "Gwyn",
-                    "firstName": "Wyn",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405
-                  },
-                  {
-                    "lastName": "Gwyn",
-                    "firstName": "Aeron",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405
-                  },
-                  {
-                    "lastName": "Gwyn",
-                    "firstName": "Cynog",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405
-                  },
-                  {
-                    "lastName": "Llywelyn",
-                    "firstName": "Gruffydd",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405
-                  },                  
-                  {
-                    "lastName": "Aled",
-                    "firstName": "Cynog",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405
-                  },
-                  {
-                    "lastName": "Aled",
-                    "firstName": "Wyn",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405
-                  },
-                  {
-                    "lastName": "Aled",
-                    "firstName": "Aeron",
-                    "contactType": "O",
-                    "relationshipCode": "PROB",
-                    "emergencyContact": false,
-                    "nextOfKin": false,
-                    "approvedVisitor": false,
-                    "bookingId": 1111405
-                  }
-                ]
-                }
-              """.trimIndent(),
-            ),
         ),
     )
   }

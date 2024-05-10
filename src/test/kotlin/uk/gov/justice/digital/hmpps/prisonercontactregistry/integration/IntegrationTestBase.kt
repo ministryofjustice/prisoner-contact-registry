@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.PrisonApiMockServer
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.BANNED_RESTRICTION_TYPE
 import java.time.LocalDate
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -79,7 +80,7 @@ abstract class IntegrationTestBase {
     assertThat(contact.nextOfKin).isFalse
     assertThat(contact.commentText).isEqualTo("Comment Here")
     assertThat(contact.restrictions.size).isEqualTo(1)
-    assertThat(contact.restrictions[0].restrictionType).isEqualTo("BAN")
+    assertThat(contact.restrictions[0].restrictionType).isEqualTo(BANNED_RESTRICTION_TYPE)
     assertThat(contact.restrictions[0].restrictionTypeDescription).isEqualTo("Banned")
     assertThat(contact.restrictions[0].startDate).isEqualTo("2012-09-13")
     assertThat(contact.restrictions[0].expiryDate).isEqualTo("2014-09-13")
@@ -113,7 +114,7 @@ abstract class IntegrationTestBase {
     assertThat(contact.emergencyContact).isFalse
     assertThat(contact.nextOfKin).isFalse
     assertThat(contact.restrictions.size).isEqualTo(1)
-    assertThat(contact.restrictions[0].restrictionType).isEqualTo("BAN")
+    assertThat(contact.restrictions[0].restrictionType).isEqualTo(BANNED_RESTRICTION_TYPE)
     assertThat(contact.restrictions[0].restrictionTypeDescription).isEqualTo("Banned")
     assertThat(contact.restrictions[0].startDate).isEqualTo("2012-09-13")
     assertThat(contact.restrictions[0].globalRestriction).isEqualTo(false)
@@ -175,25 +176,6 @@ abstract class IntegrationTestBase {
       restrictions = restrictions,
     )
   }
-
-  final fun createRestriction(
-    restrictionType: String,
-    restrictionTypeDescription: String,
-    startDate: LocalDate,
-    expiryDate: LocalDate? = null,
-    globalRestriction: Boolean = false,
-    comment: String = "Comment Here",
-  ): RestrictionDto {
-    return RestrictionDto(
-      restrictionType = restrictionType,
-      restrictionTypeDescription = restrictionTypeDescription,
-      startDate = startDate,
-      expiryDate = expiryDate,
-      globalRestriction = globalRestriction,
-      comment = comment,
-    )
-  }
-
   final fun createBanRestriction(
     startDate: LocalDate,
     expiryDate: LocalDate? = null,
@@ -201,7 +183,7 @@ abstract class IntegrationTestBase {
     comment: String = "Comment Here",
   ): RestrictionDto {
     return RestrictionDto(
-      restrictionType = "BAN",
+      restrictionType = BANNED_RESTRICTION_TYPE,
       restrictionTypeDescription = "Banned",
       startDate = startDate,
       expiryDate = expiryDate,

@@ -16,11 +16,12 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNo
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import java.time.LocalDate
 
+const val BANNED_RESTRICTION_TYPE = "BAN"
+
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
-    const val BANNED_RESTRICTION_TYPE = "BAN"
   }
 
   fun getContactList(
@@ -169,6 +170,6 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
     return visitors
       .flatMap { it.restrictions }
-      .filter { it.restrictionType == "BAN" }
+      .filter { it.restrictionType == BANNED_RESTRICTION_TYPE }
   }
 }

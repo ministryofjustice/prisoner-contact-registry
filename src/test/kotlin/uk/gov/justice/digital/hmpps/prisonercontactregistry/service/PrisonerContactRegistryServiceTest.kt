@@ -57,7 +57,7 @@ internal class PrisonerContactRegistryServiceTest {
     addressUsages = listOf(personAddressUsage),
   )
   private val contactRestriction = RestrictionDto(
-    restrictionType = "BAN",
+    restrictionType = BANNED_RESTRICTION_TYPE,
     restrictionTypeDescription = "123",
     startDate = LocalDate.now(),
     expiryDate = LocalDate.now(),
