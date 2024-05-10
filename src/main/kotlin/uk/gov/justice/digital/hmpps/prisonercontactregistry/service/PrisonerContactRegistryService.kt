@@ -8,9 +8,13 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import java.time.LocalDate
-import java.util.function.Supplier
 
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
@@ -19,7 +23,13 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     const val BANNED_RESTRICTION_TYPE = "BAN"
   }
 
-  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null, withAddress: Boolean? = true, approvedVisitorsOnly: Boolean = false): List<ContactDto> {
+  fun getContactList(
+    prisonerId: String,
+    contactType: String? = null,
+    personId: Long? = null,
+    withAddress: Boolean? = true,
+    approvedVisitorsOnly: Boolean = false,
+  ): List<ContactDto> {
     log.debug("getContactList called with parameters : prisonerId - {}, contactType - {}, personId - {}, withAddress - {}, approvedVisitorsOnly - {}", prisonerId, contactType, personId, withAddress, approvedVisitorsOnly)
 
     // Prisoners (Offenders) have a subset of Contacts (Persons / Visitors) which can be filtered by type and person id.
@@ -74,6 +84,32 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     return contacts
   }
 
+  @Throws(VisitorNotFoundException::class, DateRangeNotFoundException::class)
+  fun getBannedDateRangeForPrisonerContacts(
+    prisonerId: String,
+    visitorIds: List<Long>,
+    fromDate: LocalDate,
+    toDate: LocalDate,
+  ): DateRangeDto {
+    val dateRange = DateRangeDto(fromDate, toDate)
+
+    val visitorBanRestrictions = getVisitorBanRestrictions(prisonerId, visitorIds)
+
+    visitorBanRestrictions.forEach { restriction ->
+      restriction.expiryDate?.let { expiryDate ->
+        if (expiryDate >= dateRange.toDate) {
+          throw DateRangeNotFoundException(message = "Found visitor with restriction of 'BAN' with expiry date after our endDate, no date range possible")
+        }
+
+        if (expiryDate > dateRange.fromDate) {
+          dateRange.fromDate = expiryDate
+        }
+      } ?: throw DateRangeNotFoundException("Found visitor with restriction of 'BAN' with no expiry date, no date range possible")
+    }
+
+    return dateRange
+  }
+
   @Throws(PrisonerNotFoundException::class)
   private fun getContactById(id: String, approvedVisitorsOnly: Boolean): List<ContactDto> {
     try {
@@ -120,22 +156,19 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   private fun isBannedForDate(restrictionEndDate: LocalDate?, date: LocalDate): Boolean {
-    return (restrictionEndDate == null || !(restrictionEndDate.isBefore(date)))
+    return (restrictionEndDate == null || (date <= restrictionEndDate))
   }
-}
 
-class PrisonerNotFoundException(message: String? = null, cause: Throwable? = null) :
-  RuntimeException(message, cause),
-  Supplier<PrisonerNotFoundException> {
-  override fun get(): PrisonerNotFoundException {
-    return PrisonerNotFoundException(message, cause)
-  }
-}
+  private fun getVisitorBanRestrictions(prisonerId: String, visitorIds: List<Long>): List<RestrictionDto> {
+    val contacts = getContactById(prisonerId, true)
 
-class PersonNotFoundException(message: String? = null, cause: Throwable? = null) :
-  RuntimeException(message, cause),
-  Supplier<PersonNotFoundException> {
-  override fun get(): PersonNotFoundException {
-    return PersonNotFoundException(message, cause)
+    val visitors = contacts.filter { visitorIds.contains(it.personId) }
+    if (visitors.size != visitorIds.size) {
+      throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
+    }
+
+    return visitors
+      .flatMap { it.restrictions }
+      .filter { it.restrictionType == "BAN" }
   }
 }

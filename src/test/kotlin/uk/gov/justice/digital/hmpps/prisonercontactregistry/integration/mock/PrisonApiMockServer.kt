@@ -45,6 +45,117 @@ class PrisonApiMockServer : WireMockServer(8092) {
     )
   }
 
+  fun stubGetOffenderMultipleContacts(offenderNo: String) {
+    stubFor(
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .withStatus(200)
+            .withBody(
+              """
+                {
+                "offenderContacts": [
+                  {
+                    "personId": 2187525,
+                    "lastName": "Ireron",
+                    "firstName": "Ehicey",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405,
+                    "restrictions": [
+                      {
+                          "restrictionId": 22022,
+                          "restrictionType": "BAN",
+                          "restrictionTypeDescription": "Banned",
+                          "startDate": "2024-05-09",
+                          "globalRestriction": false
+                      }
+                    ]
+                  },
+                  {
+                    "personId": 2187526,
+                    "lastName": "Gwyn",
+                    "firstName": "Wyn",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405,
+                    "restrictions": [
+                      {
+                          "restrictionId": 22022,
+                          "restrictionType": "BAN",
+                          "restrictionTypeDescription": "Banned",
+                          "startDate": "2024-05-09",
+                          "expiryDate": "2034-05-09",
+                          "globalRestriction": false
+                      }
+                    ]
+                  },
+                  {
+                    "personId": 2187529,
+                    "lastName": "Ajdit",
+                    "firstName": "Wyn",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405,
+                    "restrictions": [
+                      {
+                          "restrictionId": 22022,
+                          "restrictionType": "BAN",
+                          "restrictionTypeDescription": "Banned",
+                          "startDate": "2024-05-09",
+                          "expiryDate": "2024-05-10",
+                          "globalRestriction": false
+                      }
+                    ]
+                  }
+                ]
+                }
+              """.trimIndent(),
+            ),
+        ),
+    )
+  }
+
+  fun stubGetOffenderContactWithNoRestrictions(offenderNo: String) {
+    stubFor(
+      get("/api/offenders/$offenderNo/contacts?approvedVisitorsOnly=true")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .withStatus(200)
+            .withBody(
+              """
+                {
+                "offenderContacts": [
+                  {
+                    "personId": 2187525,
+                    "lastName": "Ireron",
+                    "firstName": "Ehicey",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405
+                  }
+                ]
+                }
+              """.trimIndent(),
+            ),
+        ),
+    )
+  }
+
   fun stubGetOffenderContactsForOrderingByNames(offenderNo: String) {
     stubFor(
       get("/api/offenders/$offenderNo/contacts")

@@ -17,19 +17,25 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryService
 import java.time.LocalDate
 
 const val PRISON_CONTACTS_CONTROLLER_PATH: String = "/prisoners/{prisonerId}"
 const val PRISON_GET_ALL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/contacts"
 const val PRISON_GET_APRROVED_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/approved/social/contacts"
+const val PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$PRISON_GET_APRROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/banned/dateRange"
 
 @RestController
 @Validated
 @RequestMapping(name = "Contact Resource", produces = [MediaType.APPLICATION_JSON_VALUE])
 class PrisonerContactController(
   private val contactService: PrisonerContactRegistryService,
+  private val prisonerContactRegistryService: PrisonerContactRegistryService,
 ) {
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
 
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(PRISON_GET_ALL_CONTACTS_CONTROLLER_PATH)
@@ -74,7 +80,10 @@ class PrisonerContactController(
     @Parameter(description = "Query by Person Identifier (NOMIS Person ID)", example = "9147510")
     personId: Long?,
     @RequestParam(value = "withAddress", required = false)
-    @Parameter(description = "by default returns addresses for all contacts, set to false if contact addresses not needed.", example = "false")
+    @Parameter(
+      description = "by default returns addresses for all contacts, set to false if contact addresses not needed.",
+      example = "false",
+    )
     withAddress: Boolean? = true,
   ): List<ContactDto> {
     log.debug("Prisoner: $prisonerId, Type: $contactType, Person: $personId, withAddress = $withAddress")
@@ -146,7 +155,64 @@ class PrisonerContactController(
     return compareBy({ it.lastName }, { it.firstName })
   }
 
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
+  @GetMapping(PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH)
+  @Operation(
+    summary = "Get date range for visitors with ban restriction can visit a prisoner",
+    description = "Returns a date range for visitors with ban restriction can visit a prisoner",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Date range returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to Get date range for prisoner visitors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to Get date range for prisoner visitors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Prisoner, Visitor or Date range not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getDateRangeForPrisonerVisitorsWithBanRestrictions(
+    @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
+    @PathVariable
+    prisonerId: String,
+    @RequestParam(value = "visitors", required = true)
+    @Parameter(description = "Visitor Ids of prisoner contacts", example = "9147510, 8431201")
+    visitorIds: List<Long>,
+    @RequestParam(value = "fromDate", required = true)
+    @Parameter(description = "Start date range", example = "2024-03-15")
+    fromDate: LocalDate,
+    @RequestParam(value = "toDate", required = true)
+    @Parameter(description = "To date range", example = "2024-03-31")
+    toDate: LocalDate,
+  ): DateRangeDto {
+    log.debug(
+      "getBannedDateRangeForPrisonerContacts called with parameters: prisonerId: {}, visitorIds: {}, fromDate: {}, toDate: {}",
+      prisonerId,
+      visitorIds,
+      fromDate,
+      toDate,
+    )
+    return prisonerContactRegistryService.getBannedDateRangeForPrisonerContacts(
+      prisonerId,
+      visitorIds,
+      fromDate,
+      toDate,
+    )
   }
 }

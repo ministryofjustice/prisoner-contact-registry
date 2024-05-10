@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import java.time.Duration
 
 @Component
