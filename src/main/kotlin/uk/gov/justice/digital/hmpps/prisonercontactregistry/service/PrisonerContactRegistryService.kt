@@ -18,18 +18,25 @@ import java.time.LocalDate
 
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+    const val BANNED_RESTRICTION_TYPE = "BAN"
+  }
 
   fun getContactList(
     prisonerId: String,
     contactType: String? = null,
     personId: Long? = null,
     withAddress: Boolean? = true,
+    approvedVisitorsOnly: Boolean = false,
   ): List<ContactDto> {
+    log.debug("getContactList called with parameters : prisonerId - {}, contactType - {}, personId - {}, withAddress - {}, approvedVisitorsOnly - {}", prisonerId, contactType, personId, withAddress, approvedVisitorsOnly)
+
     // Prisoners (Offenders) have a subset of Contacts (Persons / Visitors) which can be filtered by type and person id.
     // When filtering the offenders contacts by type of person this results in a query result (list of matching contacts
     // or empty list) If a prisoner is not found this results in a PrisonerNotFoundException (404).
 
-    var contacts = getContactById(prisonerId)
+    var contacts = getContactById(prisonerId, approvedVisitorsOnly)
 
     if (personId != null) {
       contacts = filterByPersonId(contacts, personId)
@@ -53,6 +60,27 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
         }
       }
     }
+    return contacts
+  }
+
+  fun getApprovedSocialContactList(
+    prisonerId: String,
+    personId: Long? = null,
+    withAddress: Boolean,
+    hasDateOfBirth: Boolean? = null,
+    notBannedBeforeDate: LocalDate? = null,
+  ): List<ContactDto> {
+    log.debug("getApprovedSocialContactList called with parameters : prisonerId - {}, personId - {}, withAddress - {}, hasDateOfBirth - {}, notBannedBeforeDate - {}", prisonerId, personId, withAddress, hasDateOfBirth, notBannedBeforeDate)
+    var contacts = getContactList(prisonerId = prisonerId, contactType = "S", personId = personId, withAddress = withAddress, approvedVisitorsOnly = true)
+
+    if (hasDateOfBirth != null && hasDateOfBirth) {
+      contacts = contacts.filter { hasContactGotDateOfBirth(it) }
+    }
+
+    if (notBannedBeforeDate != null) {
+      contacts = contacts.filterNot { isContactBannedBeforeDate(it, notBannedBeforeDate) }
+    }
+
     return contacts
   }
 
@@ -83,9 +111,9 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   @Throws(PrisonerNotFoundException::class)
-  private fun getContactById(id: String): List<ContactDto> {
+  private fun getContactById(id: String, approvedVisitorsOnly: Boolean): List<ContactDto> {
     try {
-      return prisonApiClient.getOffenderContacts(id)!!.offenderContacts
+      return prisonApiClient.getOffenderContacts(id, approvedVisitorsOnly).offenderContacts
     } catch (e: WebClientResponseException) {
       if (e.statusCode == HttpStatus.NOT_FOUND) {
         throw PrisonerNotFoundException(e.message, e)
@@ -114,22 +142,33 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     return contacts?.filter { it.contactType.equals(contactType, true) } ?: emptyList()
   }
 
+  private fun hasContactGotDateOfBirth(contact: ContactDto): Boolean {
+    return contact.dateOfBirth != null
+  }
+
+  private fun isContactBannedBeforeDate(contact: ContactDto, date: LocalDate): Boolean {
+    return contact.restrictions.any { hasBanForDate(it, date) }
+  }
+
+  private fun hasBanForDate(restriction: RestrictionDto, date: LocalDate): Boolean {
+    return restriction.restrictionType == BANNED_RESTRICTION_TYPE &&
+      isBannedForDate(restriction.expiryDate, date)
+  }
+
+  private fun isBannedForDate(restrictionEndDate: LocalDate?, date: LocalDate): Boolean {
+    return (restrictionEndDate == null || (date <= restrictionEndDate))
+  }
+
   private fun getVisitorBanRestrictions(prisonerId: String, visitorIds: List<Long>): List<RestrictionDto> {
-    val contacts = getContactById(prisonerId)
+    val contacts = getContactById(prisonerId, true)
 
     val visitors = contacts.filter { visitorIds.contains(it.personId) }
     if (visitors.size != visitorIds.size) {
       throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
     }
 
-    val visitorBanRestrictions = visitors
+    return visitors
       .flatMap { it.restrictions }
       .filter { it.restrictionType == "BAN" }
-
-    return visitorBanRestrictions
-  }
-
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 }

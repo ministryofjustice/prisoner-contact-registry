@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
 @Schema(description = "A contact for a prisoner")
-class RestrictionDto(
+data class RestrictionDto(
   @Schema(description = "Restriction Type Code", example = "123", required = true)
   val restrictionType: String,
   @Schema(description = "Description of Restriction Type", example = "123", required = true)

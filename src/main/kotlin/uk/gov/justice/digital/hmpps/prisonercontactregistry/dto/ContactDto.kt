@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
 @Schema(description = "A contact for a prisoner")
-class ContactDto(
+data class ContactDto(
   @Schema(description = "Identifier for this contact (Person in NOMIS)", example = "5871791")
   val personId: Long? = null,
   @Schema(description = "First name", example = "John", required = true)
