@@ -121,7 +121,7 @@ class PrisonerContactRegistryExceptionHandler {
       .body(
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
-          userMessage = "One of the visitors provided could not found: ${e.cause?.message}",
+          userMessage = "One of the visitors provided could not found",
           developerMessage = e.message,
         ),
       )
@@ -129,13 +129,16 @@ class PrisonerContactRegistryExceptionHandler {
 
   @ExceptionHandler(DateRangeNotFoundException::class)
   fun handleDateRangeNotFoundException(e: DateRangeNotFoundException): ResponseEntity<ErrorResponse?>? {
-    log.debug("One of the visitors provided has an open ended ban with no expiry, no suitable date range found: {}", e.message)
+    log.debug(
+      "Visitor provided has a BAN restriction with either no expiry or expiry after toDate, no suitable date range found: {}",
+      e.message,
+    )
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
       .body(
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
-          userMessage = "One of the visitors provided has an open ended ban, no date range could be found: ${e.cause?.message}",
+          userMessage = "One of the visitors provided has a BAN restriction, no suitable date range found",
           developerMessage = e.message,
         ),
       )

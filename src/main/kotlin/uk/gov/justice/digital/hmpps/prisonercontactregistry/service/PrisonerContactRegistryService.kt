@@ -67,19 +67,16 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
     val visitorBanRestrictions = getVisitorBanRestrictions(prisonerId, visitorIds)
 
-    for (restriction in visitorBanRestrictions) {
+    visitorBanRestrictions.forEach { restriction ->
       restriction.expiryDate?.let { expiryDate ->
-        if (expiryDate.isAfter(dateRange.toDate)) {
+        if (expiryDate >= dateRange.toDate) {
           throw DateRangeNotFoundException(message = "Found visitor with restriction of 'BAN' with expiry date after our endDate, no date range possible")
         }
 
-        if (expiryDate.isAfter(dateRange.fromDate)) {
+        if (expiryDate > dateRange.fromDate) {
           dateRange.fromDate = expiryDate
         }
-      } ?: run {
-        // If an expiry date is found to be null, it is classed as an "open-ended" ban. Thus, no suitable date range can be given.
-        throw DateRangeNotFoundException(message = "Found visitor with restriction of 'BAN' with no expiry date, no date range possible")
-      }
+      } ?: throw DateRangeNotFoundException("Found visitor with restriction of 'BAN' with no expiry date, no date range possible")
     }
 
     return dateRange

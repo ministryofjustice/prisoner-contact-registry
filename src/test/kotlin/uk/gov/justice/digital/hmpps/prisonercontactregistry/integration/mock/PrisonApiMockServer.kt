@@ -165,6 +165,27 @@ class PrisonApiMockServer : WireMockServer(8092) {
                           "globalRestriction": false
                       }
                     ]
+                  },
+                  {
+                    "personId": 2187529,
+                    "lastName": "Ajdit",
+                    "firstName": "Wyn",
+                    "contactType": "O",
+                    "relationshipCode": "PROB",
+                    "emergencyContact": false,
+                    "nextOfKin": false,
+                    "approvedVisitor": false,
+                    "bookingId": 1111405,
+                    "restrictions": [
+                      {
+                          "restrictionId": 22022,
+                          "restrictionType": "BAN",
+                          "restrictionTypeDescription": "Banned",
+                          "startDate": "2024-05-09",
+                          "expiryDate": "2024-05-10",
+                          "globalRestriction": false
+                      }
+                    ]
                   }
                 ]
                 }
