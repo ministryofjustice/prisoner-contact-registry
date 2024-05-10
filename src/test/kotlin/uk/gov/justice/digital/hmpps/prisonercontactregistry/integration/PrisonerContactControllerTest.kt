@@ -362,8 +362,8 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187526)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.now()
-    val toDate: LocalDate = LocalDate.now()
+    val fromDate: LocalDate = LocalDate.of(2024, 5, 1)
+    val toDate: LocalDate = LocalDate.of(2024, 5, 10)
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 
@@ -380,7 +380,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187529)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.now()
+    val fromDate: LocalDate = LocalDate.of(2024, 5, 9)
     val toDate: LocalDate = LocalDate.of(2024, 5, 10)
     val uri =
       "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
