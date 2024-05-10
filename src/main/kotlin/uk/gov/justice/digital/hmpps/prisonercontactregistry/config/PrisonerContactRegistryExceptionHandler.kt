@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PersonNotFoundException
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 
 @RestControllerAdvice
 class PrisonerContactRegistryExceptionHandler {
@@ -106,6 +108,34 @@ class PrisonerContactRegistryExceptionHandler {
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
           userMessage = "Prisoner not found: ${e.cause?.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(VisitorNotFoundException::class)
+  fun handleVisitorNotFoundException(e: VisitorNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("One of the visitors provided could not be found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "One of the visitors provided could not found: ${e.cause?.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(DateRangeNotFoundException::class)
+  fun handleDateRangeNotFoundException(e: DateRangeNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("One of the visitors provided has an open ended ban with no expiry, no suitable date range found: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "One of the visitors provided has an open ended ban, no date range could be found: ${e.cause?.message}",
           developerMessage = e.message,
         ),
       )

@@ -8,12 +8,23 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
-import java.util.function.Supplier
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
+import java.time.LocalDate
 
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
 
-  fun getContactList(prisonerId: String, contactType: String? = null, personId: Long? = null, withAddress: Boolean? = true): List<ContactDto> {
+  fun getContactList(
+    prisonerId: String,
+    contactType: String? = null,
+    personId: Long? = null,
+    withAddress: Boolean? = true,
+  ): List<ContactDto> {
     // Prisoners (Offenders) have a subset of Contacts (Persons / Visitors) which can be filtered by type and person id.
     // When filtering the offenders contacts by type of person this results in a query result (list of matching contacts
     // or empty list) If a prisoner is not found this results in a PrisonerNotFoundException (404).
@@ -43,6 +54,35 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
       }
     }
     return contacts
+  }
+
+  @Throws(VisitorNotFoundException::class, DateRangeNotFoundException::class)
+  fun getBannedDateRangeForPrisonerContacts(
+    prisonerId: String,
+    visitorIds: List<Long>,
+    fromDate: LocalDate,
+    toDate: LocalDate,
+  ): DateRangeDto {
+    val dateRange = DateRangeDto(fromDate, toDate)
+
+    val visitorBanRestrictions = getVisitorBanRestrictions(prisonerId, visitorIds)
+
+    for (restriction in visitorBanRestrictions) {
+      restriction.expiryDate?.let { expiryDate ->
+        if (expiryDate.isAfter(dateRange.toDate)) {
+          throw DateRangeNotFoundException(message = "Found visitor with restriction of 'BAN' with expiry date after our endDate, no date range possible")
+        }
+
+        if (expiryDate.isAfter(dateRange.fromDate)) {
+          dateRange.fromDate = expiryDate
+        }
+      } ?: run {
+        // If an expiry date is found to be null, it is classed as an "open-ended" ban. Thus, no suitable date range can be given.
+        throw DateRangeNotFoundException(message = "Found visitor with restriction of 'BAN' with no expiry date, no date range possible")
+      }
+    }
+
+    return dateRange
   }
 
   @Throws(PrisonerNotFoundException::class)
@@ -77,23 +117,22 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     return contacts?.filter { it.contactType.equals(contactType, true) } ?: emptyList()
   }
 
+  private fun getVisitorBanRestrictions(prisonerId: String, visitorIds: List<Long>): List<RestrictionDto> {
+    val contacts = getContactById(prisonerId)
+
+    val visitors = contacts.filter { visitorIds.contains(it.personId) }
+    if (visitors.size != visitorIds.size) {
+      throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
+    }
+
+    val visitorBanRestrictions = visitors
+      .flatMap { it.restrictions }
+      .filter { it.restrictionType == "BAN" }
+
+    return visitorBanRestrictions
+  }
+
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
-  }
-}
-
-class PrisonerNotFoundException(message: String? = null, cause: Throwable? = null) :
-  RuntimeException(message, cause),
-  Supplier<PrisonerNotFoundException> {
-  override fun get(): PrisonerNotFoundException {
-    return PrisonerNotFoundException(message, cause)
-  }
-}
-
-class PersonNotFoundException(message: String? = null, cause: Throwable? = null) :
-  RuntimeException(message, cause),
-  Supplier<PersonNotFoundException> {
-  override fun get(): PersonNotFoundException {
-    return PersonNotFoundException(message, cause)
   }
 }

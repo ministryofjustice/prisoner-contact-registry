@@ -11,6 +11,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
+import java.time.LocalDate
 
 @Suppress("ClassName")
 class PrisonerContactControllerTest : IntegrationTestBase() {
@@ -318,5 +319,77 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     assertThat(contactAddress.addressUsages[0].addressUsage).isEqualTo("HDC")
     assertThat(contactAddress.addressUsages[0].addressUsageDescription).isEqualTo("HDC Address")
     assertThat(contactAddress.addressUsages[0].activeFlag).isEqualTo(true)
+  }
+
+  @Test
+  fun `visitorId not found within list of prisoner contacts`() {
+    val prisonerId = "A1234AA"
+    val visitorIds: List<Long> = listOf(2187524, 2187525)
+    val visitorIdsString = visitorIds.joinToString(",")
+    val fromDate: LocalDate = LocalDate.now().minusDays(2)
+    val toDate: LocalDate = LocalDate.now().minusDays(2)
+    val uri =
+      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+
+    prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
+
+    webTestClient.get().uri(uri)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+      .exchange()
+      .expectStatus().isNotFound
+  }
+
+  @Test
+  fun `No applicable date range found due to visitor having open ended BAN restriction`() {
+    val prisonerId = "A1234AA"
+    val visitorIds: List<Long> = listOf(2187525, 2187526)
+    val visitorIdsString = visitorIds.joinToString(",")
+    val fromDate: LocalDate = LocalDate.now().minusDays(2)
+    val toDate: LocalDate = LocalDate.now().minusDays(2)
+    val uri =
+      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+
+    prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
+
+    webTestClient.get().uri(uri)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+      .exchange()
+      .expectStatus().isNotFound
+  }
+
+  @Test
+  fun `No applicable date range found due to visitor having BAN restriction expiring after our endDate`() {
+    val prisonerId = "A1234AA"
+    val visitorIds: List<Long> = listOf(2187526)
+    val visitorIdsString = visitorIds.joinToString(",")
+    val fromDate: LocalDate = LocalDate.now()
+    val toDate: LocalDate = LocalDate.now()
+    val uri =
+      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+
+    prisonApiMockServer.stubGetOffenderMultipleContacts(prisonerId)
+
+    webTestClient.get().uri(uri)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+      .exchange()
+      .expectStatus().isNotFound
+  }
+
+  @Test
+  fun `Date range is returned successfully when visits have either no ban restrictions`() {
+    val prisonerId = "A1234AA"
+    val visitorIds: List<Long> = listOf(2187525)
+    val visitorIdsString = visitorIds.joinToString(",")
+    val fromDate: LocalDate = LocalDate.now()
+    val toDate: LocalDate = LocalDate.now()
+    val uri =
+      "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+
+    prisonApiMockServer.stubGetOffenderContactWithNoRestrictions(prisonerId)
+
+    webTestClient.get().uri(uri)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+      .exchange()
+      .expectStatus().isOk
   }
 }

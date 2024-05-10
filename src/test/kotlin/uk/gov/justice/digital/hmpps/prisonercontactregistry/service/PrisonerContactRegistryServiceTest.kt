@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import java.time.LocalDate
 
 internal class PrisonerContactRegistryServiceTest {
@@ -56,7 +57,7 @@ internal class PrisonerContactRegistryServiceTest {
     addressUsages = listOf(personAddressUsage),
   )
   private val contactRestriction = RestrictionDto(
-    restrictionType = "123",
+    restrictionType = "BAN",
     restrictionTypeDescription = "123",
     startDate = LocalDate.now(),
     expiryDate = LocalDate.now(),
@@ -319,5 +320,21 @@ internal class PrisonerContactRegistryServiceTest {
     assertThat(contacts).isEmpty()
 
     verify(apiClient, times(1)).getOffenderContacts(prisonerId)
+  }
+
+  @Test
+  fun `Get banned date range returns the most restrictive date range`() {
+    val prisonerId = "A1234AA"
+    val visitorIds: List<Long> = listOf(5871791)
+    val fromDate: LocalDate = LocalDate.now().minusDays(2)
+    val toDate: LocalDate = LocalDate.now().plusDays(28)
+
+    whenever(
+      apiClient.getOffenderContacts(prisonerId),
+    ).thenReturn(ContactsDto(listOf(offenderContact)))
+
+    val dateRange = contactService.getBannedDateRangeForPrisonerContacts(prisonerId, visitorIds, fromDate, toDate)
+
+    assertThat(dateRange.fromDate).isEqualTo(offenderContact.restrictions[0].expiryDate)
   }
 }
