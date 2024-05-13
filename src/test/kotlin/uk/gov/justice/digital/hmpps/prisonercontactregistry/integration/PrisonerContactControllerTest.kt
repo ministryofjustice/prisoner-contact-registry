@@ -12,7 +12,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClie
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.Restriction
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import java.time.LocalDate
 
 @Suppress("ClassName")
@@ -22,7 +22,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
   private val expiredBannedRestriction = RestrictionDto(
     comment = "Comment Here",
-    restrictionType = Restriction.BANNED.toString(),
+    restrictionType = RestrictionType.BANNED.toString(),
     restrictionTypeDescription = "Banned",
     startDate = LocalDate.of(2012, 9, 13),
     expiryDate = LocalDate.of(2014, 9, 13),

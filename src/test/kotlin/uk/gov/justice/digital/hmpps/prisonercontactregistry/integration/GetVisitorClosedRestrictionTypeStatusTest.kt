@@ -7,25 +7,23 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClie
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.Restriction
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import java.time.LocalDate
 
 @Suppress("ClassName")
-class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
+class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
   @SpyBean
   private lateinit var prisonApiClient: PrisonApiClient
 
   @Nested
   inner class authentication {
     @Test
-    fun `Get date range for visitors with banned restrictions requires authentication`() {
+    fun `requires authentication`() {
       // Given
       val prisonerId = "A1234AA"
       val visitorIds: List<Long> = listOf(2187525)
       val visitorIdsString = visitorIds.joinToString(",")
-      val fromDate: LocalDate = LocalDate.now()
-      val toDate: LocalDate = LocalDate.now()
-      val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
+      val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
       // When
       val result = webTestClient.get().uri(uri)
@@ -36,14 +34,12 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Get date range for visitors with banned restrictions requires correct role`() {
+    fun `Get visitor closed restriction status requires correct role`() {
       // Given
       val prisonerId = "A1234AA"
       val visitorIds: List<Long> = listOf(2187525)
       val visitorIdsString = visitorIds.joinToString(",")
-      val fromDate: LocalDate = LocalDate.now()
-      val toDate: LocalDate = LocalDate.now()
-      val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
+      val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
       // When
       val result = webTestClient.get().uri(uri)
@@ -56,14 +52,12 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Get date range for visitors with banned restrictions requires correct role PRISONER_CONTACT_REGISTRY`() {
+    fun `Get visitor closed restriction status requires correct role PRISONER_CONTACT_REGISTRY`() {
       // Given
       val prisonerId = "A1234AA"
       val visitorIds: List<Long> = listOf(2187525)
       val visitorIdsString = visitorIds.joinToString(",")
-      val fromDate: LocalDate = LocalDate.now()
-      val toDate: LocalDate = LocalDate.now()
-      val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
+      val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
       prisonApiMockServer.stubGetApprovedOffenderContacts(
         prisonerId,
@@ -81,32 +75,12 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `Get date range for visitors with banned restrictions bad request`() {
-    // Given
-    val prisonerId = "A1234AA"
-    val wrongVisitorId = "badRequest"
-    val fromDate: LocalDate = LocalDate.now().minusDays(2)
-    val toDate: LocalDate = LocalDate.now().minusDays(2)
-    val uri = createDateRangeBanUri(prisonerId, wrongVisitorId, fromDate, toDate)
-
-    // When
-    val result = webTestClient.get().uri(uri)
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
-      .exchange()
-
-    // Then
-    result.expectStatus().isBadRequest
-  }
-
-  @Test
-  fun `Get date range for visitors with banned restrictions visitorId not found within list of prisoner contacts`() {
+  fun `Get visitor closed restriction status visitorId not found within list of prisoner contacts`() {
     // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187524, 2187525)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.now().minusDays(2)
-    val toDate: LocalDate = LocalDate.now().minusDays(2)
-    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
+    val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
     val contactWithMinimumDetails = ContactDto(
       lastName = "Ireron",
@@ -142,32 +116,22 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `Get date range for visitors with banned restrictions No applicable date range found due to visitor having open ended BAN restriction`() {
+  fun `Closed restriction status returned as 'true' if closed restriction found with no expiry date for given visitors`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187529L, 2187526)
+    val visitorIds: List<Long> = listOf(2187529L)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.now().minusDays(2)
-    val toDate: LocalDate = LocalDate.now().plusDays(2)
-    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
+    val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = Restriction.BANNED.toString(),
-        restrictionTypeDescription = "Banned",
-        startDate = fromDate,
+        restrictionType = RestrictionType.CLOSED.toString(),
+        restrictionTypeDescription = "CLOSED",
+        startDate = LocalDate.of(2024, 1, 1),
         expiryDate = null,
         globalRestriction = false,
       ),
-      RestrictionDto(
-        comment = "Comment Here",
-        restrictionType = Restriction.BANNED.toString(),
-        restrictionTypeDescription = "Banned",
-        startDate = fromDate,
-        expiryDate = toDate.plusDays(1),
-        globalRestriction = false,
-      ),
     )
 
     prisonApiMockServer.stubGetApprovedOffenderContacts(
@@ -181,31 +145,25 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
       .exchange()
 
     // Then
-    result.expectStatus().isNotFound
-    result.expectBody()
-      .jsonPath("$.userMessage")
-      .isEqualTo("One of the visitors provided has a BAN restriction, no suitable date range found")
-      .jsonPath("$.developerMessage")
-      .isEqualTo("Found visitor with restriction of 'BAN' with no expiry date, no date range possible")
+    result.expectStatus().isOk
+    result.expectBody().jsonPath("$.value").isEqualTo(true)
   }
 
   @Test
-  fun `Get date range for visitors with banned restrictions No applicable date range found due to visitor having BAN restriction expiring after our endDate`() {
+  fun `Closed restriction status returned as 'true' if closed restriction found with expiry date in future for given visitors`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187526)
+    val visitorIds: List<Long> = listOf(2187529L)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.of(2024, 5, 1)
-    val toDate: LocalDate = LocalDate.of(2024, 5, 10)
-    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
+    val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = Restriction.BANNED.toString(),
-        restrictionTypeDescription = "Banned",
-        startDate = fromDate,
-        expiryDate = toDate.plusDays(1),
+        restrictionType = RestrictionType.CLOSED.toString(),
+        restrictionTypeDescription = "CLOSED",
+        startDate = LocalDate.of(2024, 1, 1),
+        expiryDate = LocalDate.now().plusDays(1),
         globalRestriction = false,
       ),
     )
@@ -221,32 +179,25 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
       .exchange()
 
     // Then
-    result.expectStatus().isNotFound
-    result.expectBody()
-      .jsonPath("$.userMessage")
-      .isEqualTo("One of the visitors provided has a BAN restriction, no suitable date range found")
-      .jsonPath("$.developerMessage")
-      .isEqualTo("Found visitor with restriction of 'BAN' with expiry date after our endDate, no date range possible")
+    result.expectStatus().isOk
+    result.expectBody().jsonPath("$.value").isEqualTo(true)
   }
 
   @Test
-  fun `Get date range for visitors with banned restrictions No applicable date range found due to visitor having BAN restriction expiring on our endDate`() {
+  fun `Closed restriction status returned as 'true' if closed restriction found with expiry date of today for given visitors`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorId = 2187529L
-    val visitorIds: List<Long> = listOf(visitorId)
+    val visitorIds: List<Long> = listOf(2187529L)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.of(2024, 5, 9)
-    val toDate: LocalDate = LocalDate.of(2024, 5, 10)
-    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
+    val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = Restriction.BANNED.toString(),
-        restrictionTypeDescription = "Banned",
-        startDate = fromDate,
-        expiryDate = toDate,
+        restrictionType = RestrictionType.CLOSED.toString(),
+        restrictionTypeDescription = "CLOSED",
+        startDate = LocalDate.of(2024, 1, 1),
+        expiryDate = LocalDate.now(),
         globalRestriction = false,
       ),
     )
@@ -262,23 +213,51 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
       .exchange()
 
     // Then
-    result.expectStatus().isNotFound
-    result.expectBody()
-      .jsonPath("$.userMessage")
-      .isEqualTo("One of the visitors provided has a BAN restriction, no suitable date range found")
-      .jsonPath("$.developerMessage")
-      .isEqualTo("Found visitor with restriction of 'BAN' with expiry date after our endDate, no date range possible")
+    result.expectStatus().isOk
+    result.expectBody().jsonPath("$.value").isEqualTo(true)
   }
 
   @Test
-  fun `Get date range for visitors with banned restrictions Date range is returned successfully when visitors have no BAN restrictions`() {
+  fun `Closed restriction status returned as 'false' if closed restriction found with expiry date in past`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187525)
+    val visitorIds: List<Long> = listOf(2187529L)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.now()
-    val toDate: LocalDate = LocalDate.now()
-    val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
+    val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
+
+    val restrictions = listOf(
+      RestrictionDto(
+        comment = "Comment Here",
+        restrictionType = RestrictionType.CLOSED.toString(),
+        restrictionTypeDescription = "CLOSED",
+        startDate = LocalDate.of(2024, 1, 1),
+        expiryDate = LocalDate.now().minusDays(10),
+        globalRestriction = false,
+      ),
+    )
+
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
+      prisonerId,
+      contacts = createContactsDto(restrictions, visitorIds),
+    )
+
+    // When
+    val result = webTestClient.get().uri(uri)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+      .exchange()
+
+    // Then
+    result.expectStatus().isOk
+    result.expectBody().jsonPath("$.value").isEqualTo(false)
+  }
+
+  @Test
+  fun `Closed restriction status returned as 'false' if no closed restriction found for visitors`() {
+    // Given
+    val prisonerId = "A1234AA"
+    val visitorIds: List<Long> = listOf(2187529L)
+    val visitorIdsString = visitorIds.joinToString(",")
+    val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
     prisonApiMockServer.stubGetApprovedOffenderContacts(
       prisonerId,
@@ -292,14 +271,13 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
 
     // Then
     result.expectStatus().isOk
+    result.expectBody().jsonPath("$.value").isEqualTo(false)
   }
 
-  private fun createDateRangeBanUri(
+  private fun createVisitorsClosedRestrictionUri(
     prisonerId: String,
     visitorIdsString: String,
-    fromDate: LocalDate,
-    toDate: LocalDate,
   ): String {
-    return "/prisoners/$prisonerId/approved/social/contacts/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
+    return "/prisoners/$prisonerId/approved/social/contacts/restrictions/close?visitors=$visitorIdsString"
   }
 }

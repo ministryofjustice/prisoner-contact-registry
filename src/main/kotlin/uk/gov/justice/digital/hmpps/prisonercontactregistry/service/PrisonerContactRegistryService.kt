@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.Restriction
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
@@ -102,7 +102,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
     val dateRange = DateRangeDto(fromDate, toDate)
 
-    val visitorBanRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, Restriction.BANNED)
+    val visitorBanRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, RestrictionType.BANNED)
 
     visitorBanRestrictions.forEach { restriction ->
       restriction.expiryDate?.let { expiryDate ->
@@ -129,7 +129,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
     val hasClosedRestrictionDto = HasClosedRestrictionDto(false)
 
-    val visitorClosedRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, Restriction.CLOSED)
+    val visitorClosedRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, RestrictionType.CLOSED)
 
     visitorClosedRestrictions.forEach { restriction ->
       restriction.expiryDate?.let { expiryDate ->
@@ -183,7 +183,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   private fun hasBanForDate(restriction: RestrictionDto, date: LocalDate): Boolean {
-    return restriction.restrictionType == Restriction.BANNED.toString() &&
+    return restriction.restrictionType == RestrictionType.BANNED.toString() &&
       isBannedForDate(restriction.expiryDate, date)
   }
 
@@ -202,7 +202,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     return visitors
   }
 
-  private fun getVisitorsWithRestrictionType(prisonerId: String, visitorIds: List<Long>, restrictionType: Restriction): List<RestrictionDto> {
+  private fun getVisitorsWithRestrictionType(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
     val visitors = getVisitors(prisonerId, visitorIds)
     val visitorsWithRestriction =
       visitors

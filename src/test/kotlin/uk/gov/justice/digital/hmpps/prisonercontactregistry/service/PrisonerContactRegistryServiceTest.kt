@@ -19,7 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.Restriction
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import java.time.LocalDate
 
@@ -58,7 +58,7 @@ internal class PrisonerContactRegistryServiceTest {
     addressUsages = listOf(personAddressUsage),
   )
   private val contactRestriction = RestrictionDto(
-    restrictionType = Restriction.BANNED.toString(),
+    restrictionType = RestrictionType.BANNED.toString(),
     restrictionTypeDescription = "123",
     startDate = LocalDate.now(),
     expiryDate = LocalDate.now(),

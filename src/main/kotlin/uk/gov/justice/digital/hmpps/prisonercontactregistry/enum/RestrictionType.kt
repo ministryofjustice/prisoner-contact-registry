@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.enum
 
-enum class Restriction(private val restriction: String) {
+enum class RestrictionType(private val restriction: String) {
   BANNED("BAN"),
   CLOSED("CLOSED"),
   ;
