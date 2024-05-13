@@ -52,14 +52,14 @@ workflows:
           name: build_docker
       - request-dev-approval:
           type: approval
-      - hmpps/deploy_env:
-          name: deploy_dev
-          env: "dev"
-          context: hmpps-common-vars
           filters:
             branches:
               only:
                 - main
+      - hmpps/deploy_env:
+          name: deploy_dev
+          env: "dev"
+          context: hmpps-common-vars
           requires:
             - validate
             - build_docker
