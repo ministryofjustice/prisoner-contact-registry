@@ -18,13 +18,15 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryService
 import java.time.LocalDate
 
 const val PRISON_CONTACTS_CONTROLLER_PATH: String = "/prisoners/{prisonerId}"
 const val PRISON_GET_ALL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/contacts"
-const val PRISON_GET_APRROVED_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/approved/social/contacts"
-const val PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$PRISON_GET_APRROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/banned/dateRange"
+const val PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/approved/social/contacts"
+const val PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/banned/dateRange"
+const val PRISON_GET_CLOSED_RESTRICTIONS_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/close"
 
 @RestController
 @Validated
@@ -92,7 +94,7 @@ class PrisonerContactController(
   }
 
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
-  @GetMapping(PRISON_GET_APRROVED_SOCIAL_CONTACTS_CONTROLLER_PATH)
+  @GetMapping(PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH)
   @Operation(
     summary = "Get Prisoners approved Social Contacts",
     description = "Returns details of a prisoner's social contacts that have been approved.",
@@ -158,12 +160,12 @@ class PrisonerContactController(
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH)
   @Operation(
-    summary = "Get date range for visitors with ban restriction can visit a prisoner",
-    description = "Returns a date range for visitors with ban restriction can visit a prisoner",
+    summary = "Get an updated date range for visitors if a visitor with ban restriction is found, else returns original date",
+    description = "Returns an updated date range for visitors if one is found with an active ban restriction. If not, it returns the original date range",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Date range returned",
+        description = "Date range returned (original or adjusted)",
       ),
       ApiResponse(
         responseCode = "400",
@@ -187,12 +189,12 @@ class PrisonerContactController(
       ),
     ],
   )
-  fun getDateRangeForPrisonerVisitorsWithBanRestrictions(
+  fun getUpdatedDateRangeForPrisonerVisitorsIfFoundWithBanRestrictions(
     @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
     @PathVariable
     prisonerId: String,
     @RequestParam(value = "visitors", required = true)
-    @Parameter(description = "Visitor Ids of prisoner contacts", example = "9147510, 8431201")
+    @Parameter(description = "Ids of prisoner visitors", example = "9147510, 8431201")
     visitorIds: List<Long>,
     @RequestParam(value = "fromDate", required = true)
     @Parameter(description = "Start date range", example = "2024-03-15")
@@ -208,11 +210,54 @@ class PrisonerContactController(
       fromDate,
       toDate,
     )
-    return prisonerContactRegistryService.getBannedDateRangeForPrisonerContacts(
+    return prisonerContactRegistryService.getBannedDateRangeForPrisonerContacts(prisonerId, visitorIds, fromDate, toDate)
+  }
+
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
+  @GetMapping(PRISON_GET_CLOSED_RESTRICTIONS_CONTROLLER_PATH)
+  @Operation(
+    summary = "Get status on any visitors having closed restrictions",
+    description = "Returns a boolean true/false for a given list of visitors if any closed restrictions are found",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returned status on visitor closed restrictions successfully",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to Get status of visitors closed restrictions",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to Get status of visitors closed restrictions",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Prisoner or Visitor",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getClosedRestrictionStatusForPrisonerVisitors(
+    @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
+    @PathVariable
+    prisonerId: String,
+    @RequestParam(value = "visitors", required = true)
+    @Parameter(description = "Ids of prisoner visitors", example = "9147510, 8431201")
+    visitorIds: List<Long>,
+  ): HasClosedRestrictionDto {
+    log.debug(
+      "getHasClosedRestrictionForPrisonerVisitors called with parameters: prisonerId: {}, visitorIds: {}",
       prisonerId,
       visitorIds,
-      fromDate,
-      toDate,
     )
+    return prisonerContactRegistryService.getClosedRestrictionStatusForPrisonerContacts(prisonerId, visitorIds)
   }
 }

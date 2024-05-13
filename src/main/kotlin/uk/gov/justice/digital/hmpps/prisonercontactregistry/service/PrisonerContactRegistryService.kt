@@ -9,14 +9,14 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClie
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import java.time.LocalDate
-
-const val BANNED_RESTRICTION_TYPE = "BAN"
 
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
@@ -92,9 +92,17 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     fromDate: LocalDate,
     toDate: LocalDate,
   ): DateRangeDto {
+    log.debug(
+      "getBannedDateRangeForPrisonerContacts called with parameters : prisonerId - {}, visitorIds - {}, fromDate - {}, toDate - {}",
+      prisonerId,
+      visitorIds,
+      fromDate,
+      toDate,
+    )
+
     val dateRange = DateRangeDto(fromDate, toDate)
 
-    val visitorBanRestrictions = getVisitorBanRestrictions(prisonerId, visitorIds)
+    val visitorBanRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, RestrictionType.BANNED)
 
     visitorBanRestrictions.forEach { restriction ->
       restriction.expiryDate?.let { expiryDate ->
@@ -109,6 +117,23 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     }
 
     return dateRange
+  }
+
+  @Throws(VisitorNotFoundException::class)
+  fun getClosedRestrictionStatusForPrisonerContacts(prisonerId: String, visitorIds: List<Long>): HasClosedRestrictionDto {
+    log.debug(
+      "getHasClosedRestrictionForPrisonerContacts called with parameters : prisonerId - {}, visitorIds - {}",
+      prisonerId,
+      visitorIds,
+    )
+
+    val visitorClosedRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, RestrictionType.CLOSED)
+
+    return HasClosedRestrictionDto(
+      visitorClosedRestrictions.any { restriction ->
+        restriction.expiryDate == null || LocalDate.now() <= restriction.expiryDate
+      },
+    )
   }
 
   @Throws(PrisonerNotFoundException::class)
@@ -152,7 +177,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   private fun hasBanForDate(restriction: RestrictionDto, date: LocalDate): Boolean {
-    return restriction.restrictionType == BANNED_RESTRICTION_TYPE &&
+    return restriction.restrictionType == RestrictionType.BANNED.toString() &&
       isBannedForDate(restriction.expiryDate, date)
   }
 
@@ -160,7 +185,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     return (restrictionEndDate == null || (date <= restrictionEndDate))
   }
 
-  private fun getVisitorBanRestrictions(prisonerId: String, visitorIds: List<Long>): List<RestrictionDto> {
+  private fun getVisitors(prisonerId: String, visitorIds: List<Long>): List<ContactDto> {
     val contacts = getContactById(prisonerId, true)
 
     val visitors = contacts.filter { visitorIds.contains(it.personId) }
@@ -169,7 +194,15 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     }
 
     return visitors
-      .flatMap { it.restrictions }
-      .filter { it.restrictionType == BANNED_RESTRICTION_TYPE }
+  }
+
+  private fun getVisitorsWithRestrictionType(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
+    val visitors = getVisitors(prisonerId, visitorIds)
+    val visitorsWithRestriction =
+      visitors
+        .flatMap { it.restrictions }
+        .filter { it.restrictionType == restrictionType.toString() }
+
+    return visitorsWithRestriction
   }
 }
