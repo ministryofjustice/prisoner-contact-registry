@@ -50,10 +50,6 @@ workflows:
           name: helm_lint
       - hmpps/build_docker:
           name: build_docker
-          filters:
-            branches:
-              only:
-                - main
       - request-dev-approval:
           type: approval
       - hmpps/deploy_env:
@@ -64,6 +60,7 @@ workflows:
             - validate
             - build_docker
             - helm_lint
+            - request-dev-approval
       - request-staging-approval:
           type: approval
           requires:
