@@ -97,12 +97,13 @@ workflows:
           context:
             - hmpps-common-vars
             - prisoner-contact-registry-prod
-          requires:
-            - request-prod-approval
           filters:
             branches:
               only:
                 - main
+          requires:
+            - request-prod-approval
+
 
   security:
     triggers:
