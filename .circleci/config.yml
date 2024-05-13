@@ -63,12 +63,12 @@ workflows:
             - build_docker
             - helm_lint
             - request-dev-approval
-      - request-dev-approval:
+      - request-dev-main-approval:
           type: approval
-      - request-staging-approval:
-          type: approval
-          requires:
-            - deploy_dev
+          filters:
+            branches:
+              only:
+                - main
       - hmpps/deploy_env:
           name: deploy_staging
           env: "staging"
@@ -77,10 +77,10 @@ workflows:
             - hmpps-common-vars
           requires:
             - request-staging-approval
-      - request-preprod-approval:
+      - request-staging-approval:
           type: approval
           requires:
-            - deploy_staging
+            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
@@ -89,10 +89,10 @@ workflows:
             - hmpps-common-vars
           requires:
             - request-preprod-approval
-      - request-prod-approval:
+      - request-preprod-approval:
           type: approval
           requires:
-            - deploy_preprod
+            - deploy_staging
       - hmpps/deploy_env:
           name: deploy_prod
           env: "prod"
@@ -107,6 +107,10 @@ workflows:
                 - main
           requires:
             - request-prod-approval
+      - request-prod-approval:
+          type: approval
+          requires:
+            - deploy_preprod
 
 
   security:
