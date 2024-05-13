@@ -63,7 +63,7 @@ workflows:
             - build_docker
             - helm_lint
             - request-dev-approval
-      - request-dev-main-approval:
+      - request-dev-approval:
           type: approval
           filters:
             branches:
