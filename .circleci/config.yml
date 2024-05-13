@@ -54,10 +54,6 @@ workflows:
           name: deploy_dev
           env: "dev"
           context: hmpps-common-vars
-          filters:
-            branches:
-              only:
-                - main
           requires:
             - validate
             - build_docker
@@ -65,10 +61,6 @@ workflows:
             - request-dev-approval
       - request-dev-approval:
           type: approval
-          filters:
-            branches:
-              only:
-                - main
       - hmpps/deploy_env:
           name: deploy_staging
           env: "staging"
@@ -109,6 +101,10 @@ workflows:
             - request-prod-approval
       - request-prod-approval:
           type: approval
+          filters:
+            branches:
+              only:
+                - main
           requires:
             - deploy_preprod
 
