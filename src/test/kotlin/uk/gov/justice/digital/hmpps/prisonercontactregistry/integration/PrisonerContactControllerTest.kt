@@ -8,11 +8,11 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.Restriction
 import java.time.LocalDate
 
 @Suppress("ClassName")

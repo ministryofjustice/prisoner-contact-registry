@@ -11,11 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.PrisonApiMockServer
 import java.time.LocalDate

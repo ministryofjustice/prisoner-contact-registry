@@ -12,7 +12,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressUsageDto
@@ -20,6 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import java.time.LocalDate
 

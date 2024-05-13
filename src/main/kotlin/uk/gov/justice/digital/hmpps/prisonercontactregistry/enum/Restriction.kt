@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.enum
 
 enum class Restriction(private val restriction: String) {
   BANNED("BAN"),

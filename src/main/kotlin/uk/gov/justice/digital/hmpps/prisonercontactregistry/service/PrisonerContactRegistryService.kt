@@ -5,13 +5,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
