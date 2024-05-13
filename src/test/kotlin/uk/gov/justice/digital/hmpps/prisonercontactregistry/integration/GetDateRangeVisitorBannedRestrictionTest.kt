@@ -3,11 +3,11 @@ package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.mock.mockito.SpyBean
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.BANNED_RESTRICTION_TYPE
 import java.time.LocalDate
 
 @Suppress("ClassName")
@@ -154,7 +154,7 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = BANNED_RESTRICTION_TYPE,
+        restrictionType = Restriction.BANNED.toString(),
         restrictionTypeDescription = "Banned",
         startDate = fromDate,
         expiryDate = null,
@@ -162,7 +162,7 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
       ),
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = BANNED_RESTRICTION_TYPE,
+        restrictionType = Restriction.BANNED.toString(),
         restrictionTypeDescription = "Banned",
         startDate = fromDate,
         expiryDate = toDate.plusDays(1),
@@ -202,7 +202,7 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = BANNED_RESTRICTION_TYPE,
+        restrictionType = Restriction.BANNED.toString(),
         restrictionTypeDescription = "Banned",
         startDate = fromDate,
         expiryDate = toDate.plusDays(1),
@@ -243,7 +243,7 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = BANNED_RESTRICTION_TYPE,
+        restrictionType = Restriction.BANNED.toString(),
         restrictionTypeDescription = "Banned",
         startDate = fromDate,
         expiryDate = toDate,

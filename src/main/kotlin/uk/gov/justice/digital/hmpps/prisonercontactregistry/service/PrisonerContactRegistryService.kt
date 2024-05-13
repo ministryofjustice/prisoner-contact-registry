@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
@@ -16,9 +17,6 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotF
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import java.time.LocalDate
-
-const val BANNED_RESTRICTION_TYPE = "BAN"
-const val CLOSED_RESTRICTION_TYPE = "CLOSED"
 
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
@@ -104,11 +102,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
     val dateRange = DateRangeDto(fromDate, toDate)
 
-    val visitors = getVisitors(prisonerId, visitorIds)
-    val visitorBanRestrictions =
-      visitors
-        .flatMap { it.restrictions }
-        .filter { it.restrictionType == BANNED_RESTRICTION_TYPE }
+    val visitorBanRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, Restriction.BANNED)
 
     visitorBanRestrictions.forEach { restriction ->
       restriction.expiryDate?.let { expiryDate ->
@@ -135,11 +129,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
     val hasClosedRestrictionDto = HasClosedRestrictionDto(false)
 
-    val visitors = getVisitors(prisonerId, visitorIds)
-    val visitorClosedRestrictions =
-      visitors
-        .flatMap { it.restrictions }
-        .filter { it.restrictionType == CLOSED_RESTRICTION_TYPE }
+    val visitorClosedRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, Restriction.CLOSED)
 
     visitorClosedRestrictions.forEach { restriction ->
       restriction.expiryDate?.let { expiryDate ->
@@ -193,7 +183,7 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
   }
 
   private fun hasBanForDate(restriction: RestrictionDto, date: LocalDate): Boolean {
-    return restriction.restrictionType == BANNED_RESTRICTION_TYPE &&
+    return restriction.restrictionType == Restriction.BANNED.toString() &&
       isBannedForDate(restriction.expiryDate, date)
   }
 
@@ -208,6 +198,17 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     if (visitors.size != visitorIds.size) {
       throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
     }
+
     return visitors
+  }
+
+  private fun getVisitorsWithRestrictionType(prisonerId: String, visitorIds: List<Long>, restrictionType: Restriction): List<RestrictionDto> {
+    val visitors = getVisitors(prisonerId, visitorIds)
+    val visitorsWithRestriction =
+      visitors
+        .flatMap { it.restrictions }
+        .filter { it.restrictionType == restrictionType.toString() }
+
+    return visitorsWithRestriction
   }
 }

@@ -3,11 +3,11 @@ package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.mock.mockito.SpyBean
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.CLOSED_RESTRICTION_TYPE
 import java.time.LocalDate
 
 @Suppress("ClassName")
@@ -126,7 +126,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = CLOSED_RESTRICTION_TYPE,
+        restrictionType = Restriction.CLOSED.toString(),
         restrictionTypeDescription = "CLOSED",
         startDate = LocalDate.of(2024, 1, 1),
         expiryDate = null,
@@ -160,7 +160,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = CLOSED_RESTRICTION_TYPE,
+        restrictionType = Restriction.CLOSED.toString(),
         restrictionTypeDescription = "CLOSED",
         startDate = LocalDate.of(2024, 1, 1),
         expiryDate = LocalDate.now().plusDays(1),
@@ -194,7 +194,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = CLOSED_RESTRICTION_TYPE,
+        restrictionType = Restriction.CLOSED.toString(),
         restrictionTypeDescription = "CLOSED",
         startDate = LocalDate.of(2024, 1, 1),
         expiryDate = LocalDate.now(),
@@ -228,7 +228,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
     val restrictions = listOf(
       RestrictionDto(
         comment = "Comment Here",
-        restrictionType = CLOSED_RESTRICTION_TYPE,
+        restrictionType = Restriction.CLOSED.toString(),
         restrictionTypeDescription = "CLOSED",
         startDate = LocalDate.of(2024, 1, 1),
         expiryDate = LocalDate.now().minusDays(10),

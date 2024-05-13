@@ -8,11 +8,11 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.BANNED_RESTRICTION_TYPE
 import java.time.LocalDate
 
 @Suppress("ClassName")
@@ -22,7 +22,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
 
   private val expiredBannedRestriction = RestrictionDto(
     comment = "Comment Here",
-    restrictionType = BANNED_RESTRICTION_TYPE,
+    restrictionType = Restriction.BANNED.toString(),
     restrictionTypeDescription = "Banned",
     startDate = LocalDate.of(2012, 9, 13),
     expiryDate = LocalDate.of(2014, 9, 13),

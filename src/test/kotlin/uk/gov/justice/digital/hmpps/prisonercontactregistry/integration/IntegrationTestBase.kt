@@ -11,13 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.PrisonApiMockServer
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.BANNED_RESTRICTION_TYPE
 import java.time.LocalDate
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -81,7 +81,7 @@ abstract class IntegrationTestBase {
     assertThat(contact.nextOfKin).isFalse
     assertThat(contact.commentText).isEqualTo("Comment Here")
     assertThat(contact.restrictions.size).isEqualTo(1)
-    assertThat(contact.restrictions[0].restrictionType).isEqualTo(BANNED_RESTRICTION_TYPE)
+    assertThat(contact.restrictions[0].restrictionType).isEqualTo(Restriction.BANNED.toString())
     assertThat(contact.restrictions[0].restrictionTypeDescription).isEqualTo("Banned")
     assertThat(contact.restrictions[0].startDate).isEqualTo("2012-09-13")
     assertThat(contact.restrictions[0].expiryDate).isEqualTo("2014-09-13")
@@ -115,7 +115,7 @@ abstract class IntegrationTestBase {
     assertThat(contact.emergencyContact).isFalse
     assertThat(contact.nextOfKin).isFalse
     assertThat(contact.restrictions.size).isEqualTo(1)
-    assertThat(contact.restrictions[0].restrictionType).isEqualTo(BANNED_RESTRICTION_TYPE)
+    assertThat(contact.restrictions[0].restrictionType).isEqualTo(Restriction.BANNED.toString())
     assertThat(contact.restrictions[0].restrictionTypeDescription).isEqualTo("Banned")
     assertThat(contact.restrictions[0].startDate).isEqualTo("2012-09-13")
     assertThat(contact.restrictions[0].globalRestriction).isEqualTo(false)
@@ -184,7 +184,7 @@ abstract class IntegrationTestBase {
     comment: String = "Comment Here",
   ): RestrictionDto {
     return RestrictionDto(
-      restrictionType = BANNED_RESTRICTION_TYPE,
+      restrictionType = Restriction.BANNED.toString(),
       restrictionTypeDescription = "Banned",
       startDate = startDate,
       expiryDate = expiryDate,

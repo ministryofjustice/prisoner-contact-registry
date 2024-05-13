@@ -12,6 +12,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.Restriction
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressUsageDto
@@ -57,7 +58,7 @@ internal class PrisonerContactRegistryServiceTest {
     addressUsages = listOf(personAddressUsage),
   )
   private val contactRestriction = RestrictionDto(
-    restrictionType = BANNED_RESTRICTION_TYPE,
+    restrictionType = Restriction.BANNED.toString(),
     restrictionTypeDescription = "123",
     startDate = LocalDate.now(),
     expiryDate = LocalDate.now(),
