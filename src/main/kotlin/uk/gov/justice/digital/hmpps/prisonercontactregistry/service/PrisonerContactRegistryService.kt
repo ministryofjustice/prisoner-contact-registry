@@ -127,19 +127,13 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
       visitorIds,
     )
 
-    val hasClosedRestrictionDto = HasClosedRestrictionDto(false)
-
     val visitorClosedRestrictions = getVisitorsWithRestrictionType(prisonerId, visitorIds, RestrictionType.CLOSED)
 
-    visitorClosedRestrictions.forEach { restriction ->
-      restriction.expiryDate?.let { expiryDate ->
-        if (LocalDate.now() <= expiryDate) {
-          hasClosedRestrictionDto.value = true
-        }
-      } ?: run { hasClosedRestrictionDto.value = true }
-    }
-
-    return hasClosedRestrictionDto
+    return HasClosedRestrictionDto(
+      visitorClosedRestrictions.any { restriction ->
+        restriction.expiryDate == null || LocalDate.now() <= restriction.expiryDate
+      },
+    )
   }
 
   @Throws(PrisonerNotFoundException::class)
