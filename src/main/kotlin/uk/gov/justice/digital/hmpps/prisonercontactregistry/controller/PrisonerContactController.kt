@@ -160,12 +160,12 @@ class PrisonerContactController(
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH)
   @Operation(
-    summary = "Get date range for visitors with ban restriction can visit a prisoner",
-    description = "Returns a date range for visitors with ban restriction can visit a prisoner",
+    summary = "Get an updated date range for visitors if a visitor with ban restriction is found, else returns original date",
+    description = "Returns an updated date range for visitors if one is found with an active ban restriction. If not, it returns the original date range",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Date range returned",
+        description = "Date range returned (original or adjusted)",
       ),
       ApiResponse(
         responseCode = "400",
@@ -189,7 +189,7 @@ class PrisonerContactController(
       ),
     ],
   )
-  fun getDateRangeForPrisonerVisitorsWithBanRestrictions(
+  fun getUpdatedDateRangeForPrisonerVisitorsIfFoundWithBanRestrictions(
     @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
     @PathVariable
     prisonerId: String,
@@ -256,7 +256,7 @@ class PrisonerContactController(
     log.debug(
       "getHasClosedRestrictionForPrisonerVisitors called with parameters: prisonerId: {}, visitorIds: {}",
       prisonerId,
-      visitorIds
+      visitorIds,
     )
     return prisonerContactRegistryService.getClosedRestrictionStatusForPrisonerContacts(prisonerId, visitorIds)
   }

@@ -61,7 +61,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
 
       prisonApiMockServer.stubGetApprovedOffenderContacts(
         prisonerId,
-        contacts = createContactsDto(restrictions = listOf(), visitorIds)
+        contacts = createContactsDto(restrictions = listOf(), visitorIds),
       )
 
       // When
@@ -131,7 +131,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
         startDate = LocalDate.of(2024, 1, 1),
         expiryDate = null,
         globalRestriction = false,
-      )
+      ),
     )
 
     prisonApiMockServer.stubGetApprovedOffenderContacts(
@@ -165,7 +165,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
         startDate = LocalDate.of(2024, 1, 1),
         expiryDate = LocalDate.now().plusDays(1),
         globalRestriction = false,
-      )
+      ),
     )
 
     prisonApiMockServer.stubGetApprovedOffenderContacts(
@@ -199,7 +199,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
         startDate = LocalDate.of(2024, 1, 1),
         expiryDate = LocalDate.now(),
         globalRestriction = false,
-      )
+      ),
     )
 
     prisonApiMockServer.stubGetApprovedOffenderContacts(
@@ -233,7 +233,7 @@ class GetVisitorClosedRestrictionStatusTest : IntegrationTestBase() {
         startDate = LocalDate.of(2024, 1, 1),
         expiryDate = LocalDate.now().minusDays(10),
         globalRestriction = false,
-      )
+      ),
     )
 
     prisonApiMockServer.stubGetApprovedOffenderContacts(

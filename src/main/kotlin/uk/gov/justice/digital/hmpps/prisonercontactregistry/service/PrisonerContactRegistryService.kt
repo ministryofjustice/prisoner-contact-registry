@@ -94,7 +94,8 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     fromDate: LocalDate,
     toDate: LocalDate,
   ): DateRangeDto {
-    log.debug("getBannedDateRangeForPrisonerContacts called with parameters : prisonerId - {}, visitorIds - {}, fromDate - {}, toDate - {}",
+    log.debug(
+      "getBannedDateRangeForPrisonerContacts called with parameters : prisonerId - {}, visitorIds - {}, fromDate - {}, toDate - {}",
       prisonerId,
       visitorIds,
       fromDate,
@@ -126,7 +127,8 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
 
   @Throws(VisitorNotFoundException::class)
   fun getClosedRestrictionStatusForPrisonerContacts(prisonerId: String, visitorIds: List<Long>): HasClosedRestrictionDto {
-    log.debug("getHasClosedRestrictionForPrisonerContacts called with parameters : prisonerId - {}, visitorIds - {}",
+    log.debug(
+      "getHasClosedRestrictionForPrisonerContacts called with parameters : prisonerId - {}, visitorIds - {}",
       prisonerId,
       visitorIds,
     )
@@ -199,13 +201,13 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     return (restrictionEndDate == null || (date <= restrictionEndDate))
   }
 
-  private fun getVisitors(prisonerId: String, visitorIds: List<Long>, ): List<ContactDto> {
+  private fun getVisitors(prisonerId: String, visitorIds: List<Long>): List<ContactDto> {
     val contacts = getContactById(prisonerId, true)
 
     val visitors = contacts.filter { visitorIds.contains(it.personId) }
     if (visitors.size != visitorIds.size) {
       throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
-      }
+    }
     return visitors
   }
 }

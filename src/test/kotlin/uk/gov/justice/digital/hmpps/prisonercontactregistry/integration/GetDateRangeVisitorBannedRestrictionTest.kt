@@ -67,7 +67,7 @@ class GetDateRangeVisitorBannedRestrictionTest : IntegrationTestBase() {
 
       prisonApiMockServer.stubGetApprovedOffenderContacts(
         prisonerId,
-        contacts = createContactsDto(restrictions = listOf(), visitorIds)
+        contacts = createContactsDto(restrictions = listOf(), visitorIds),
       )
 
       // When
