@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.PrisonApiMockServer
@@ -190,5 +191,28 @@ abstract class IntegrationTestBase {
       globalRestriction = globalRestriction,
       comment = comment,
     )
+  }
+
+  fun createContactsDto(restrictions: List<RestrictionDto> = listOf(), visitorsId: List<Long>): ContactsDto {
+    val contacts = visitorsId.mapIndexed { index: Int, visitorId: Long ->
+      ContactDto(
+        lastName = "Ireron",
+        middleName = "Danger",
+        firstName = "Ehicey",
+        dateOfBirth = LocalDate.of(1912, 9, 13),
+        contactType = "S",
+        contactTypeDescription = "Social",
+        relationshipCode = "PROB",
+        relationshipDescription = "Probation Officer",
+        commentText = "Comment Here",
+        emergencyContact = false,
+        nextOfKin = false,
+        personId = visitorId,
+        approvedVisitor = false,
+        restrictions = if (restrictions.isNotEmpty()) listOf(restrictions[index]) else listOf(),
+      )
+    }
+
+    return ContactsDto(contacts)
   }
 }
