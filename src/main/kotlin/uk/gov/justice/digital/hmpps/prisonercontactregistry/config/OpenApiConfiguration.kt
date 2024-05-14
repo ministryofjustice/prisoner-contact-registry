@@ -16,7 +16,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
   private val buildVersion: String = buildProperties.version
 
   @Value("\${info.app.description}")
-  private val description: String = "Service for managing and sotring details about prison visitors. Currently a facade over visitor-orientated endpoints of the Prison API"
+  private val description: String = "Service for managing and sorting details about prison visitors. Currently a facade over visitor-orientated endpoints of the Prison API"
 
   @Value("\${info.app.contact.name}")
   private val contactName: String = "Prison Visits Booking Project"
@@ -32,7 +32,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
         Server().url("https://prisoner-contact-registry-preprod.prison.service.justice.gov.uk").description("PreProd"),
         Server().url("https://prisoner-contact-registry-staging.prison.service.justice.gov.uk").description("Staging"),
         Server().url("https://prisoner-contact-registry-dev.prison.service.justice.gov.uk").description("Development"),
-        Server().url("http://localhost:8080").description("Local"),
+        Server().url("http://localhost:8082").description("Local"),
       ),
     )
     .info(
