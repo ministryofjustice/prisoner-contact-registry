@@ -20,6 +20,15 @@ Run:
 ./gradlew test 
 ```
 
+Testing coverage report
+
+Run:
+```
+./gradlew koverHtmlReport
+```
+Then view output file for coverage report.
+
+
 ## Running
 
 This service connects to a development environment for downstream APIs. 
