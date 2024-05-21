@@ -1,7 +1,7 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.6"
-  kotlin("plugin.spring") version "1.9.23"
-  id("org.jetbrains.kotlin.plugin.noarg") version "1.9.23"
+  kotlin("plugin.spring") version "1.9.24"
+  id("org.jetbrains.kotlin.plugin.noarg") version "1.9.24"
   id("org.jetbrains.kotlinx.kover") version "0.7.6"
 }
 
@@ -21,11 +21,11 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-cache")
 
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.3.0")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.4.0")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
