@@ -2,10 +2,9 @@
 
 [![CircleCI](https://circleci.com/gh/ministryofjustice/prisoner-contact-registry/tree/main.svg?style=shield)](https://app.circleci.com/pipelines/github/ministryofjustice/prisoner-contact-registry)
 
-This is a Spring Boot application, written in Kotlin, providing prisoner contact information. Used by [Visit Someone in Prison](https://github.com/ministryofjustice/book-a-prison-visit-staff-ui).
+This is a Spring Boot application, written in Kotlin, providing prisoner contact information. Used by [Visits UI](https://github.com/ministryofjustice/book-a-prison-visit-staff-ui).
 
 Initially a facade over the NOMIS **Prison API** enabling access to data held in **NOMIS**
-
 
 ## Building
 
@@ -21,11 +20,29 @@ Run:
 ./gradlew test 
 ```
 
+Testing coverage report
+
+Run:
+```
+./gradlew koverHtmlReport
+```
+Then view output file for coverage report.
+
+
 ## Running
 
-Create a Spring Boot run configuration with active profile of dev, to run against te development environment.
+This service connects to a development environment for downstream APIs. 
 
-Alternatively the service can be run using docker-compose.
+Create a Spring Boot run configuration with active profile of 'dev', to run against te development environment.
+
+Ports
+
+| Service                   | Port |  
+|---------------------------|------|
+| prisoner-contact-registry | 8082 |
+
+Alternatively the service can be run using docker-compose which will allow you to connect to a local version of prison-api.
+edit the application-dev.yml file by changing the `prison.api.url` to `http://localhost:8091`. Then run:
 ```
 docker-compose up
 ```
@@ -34,29 +51,38 @@ Ports
 
 | Service                   | Port |  
 |---------------------------|------|
-| prisoner-contact-registry | 8080 |
-| hmpps-auth                | 8090 |
+| prisoner-contact-registry | 8082 |
 | prison-api                | 8091 |
 
-To create a Token (local):
+
+To create a Token via curl (local):
 ```
-curl --location --request POST "http://localhost:8081/auth/oauth/token?grant_type=client_credentials" --header "Authorization: Basic $(echo -n {Client}:{ClientSecret} | base64)"
+curl --location --request POST "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token?grant_type=client_credentials" --header "Authorization: Basic $(echo -n {Client}:{ClientSecret} | base64)"
+```
+
+or via postman collection using the following authorisation urls:
+```
+Grant type: Client Credentials
+Access Token URL: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token
+Client ID: <get from kubernetes secrets for dev namespace>
+Client Secret: <get from kubernetes secrets for dev namespace>
+Client Authentication: "Send as Basic Auth Header"
 ```
 
 Call info endpoint:
 ```
-$ curl 'http://localhost:8080/info' -i -X GET
+$ curl 'http://localhost:8082/info' -i -X GET
 ```
 
 ## Swagger v3
 Prisoner Contact Registry
 ```
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8082/swagger-ui/index.html
 ```
 
 Export Spec
 ```
-http://localhost:8080/v3/api-docs?group=full-api
+http://localhost:8082/v3/api-docs?group=full-api
 ```
 
 ## App Insights

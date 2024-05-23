@@ -1,49 +1,17 @@
 version: "3.8"
 services:
-  prisoner-contact-registry:
-    build:
-      context: .
-    container_name: prisoner-contact-registry
-    networks:
-      - hmpps
-    ports:
-      - "8080:8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-    environment:
-      - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=dev
-      - HMPPS_AUTH_URL=http://hmpps-auth:8080/auth
-      - PRISON_API_URL=http://prison-api:8080
-      - SYSTEM_CLIENT_ID=book-a-prison-visit-client
-      - SYSTEM_CLIENT_SECRET=clientsecret
-
-  hmpps-auth:
-    image: quay.io/hmpps/hmpps-auth:latest
-    networks:
-      - hmpps
-    container_name: hmpps-auth
-    ports:
-      - "8090:8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
-    environment:
-      - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=dev
 
   prison-api:
     image: quay.io/hmpps/prison-api:latest
     networks:
       - hmpps
     container_name: prison-api
-    depends_on:
-      - hmpps-auth
     ports:
-      - "8091:8080"
+      - "8091:8091"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8091/health"]
     environment:
-      - SERVER_PORT=8080
+      - SERVER_PORT=8091
       - SPRING_PROFILES_ACTIVE=nomis-hsqldb
 
 networks:

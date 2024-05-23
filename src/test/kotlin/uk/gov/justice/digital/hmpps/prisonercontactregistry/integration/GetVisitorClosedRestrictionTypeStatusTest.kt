@@ -278,6 +278,6 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     prisonerId: String,
     visitorIdsString: String,
   ): String {
-    return "/prisoners/$prisonerId/approved/social/contacts/restrictions/close?visitors=$visitorIdsString"
+    return "/prisoners/$prisonerId/approved/social/contacts/restrictions/closed?visitors=$visitorIdsString"
   }
 }
