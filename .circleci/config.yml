@@ -61,6 +61,10 @@ workflows:
             - request-dev-approval
       - request-dev-approval:
           type: approval
+          filters:
+            branches:
+              ignore:
+                - main
       - hmpps/deploy_env:
           name: deploy_staging
           env: "staging"
@@ -73,6 +77,10 @@ workflows:
           type: approval
           requires:
             - deploy_dev
+          filters:
+            branches:
+              ignore:
+                - main
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
@@ -81,6 +89,10 @@ workflows:
             - hmpps-common-vars
           requires:
             - request-preprod-approval
+          filters:
+            branches:
+              only:
+                - main
       - request-preprod-approval:
           type: approval
           requires:
@@ -93,21 +105,16 @@ workflows:
           context:
             - hmpps-common-vars
             - prisoner-contact-registry-prod
-          filters:
-            branches:
-              only:
-                - main
           requires:
             - request-prod-approval
-      - request-prod-approval:
-          type: approval
           filters:
             branches:
               only:
                 - main
+      - request-prod-approval:
+          type: approval
           requires:
             - deploy_preprod
-
 
   security:
     triggers:
