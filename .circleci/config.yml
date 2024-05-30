@@ -40,16 +40,125 @@ jobs:
 
 workflows:
   version: 2
-  build-test-and-deploy:
+  build-test-deploy-main:
     jobs:
       - validate:
           filters:
             tags:
               ignore: /.*/
+            branches:
+              only:
+                - main
+
       - hmpps/helm_lint:
           name: helm_lint
+          filters:
+            branches:
+              only:
+                - main
+
       - hmpps/build_docker:
           name: build_docker
+          filters:
+            branches:
+              only:
+                - main
+
+      - hmpps/deploy_env:
+          name: deploy_dev
+          env: "dev"
+          context:
+            - hmpps-common-vars
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - validate
+            - build_docker
+            - helm_lint
+
+      - hmpps/deploy_env:
+          name: deploy_staging
+          env: "staging"
+          context:
+            - prisoner-contact-registry-stage
+            - hmpps-common-vars
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - deploy_dev
+
+      - hmpps/deploy_env:
+          name: deploy_preprod
+          env: "preprod"
+          context:
+            - prisoner-contact-registry-preprod
+            - hmpps-common-vars
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - request-preprod-approval
+      - request-preprod-approval:
+          type: approval
+          requires:
+            - deploy_staging
+          filters:
+            branches:
+              only:
+                - main
+
+      - hmpps/deploy_env:
+          name: deploy_prod
+          env: "prod"
+          slack_notification: true
+          slack_channel_name: << pipeline.parameters.releases-slack-channel >>
+          context:
+            - hmpps-common-vars
+            - prisoner-contact-registry-prod
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - request-prod-approval
+      - request-prod-approval:
+          type: approval
+          requires:
+            - deploy_preprod
+          filters:
+            branches:
+              only:
+                - main
+
+  build-test-deploy-feature:
+    jobs:
+      - validate:
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              ignore:
+                - main
+
+      - hmpps/helm_lint:
+          name: helm_lint
+          filters:
+            branches:
+              ignore:
+                - main
+
+      - hmpps/build_docker:
+          name: build_docker
+          filters:
+            branches:
+              ignore:
+                - main
+
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -59,18 +168,27 @@ workflows:
             - build_docker
             - helm_lint
             - request-dev-approval
+          filters:
+            branches:
+              ignore:
+                - main
       - request-dev-approval:
           type: approval
           filters:
             branches:
               ignore:
                 - main
+
       - hmpps/deploy_env:
           name: deploy_staging
           env: "staging"
           context:
             - prisoner-contact-registry-stage
             - hmpps-common-vars
+          filters:
+            branches:
+              ignore:
+                - main
           requires:
             - request-staging-approval
       - request-staging-approval:
@@ -81,40 +199,6 @@ workflows:
             branches:
               ignore:
                 - main
-      - hmpps/deploy_env:
-          name: deploy_preprod
-          env: "preprod"
-          context:
-            - prisoner-contact-registry-preprod
-            - hmpps-common-vars
-          requires:
-            - request-preprod-approval
-          filters:
-            branches:
-              only:
-                - main
-      - request-preprod-approval:
-          type: approval
-          requires:
-            - deploy_staging
-      - hmpps/deploy_env:
-          name: deploy_prod
-          env: "prod"
-          slack_notification: true
-          slack_channel_name: << pipeline.parameters.releases-slack-channel >>
-          context:
-            - hmpps-common-vars
-            - prisoner-contact-registry-prod
-          requires:
-            - request-prod-approval
-          filters:
-            branches:
-              only:
-                - main
-      - request-prod-approval:
-          type: approval
-          requires:
-            - deploy_preprod
 
   security:
     triggers:
