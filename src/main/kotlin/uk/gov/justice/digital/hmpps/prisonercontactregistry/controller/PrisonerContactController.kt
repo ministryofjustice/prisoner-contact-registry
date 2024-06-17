@@ -29,6 +29,7 @@ const val PRISON_GET_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS
 // TODO: This endpoint is deprecated now. Remove in future.
 const val PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/approved/social/contacts"
 
+// TODO: These endpoints need updating to be correct structure: "/prisoners/{prisonerId}/contacts/social/approved/..."
 const val PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/banned/dateRange"
 const val PRISON_GET_CLOSED_RESTRICTIONS_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/closed"
 
