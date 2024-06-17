@@ -52,7 +52,18 @@ class PrisonApiMockServer : WireMockServer(8092) {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(404),
+            .withStatus(HttpStatus.NOT_FOUND.value()),
+        ),
+    )
+  }
+
+  fun stubGetOffenderBadRequest(offenderNo: String) {
+    stubFor(
+      get("/api/offenders/$offenderNo/contacts")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .withStatus(HttpStatus.BAD_REQUEST.value()),
         ),
     )
   }

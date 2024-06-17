@@ -24,7 +24,11 @@ import java.time.LocalDate
 
 const val PRISON_CONTACTS_CONTROLLER_PATH: String = "/prisoners/{prisonerId}"
 const val PRISON_GET_ALL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/contacts"
+const val PRISON_GET_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/contacts/social"
+
+// TODO: Restructure URLs to "/contacts/social/approved"
 const val PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/approved/social/contacts"
+
 const val PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/banned/dateRange"
 const val PRISON_GET_CLOSED_RESTRICTIONS_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/closed"
 
@@ -93,6 +97,70 @@ class PrisonerContactController(
       .sortedWith(getDefaultSortOrder())
   }
 
+  // TODO: Combine PRISON_GET_SOCIAL_CONTACTS_CONTROLLER_PATH & PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH
+  //  with new optional parameter "approvedVisitorsOnly" which defaults to true if not passed in. As all logic is shared
+  //  by these endpoints with only 1 flag difference.
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
+  @GetMapping(PRISON_GET_SOCIAL_CONTACTS_CONTROLLER_PATH)
+  @Operation(
+    summary = "Get Prisoners Social Contacts",
+    description = "Returns details of a prisoner's social contacts",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Prisoner Social Contacts Information Returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to retrieve prisoner's approved social contacts",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to retrieve prisoner's approved social contacts",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Prisoner not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getPrisonerSocialContacts(
+    @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
+    @PathVariable
+    prisonerId: String,
+    @RequestParam(value = "id", required = false)
+    @Parameter(description = "Query by Person Identifier (NOMIS Person ID)", example = "9147510")
+    personId: Long?,
+    @RequestParam(value = "hasDateOfBirth", required = false)
+    @Parameter(description = "Defaults to null. By default (or when false), returns all contacts with or without a DOB. If true, returns only contacts with a DOB.", example = "false")
+    hasDateOfBirth: Boolean? = null,
+    @RequestParam(value = "notBannedBeforeDate", required = false)
+    @Parameter(description = "Get only visitors that have a ban date that expires before this date. Gets all visitors irrespective of BANs if not passed.", example = "2024-12-31", required = false)
+    notBannedBeforeDate: LocalDate? = null,
+    @RequestParam(value = "withAddress", required = false)
+    @Parameter(description = "by default returns addresses for all contacts, set to false if contact addresses not needed.", example = "false")
+    withAddress: Boolean? = true,
+  ): List<ContactDto> {
+    log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, id : {}, hasDateOfBirth = {}, notBannedBeforeDate = {}, withAddress = {}", prisonerId, personId, hasDateOfBirth, notBannedBeforeDate, withAddress)
+
+    return contactService.getSocialContactList(
+      prisonerId = prisonerId,
+      personId = personId,
+      withAddress = withAddress ?: true,
+      hasDateOfBirth = hasDateOfBirth,
+      notBannedBeforeDate = notBannedBeforeDate,
+      approvedVisitorsOnly = false,
+    ).sortedWith(getDefaultSortOrder())
+  }
+
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH)
   @Operation(
@@ -101,7 +169,7 @@ class PrisonerContactController(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Prisoner Social Contacts Information Returned",
+        description = "Prisoner Approved Social Contacts Information Returned",
       ),
       ApiResponse(
         responseCode = "400",
@@ -144,12 +212,13 @@ class PrisonerContactController(
   ): List<ContactDto> {
     log.debug("getPrisonersApprovedSocialContacts called with params : Prisoner: {}, id : {}, hasDateOfBirth = {}, notBannedBeforeDate = {}, withAddress = {}", prisonerId, personId, hasDateOfBirth, notBannedBeforeDate, withAddress)
 
-    return contactService.getApprovedSocialContactList(
+    return contactService.getSocialContactList(
       prisonerId = prisonerId,
       personId = personId,
       withAddress = withAddress ?: true,
       hasDateOfBirth = hasDateOfBirth,
       notBannedBeforeDate = notBannedBeforeDate,
+      approvedVisitorsOnly = true,
     ).sortedWith(getDefaultSortOrder())
   }
 

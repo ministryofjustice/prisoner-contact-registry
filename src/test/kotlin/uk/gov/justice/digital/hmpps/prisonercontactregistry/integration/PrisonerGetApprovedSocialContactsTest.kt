@@ -17,7 +17,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import java.time.LocalDate
 
 @Suppress("ClassName")
-class PrisonerGetSocialContactsTest : IntegrationTestBase() {
+class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
   @SpyBean
   private lateinit var prisonApiClientSpy: PrisonApiClient
 
@@ -81,22 +81,14 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     restrictions = emptyList(),
   )
 
-  private val socialUnapprovedContact = createContact(
-    lastName = "BVisitor",
-    firstName = "Social",
-    dateOfBirth = LocalDate.of(1912, 9, 13),
-    personId = 5L,
-    approvedVisitor = false,
-  )
-
-  fun callGetSocialContacts(
+  fun callGetApprovedSocialContacts(
     prisonerId: String,
     personId: Long? = null,
     hasDateOfBirth: Boolean? = null,
     notBannedBeforeDate: LocalDate? = null,
     withAddress: Boolean? = null,
   ): WebTestClient.ResponseSpec {
-    val uri = "/prisoners/$prisonerId/contacts/social?${getContactsQueryParams(personId, hasDateOfBirth, notBannedBeforeDate, withAddress)}"
+    val uri = "/prisoners/$prisonerId/approved/social/contacts?${getContactsQueryParams(personId, hasDateOfBirth, notBannedBeforeDate, withAddress)}"
     return webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
@@ -107,7 +99,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     @Test
     fun `requires authentication`() {
       val prisonerId = "A1234AA"
-      webTestClient.get().uri("/prisoners/$prisonerId/contacts/social")
+      webTestClient.get().uri("/prisoners/$prisonerId/approved/social/contacts")
         .exchange()
         .expectStatus().isUnauthorized
     }
@@ -115,7 +107,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     @Test
     fun `requires correct role`() {
       val prisonerId = "A1234AA"
-      webTestClient.get().uri("/prisoners/$prisonerId/contacts/social")
+      webTestClient.get().uri("/prisoners/$prisonerId/approved/social/contacts")
         .headers(setAuthorisation(roles = listOf("AnyThingWillDo")))
         .exchange()
         .expectStatus().isForbidden
@@ -126,8 +118,8 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     @Test
     fun `requires correct role PRISONER_CONTACT_REGISTRY`() {
       val prisonerId = "A1234AA"
-      prisonApiMockServer.stubGetOffenderContacts(prisonerId, ContactsDto(emptyList()))
-      webTestClient.get().uri("/prisoners/$prisonerId/contacts/social")
+      prisonApiMockServer.stubGetApprovedOffenderContacts(prisonerId, ContactsDto(emptyList()))
+      webTestClient.get().uri("/prisoners/$prisonerId/approved/social/contacts")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
         .exchange()
         .expectStatus().isOk
@@ -138,12 +130,12 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   fun `when prisoner has both social and official contacts only social contacts are returned`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderContacts(
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
       prisonerId,
       contacts = ContactsDto(
         listOf(
           socialContactWithExpiredBannedRestriction,
-          socialUnapprovedContact,
+          socialContactWithCurrentBannedRestriction,
           socialContactWithNoDOB,
           officialContact,
         ),
@@ -151,31 +143,31 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     )
 
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    prisonApiMockServer.stubGetPersonAddressesFullAddress(socialUnapprovedContact.personId!!)
+    prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithCurrentBannedRestriction.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithNoDOB.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(officialContact.personId!!)
 
-    val returnResult = callGetSocialContacts(prisonerId)
+    val returnResult = callGetApprovedSocialContacts(prisonerId)
       .expectStatus().isOk
       .expectBody()
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts.size).isEqualTo(3)
     val contact1 = contacts[0]
-    assertContact(contact1, socialContactWithExpiredBannedRestriction)
+    assertContact(contact1, socialContactWithCurrentBannedRestriction)
     assertContactAddress(contact1.addresses[0])
 
     val contact2 = contacts[1]
-    assertContact(contact2, socialUnapprovedContact)
+    assertContact(contact2, socialContactWithExpiredBannedRestriction)
     assertContactAddress(contact2.addresses[0])
 
     val contact3 = contacts[2]
     assertContact(contact3, socialContactWithNoDOB)
     assertContactAddress(contact3.addresses[0])
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId!!)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId!!)
   }
 
@@ -183,19 +175,19 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   fun `when prisoner has official contacts only and no social contacts no contacts are returned`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderContacts(prisonerId, contacts = ContactsDto(listOf(officialContact)))
+    prisonApiMockServer.stubGetApprovedOffenderContacts(prisonerId, contacts = ContactsDto(listOf(officialContact)))
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithExpiredBannedRestriction.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithCurrentBannedRestriction.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(officialContact.personId!!)
 
-    val returnResult = callGetSocialContacts(prisonerId)
+    val returnResult = callGetApprovedSocialContacts(prisonerId)
       .expectStatus().isOk
       .expectBody()
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts).isEmpty()
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
   }
 
@@ -203,17 +195,17 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   fun `when person id is passed only one contact is returned`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderContacts(prisonerId, contacts = ContactsDto(listOf(socialUnapprovedContact, socialContactWithExpiredBannedRestriction, socialContactWithCurrentBannedRestriction)))
+    prisonApiMockServer.stubGetApprovedOffenderContacts(prisonerId, contacts = ContactsDto(listOf(socialContactWithNoDOB, socialContactWithExpiredBannedRestriction, socialContactWithCurrentBannedRestriction)))
 
-    val returnResult = callGetSocialContacts(prisonerId, personId = socialUnapprovedContact.personId, withAddress = false)
+    val returnResult = callGetApprovedSocialContacts(prisonerId, personId = socialContactWithCurrentBannedRestriction.personId, withAddress = false)
       .expectStatus().isOk
       .expectBody()
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts.size).isEqualTo(1)
-    assertContact(contacts[0], socialUnapprovedContact)
+    assertContact(contacts[0], socialContactWithCurrentBannedRestriction)
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
   }
 
@@ -221,36 +213,36 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   fun `when withAddress is false then no call is made to get address`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderContacts(
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
       prisonerId,
       contacts = ContactsDto(
         listOf(
           socialContactWithExpiredBannedRestriction,
-          socialUnapprovedContact,
+          socialContactWithCurrentBannedRestriction,
           officialContact,
         ),
       ),
     )
 
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    prisonApiMockServer.stubGetPersonAddressesFullAddress(socialUnapprovedContact.personId!!)
+    prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithCurrentBannedRestriction.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(officialContact.personId!!)
 
-    val returnResult = callGetSocialContacts(prisonerId, withAddress = false)
+    val returnResult = callGetApprovedSocialContacts(prisonerId, withAddress = false)
       .expectStatus().isOk
       .expectBody()
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts.size).isEqualTo(2)
     val contact1 = contacts[0]
-    assertContact(contact1, socialContactWithExpiredBannedRestriction)
+    assertContact(contact1, socialContactWithCurrentBannedRestriction)
     assertThat(contact1.addresses).isEmpty()
 
     val contact2 = contacts[1]
-    assertContact(contact2, socialUnapprovedContact)
+    assertContact(contact2, socialContactWithExpiredBannedRestriction)
     assertThat(contact1.addresses).isEmpty()
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
   }
 
@@ -258,84 +250,84 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   fun `when hasDateOfBirth is passed as true only social contacts with a DOB are returned`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderContacts(
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
       prisonerId,
       contacts = ContactsDto(
         listOf(
           socialContactWithNoDOB,
           socialContactWithExpiredBannedRestriction,
-          socialUnapprovedContact,
+          socialContactWithCurrentBannedRestriction,
           officialContact,
         ),
       ),
     )
 
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    prisonApiMockServer.stubGetPersonAddressesFullAddress(socialUnapprovedContact.personId!!)
+    prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithCurrentBannedRestriction.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(officialContact.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithNoDOB.personId!!)
 
-    val returnResult = callGetSocialContacts(prisonerId, hasDateOfBirth = true)
+    val returnResult = callGetApprovedSocialContacts(prisonerId, hasDateOfBirth = true)
       .expectStatus().isOk
       .expectBody()
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts.size).isEqualTo(2)
     val contact1 = contacts[0]
-    assertContact(contact1, socialContactWithExpiredBannedRestriction)
+    assertContact(contact1, socialContactWithCurrentBannedRestriction)
     assertContactAddress(contact1.addresses[0])
 
     val contact2 = contacts[1]
-    assertContact(contact2, socialUnapprovedContact)
+    assertContact(contact2, socialContactWithExpiredBannedRestriction)
     assertContactAddress(contact2.addresses[0])
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId!!)
   }
 
   @Test
   fun `when hasDateOfBirth is passed as false all social contacts with or without a DOB are returned`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderContacts(
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
       prisonerId,
       contacts = ContactsDto(
         listOf(
           socialContactWithNoDOB,
           socialContactWithExpiredBannedRestriction,
-          socialUnapprovedContact,
+          socialContactWithCurrentBannedRestriction,
           officialContact,
         ),
       ),
     )
 
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    prisonApiMockServer.stubGetPersonAddressesFullAddress(socialUnapprovedContact.personId!!)
+    prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithCurrentBannedRestriction.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(officialContact.personId!!)
     prisonApiMockServer.stubGetPersonAddressesFullAddress(socialContactWithNoDOB.personId!!)
 
-    val returnResult = callGetSocialContacts(prisonerId, hasDateOfBirth = false)
+    val returnResult = callGetApprovedSocialContacts(prisonerId, hasDateOfBirth = false)
       .expectStatus().isOk
       .expectBody()
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts.size).isEqualTo(3)
     val contact1 = contacts[0]
-    assertContact(contact1, socialContactWithExpiredBannedRestriction)
+    assertContact(contact1, socialContactWithCurrentBannedRestriction)
     assertContactAddress(contact1.addresses[0])
 
     val contact2 = contacts[1]
-    assertContact(contact2, socialUnapprovedContact)
+    assertContact(contact2, socialContactWithExpiredBannedRestriction)
     assertContactAddress(contact2.addresses[0])
 
     val contact3 = contacts[2]
     assertContact(contact3, socialContactWithNoDOB)
     assertContactAddress(contact3.addresses[0])
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId!!)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId!!)
   }
 
@@ -367,12 +359,12 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       restrictions = listOf(banEndBeforeEndDateRestriction),
     )
 
-    prisonApiMockServer.stubGetOffenderContacts(
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
       prisonerId,
       contacts = ContactsDto(
         listOf(
-          // returned - no restrictions, unapproved.
-          socialUnapprovedContact,
+          // returned - no restrictions
+          socialContactWithNoDOB,
           // returned - expired BANNED restriction
           socialContactWithExpiredBannedRestriction,
           // not returned - social contact with BANNED restriction with expiry date as NULL
@@ -389,17 +381,17 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       ),
     )
 
-    val returnResult = callGetSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
+    val returnResult = callGetApprovedSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
       .expectStatus().isOk
       .expectBody()
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts.size).isEqualTo(3)
-    assertContact(contacts[0], socialUnapprovedContact)
-    assertContact(contacts[1], socialContactWithExpiredBannedRestriction)
+    assertContact(contacts[0], socialContactWithExpiredBannedRestriction)
+    assertContact(contacts[1], socialContactWithNoDOB)
     assertContact(contacts[2], socialContactWithBanEndBeforeEndDate)
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
   }
 
@@ -415,7 +407,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       restrictions = listOf(banEndBeforeEndDateRestriction, indefinitelyBannedRestriction),
     )
 
-    prisonApiMockServer.stubGetOffenderContacts(
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
       prisonerId,
       contacts = ContactsDto(
         listOf(
@@ -427,14 +419,49 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       ),
     )
 
-    val returnResult = callGetSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
+    val returnResult = callGetApprovedSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
       .expectStatus().isOk
       .expectBody()
 
     val contacts = getContactResults(returnResult)
     assertThat(contacts).isEmpty()
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
+    verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
+  }
+
+  @Test
+  fun `when bannedDate is passed and contact has multiple bans with one expiring after end date most relevant ban is used`() {
+    val prisonerId = "A1234AA"
+
+    val socialContactWithMultipleBans = createContact(
+      lastName = "GBannedVisitor",
+      firstName = "Social",
+      dateOfBirth = LocalDate.of(1951, 9, 13),
+      personId = 8L,
+      restrictions = listOf(banEndBeforeEndDateRestriction, banEndAfterEndDateRestriction),
+    )
+
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
+      prisonerId,
+      contacts = ContactsDto(
+        listOf(
+          // not returned
+          socialContactWithMultipleBans,
+          // not returned - official contact
+          officialContact,
+        ),
+      ),
+    )
+
+    val returnResult = callGetApprovedSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
+      .expectStatus().isOk
+      .expectBody()
+
+    val contacts = getContactResults(returnResult)
+    assertThat(contacts).isEmpty()
+
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
   }
 
@@ -442,12 +469,12 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   fun `when 404 returned from prison API get contacts 404 is returned`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderNotFound(prisonerId)
+    prisonApiMockServer.stubGetApprovedOffenderContacts(prisonerId, contacts = null)
 
-    val responseSpec = callGetSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
+    val responseSpec = callGetApprovedSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
       .expectStatus().isNotFound
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
     assertErrorResult(responseSpec, HttpStatus.NOT_FOUND, "Contacts not found for - $prisonerId on prison-api")
   }
@@ -456,12 +483,12 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   fun `when BAD_REQUEST returned from prison API get contacts BAD_REQUEST is returned`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderBadRequest(prisonerId)
+    prisonApiMockServer.stubGetApprovedOffenderContacts(prisonerId, contacts = null, HttpStatus.BAD_REQUEST)
 
-    callGetSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
+    callGetApprovedSocialContacts(prisonerId, notBannedBeforeDate = banEndDate, withAddress = false)
       .expectStatus().isBadRequest
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
   }
 
@@ -469,13 +496,13 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   fun `when 404 returned from prison API get contact address only contact data is returned`() {
     val prisonerId = "A1234AA"
 
-    prisonApiMockServer.stubGetOffenderContacts(
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
       prisonerId,
       contacts = ContactsDto(listOf(socialContactWithExpiredBannedRestriction)),
     )
     prisonApiMockServer.stubGetPersonNotFound(socialContactWithExpiredBannedRestriction.personId!!)
 
-    val returnResult = callGetSocialContacts(prisonerId)
+    val returnResult = callGetApprovedSocialContacts(prisonerId)
       .expectStatus().isOk
       .expectBody()
 
@@ -484,7 +511,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     assertThat(contacts[0]).isEqualTo(socialContactWithExpiredBannedRestriction)
     assertThat(contacts[0].addresses.size).isEqualTo(0)
 
-    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
+    verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(any())
   }
 
@@ -499,6 +526,15 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
         objectMapper.readValue(responseSpec.expectBody().returnResult().responseBody, ErrorResponse::class.java)
       assertThat(errorResponse.developerMessage).isEqualTo(errorMessage)
     }
+  }
+
+  @Test
+  fun `bad request`() {
+    val prisonerId = "A1234AA"
+    webTestClient.get().uri("/prisoners/$prisonerId/contacts?id=ABC")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+      .exchange()
+      .expectStatus().isBadRequest
   }
 
   private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> {
