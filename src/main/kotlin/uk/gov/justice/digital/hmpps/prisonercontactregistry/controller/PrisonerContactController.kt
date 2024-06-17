@@ -26,7 +26,7 @@ const val PRISON_CONTACTS_CONTROLLER_PATH: String = "/prisoners/{prisonerId}"
 const val PRISON_GET_ALL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/contacts"
 const val PRISON_GET_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/contacts/social"
 
-// TODO: Restructure URLs to "/contacts/social/approved"
+// TODO: This endpoint is deprecated now. Remove in future.
 const val PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON_CONTACTS_CONTROLLER_PATH/approved/social/contacts"
 
 const val PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/banned/dateRange"
@@ -97,9 +97,6 @@ class PrisonerContactController(
       .sortedWith(getDefaultSortOrder())
   }
 
-  // TODO: Combine PRISON_GET_SOCIAL_CONTACTS_CONTROLLER_PATH & PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH
-  //  with new optional parameter "approvedVisitorsOnly" which defaults to true if not passed in. As all logic is shared
-  //  by these endpoints with only 1 flag difference.
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(PRISON_GET_SOCIAL_CONTACTS_CONTROLLER_PATH)
   @Operation(
@@ -148,8 +145,10 @@ class PrisonerContactController(
     @RequestParam(value = "withAddress", required = false)
     @Parameter(description = "by default returns addresses for all contacts, set to false if contact addresses not needed.", example = "false")
     withAddress: Boolean? = true,
+    @Parameter(description = "by default set to true and will return only approved social contacts. If false, returns all social contacts", example = "false")
+    approvedVisitorsOnly: Boolean? = true,
   ): List<ContactDto> {
-    log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, id : {}, hasDateOfBirth = {}, notBannedBeforeDate = {}, withAddress = {}", prisonerId, personId, hasDateOfBirth, notBannedBeforeDate, withAddress)
+    log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, id : {}, hasDateOfBirth = {}, notBannedBeforeDate = {}, withAddress = {}, approvedVisitorsOnly = {}", prisonerId, personId, hasDateOfBirth, notBannedBeforeDate, withAddress, approvedVisitorsOnly)
 
     return contactService.getSocialContactList(
       prisonerId = prisonerId,
@@ -157,10 +156,11 @@ class PrisonerContactController(
       withAddress = withAddress ?: true,
       hasDateOfBirth = hasDateOfBirth,
       notBannedBeforeDate = notBannedBeforeDate,
-      approvedVisitorsOnly = false,
+      approvedVisitorsOnly = approvedVisitorsOnly ?: true,
     ).sortedWith(getDefaultSortOrder())
   }
 
+  @Deprecated("This has been replaced by PRISON_GET_SOCIAL_CONTACTS_CONTROLLER_PATH endpoint")
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH)
   @Operation(

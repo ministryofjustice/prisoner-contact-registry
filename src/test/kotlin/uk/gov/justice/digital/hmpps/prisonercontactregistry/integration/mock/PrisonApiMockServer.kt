@@ -46,6 +46,28 @@ class PrisonApiMockServer : WireMockServer(8092) {
     )
   }
 
+  fun stubGetOffenderSocialContacts(
+    offenderNo: String,
+    contacts: ContactsDto? = null,
+    httpStatus: HttpStatus = NOT_FOUND,
+  ) {
+    stubFor(
+      get("/api/offenders/$offenderNo/contacts")
+        .willReturn(
+          if (contacts != null) {
+            aResponse()
+              .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+              .withStatus(200)
+              .withBody(getJsonString(contacts))
+          } else {
+            aResponse()
+              .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+              .withStatus(httpStatus.value())
+          },
+        ),
+    )
+  }
+
   fun stubGetOffenderNotFound(offenderNo: String) {
     stubFor(
       get("/api/offenders/$offenderNo/contacts")
@@ -53,17 +75,6 @@ class PrisonApiMockServer : WireMockServer(8092) {
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .withStatus(HttpStatus.NOT_FOUND.value()),
-        ),
-    )
-  }
-
-  fun stubGetOffenderBadRequest(offenderNo: String) {
-    stubFor(
-      get("/api/offenders/$offenderNo/contacts")
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .withStatus(HttpStatus.BAD_REQUEST.value()),
         ),
     )
   }
