@@ -64,15 +64,16 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     return contacts
   }
 
-  fun getApprovedSocialContactList(
+  fun getSocialContactList(
     prisonerId: String,
     personId: Long? = null,
     withAddress: Boolean,
     hasDateOfBirth: Boolean? = null,
     notBannedBeforeDate: LocalDate? = null,
+    approvedVisitorsOnly: Boolean,
   ): List<ContactDto> {
-    log.debug("getApprovedSocialContactList called with parameters : prisonerId - {}, personId - {}, withAddress - {}, hasDateOfBirth - {}, notBannedBeforeDate - {}", prisonerId, personId, withAddress, hasDateOfBirth, notBannedBeforeDate)
-    var contacts = getContactList(prisonerId = prisonerId, contactType = "S", personId = personId, withAddress = withAddress, approvedVisitorsOnly = true)
+    log.debug("getSocialContactList called with parameters : prisonerId - {}, personId - {}, withAddress - {}, hasDateOfBirth - {}, notBannedBeforeDate - {}, approvedVisitsOnly - {}", prisonerId, personId, withAddress, hasDateOfBirth, notBannedBeforeDate, approvedVisitorsOnly)
+    var contacts = getContactList(prisonerId = prisonerId, contactType = "S", personId = personId, withAddress = withAddress, approvedVisitorsOnly = approvedVisitorsOnly)
 
     if (hasDateOfBirth != null && hasDateOfBirth) {
       contacts = contacts.filter { hasContactGotDateOfBirth(it) }
