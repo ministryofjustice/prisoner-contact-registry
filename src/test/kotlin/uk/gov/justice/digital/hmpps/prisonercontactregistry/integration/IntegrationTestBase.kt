@@ -102,7 +102,7 @@ abstract class IntegrationTestBase {
     assertThat(actualContact.relationshipDescription).isEqualTo(expectedContact.relationshipDescription)
     assertThat(actualContact.contactType).isEqualTo("S")
     assertThat(actualContact.contactTypeDescription).isEqualTo("Social")
-    assertThat(actualContact.approvedVisitor).isTrue()
+    assertThat(actualContact.approvedVisitor).isEqualTo(expectedContact.approvedVisitor)
     assertThat(actualContact.emergencyContact).isEqualTo(expectedContact.emergencyContact)
     assertThat(actualContact.nextOfKin).isEqualTo(expectedContact.nextOfKin)
     assertThat(actualContact.commentText).isEqualTo(expectedContact.commentText)
@@ -162,6 +162,7 @@ abstract class IntegrationTestBase {
     nextOfKin: Boolean = false,
     personId: Long,
     restrictions: List<RestrictionDto> = emptyList(),
+    approvedVisitor: Boolean = true,
   ): ContactDto {
     return ContactDto(
       lastName = lastName,
@@ -176,7 +177,7 @@ abstract class IntegrationTestBase {
       emergencyContact = emergencyContact,
       nextOfKin = nextOfKin,
       personId = personId,
-      approvedVisitor = true,
+      approvedVisitor = approvedVisitor,
       restrictions = restrictions,
     )
   }
