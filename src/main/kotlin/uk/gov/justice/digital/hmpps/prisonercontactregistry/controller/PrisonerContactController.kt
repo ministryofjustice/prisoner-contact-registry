@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.VisitorActiveRestrictionsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryService
 import java.time.LocalDate
 
@@ -32,6 +33,7 @@ const val PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$PRISON
 // TODO: These endpoints need updating to be correct structure: "/prisoners/{prisonerId}/contacts/social/approved/..."
 const val PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/banned/dateRange"
 const val PRISON_GET_CLOSED_RESTRICTIONS_CONTROLLER_PATH: String = "$PRISON_GET_APPROVED_SOCIAL_CONTACTS_CONTROLLER_PATH/restrictions/closed"
+const val PRISON_GET_ACTIVE_RESTRICTIONS_CONTROLLER_PATH: String = "/prisoners/{prisonerId}/contacts/social/approved/{visitorId}/restrictions/active"
 
 @RestController
 @Validated
@@ -329,5 +331,53 @@ class PrisonerContactController(
       visitorIds,
     )
     return prisonerContactRegistryService.getClosedRestrictionStatusForPrisonerContacts(prisonerId, visitorIds)
+  }
+
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
+  @GetMapping(PRISON_GET_ACTIVE_RESTRICTIONS_CONTROLLER_PATH)
+  @Operation(
+    summary = "Get active restrictions of given visitor",
+    description = "Returns a list of active restrictions for a single visitor",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returned all active restrictions for visitor",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to Get active restrictions of visitor",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to Get active restrictions of visitor",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Prisoner or Visitor",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getActiveRestrictionsForPrisonerVisitor(
+    @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
+    @PathVariable
+    prisonerId: String,
+    @Schema(description = "Id of prisoner visitor", example = "9147510", required = true)
+    @PathVariable
+    visitorId: Long,
+  ): VisitorActiveRestrictionsDto {
+    log.debug(
+      "getActiveRestrictionsForPrisonerVisitor called with parameters: prisonerId: {}, visitorId: {}",
+      prisonerId,
+      visitorId,
+    )
+    return prisonerContactRegistryService.getActiveRestrictionsForPrisonerContact(prisonerId, visitorId)
   }
 }
