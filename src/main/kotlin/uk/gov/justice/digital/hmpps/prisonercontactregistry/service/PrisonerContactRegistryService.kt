@@ -147,8 +147,8 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     )
     val visitor = getVisitor(prisonerId, visitorId)
     val visitorActiveRestrictions =
-      visitor.restrictions.filter {
-        it.expiryDate == null || it.expiryDate.isEqual(LocalDate.now()) || it.expiryDate.isAfter(LocalDate.now())
+      visitor.restrictions.filter { restriction ->
+        !restriction.globalRestriction && (restriction.expiryDate == null || restriction.expiryDate.isEqual(LocalDate.now()) || restriction.expiryDate.isAfter(LocalDate.now()))
       }.map { it.restrictionType }
 
     return VisitorActiveRestrictionsDto(visitorActiveRestrictions)
