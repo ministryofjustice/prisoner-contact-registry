@@ -313,7 +313,7 @@ class PrisonerContactController(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Prisoner or Visitor",
+        description = "Prisoner or Visitor not found",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
@@ -361,7 +361,7 @@ class PrisonerContactController(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Prisoner or Visitor",
+        description = "Prisoner or Visitor not found",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
