@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.VisitorActiveRestrictionsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
@@ -138,22 +137,6 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     )
   }
 
-  @Throws(VisitorNotFoundException::class)
-  fun getActiveRestrictionsForPrisonerContact(prisonerId: String, visitorId: Long): VisitorActiveRestrictionsDto {
-    log.debug(
-      "getActiveRestrictionsForPrisonerContact called with parameters : prisonerId - {}, visitorId - {}",
-      prisonerId,
-      visitorId,
-    )
-    val visitor = getVisitor(prisonerId, visitorId)
-    val visitorActiveRestrictions =
-      visitor.restrictions.filter { restriction ->
-        restriction.expiryDate == null || restriction.expiryDate >= LocalDate.now()
-      }.map { it.restrictionType }
-
-    return VisitorActiveRestrictionsDto(visitorActiveRestrictions)
-  }
-
   @Throws(PrisonerNotFoundException::class)
   private fun getContactById(id: String, approvedVisitorsOnly: Boolean): List<ContactDto> {
     try {
@@ -222,16 +205,5 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
         .filter { it.restrictionType == restrictionType.toString() }
 
     return visitorsWithRestriction
-  }
-
-  private fun getVisitor(prisonerId: String, visitorId: Long): ContactDto {
-    val contacts = getContactById(prisonerId, true)
-
-    val visitor = contacts.firstOrNull { it.personId == visitorId }
-    if (visitor == null) {
-      throw VisitorNotFoundException(message = "visitor provided ($visitorId) is not listed contact for prisoner $prisonerId")
-    }
-
-    return visitor
   }
 }
