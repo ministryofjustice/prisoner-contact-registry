@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import java.time.Duration
 
@@ -58,10 +59,21 @@ class PrisonApiClient(
   }
 
   fun getPersonAddress(personId: Long): List<AddressDto>? {
+    val uri = "/api/persons/$personId/addresses"
     return webClient.get()
-      .uri("/api/persons/$personId/addresses")
+      .uri(uri)
       .retrieve()
       .bodyToMono(addresses)
+      .onErrorResume {
+          e ->
+        if (!isNotFoundError(e)) {
+          logger.error("get contact address Failed for get request $uri")
+          Mono.error(e)
+        } else {
+          logger.error("get contact address returned NOT_FOUND for get request $uri")
+          Mono.error { PersonNotFoundException("Contacts not found $personId on prison-api") }
+        }
+      }
       .block(apiTimeout)
       .also {
         logger.debug("Get person address called for $personId")

@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.get
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.MediaType
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 
 class PrisonApiMockServer : WireMockServer(8092) {
@@ -95,52 +96,14 @@ class PrisonApiMockServer : WireMockServer(8092) {
     )
   }
 
-  fun stubGetPersonAddressesFullAddress(personId: Long) {
+  fun stubGetPersonAddressesFullAddress(personId: Long, addresses: List<AddressDto>) {
     stubFor(
       get("/api/persons/$personId/addresses")
         .willReturn(
           aResponse()
             .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .withStatus(200)
-            .withBody(
-              """
-                [
-                  {
-                      "addressId": 2593598,
-                      "addressType": "BUS",
-                      "flat": "3B",
-                      "premise": "Liverpool Prison",
-                      "street": "Slinn Street",
-                      "locality": "Brincliffe",
-                      "town": "Birmingham",
-                      "postalCode": "D7 5CC",
-                      "county": "West Midlands",
-                      "country": "England",
-                      "comment": "Comment Here",
-                      "primary": true,
-                      "noFixedAddress": false,
-                      "startDate": "2012-05-01",
-                      "endDate": "2016-05-01",
-                      "phones": [
-                        {
-                            "phoneId": 620163,
-                            "number": "504 555 24302",
-                            "type": "BUS",
-                            "ext": "123"
-                        }
-                      ],
-                      "addressUsages": [
-                        {
-                          "addressId": "23422313",
-                          "addressUsage": "HDC",
-                          "addressUsageDescription": "HDC Address",
-                          "activeFlag": true
-                        }
-                      ]
-                  }
-              ]
-              """.trimIndent(),
-            ),
+            .withBody(getJsonString(addresses)),
         ),
     )
   }

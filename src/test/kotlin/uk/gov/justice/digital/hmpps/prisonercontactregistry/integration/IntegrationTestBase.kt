@@ -13,9 +13,11 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressUsageDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.HmppsAuthExtension
@@ -218,5 +220,40 @@ abstract class IntegrationTestBase {
     }
 
     return ContactsDto(contacts)
+  }
+
+  fun createContactsAddressDto(): List<AddressDto> {
+    return listOf(
+      AddressDto(
+        addressType = "BUS",
+        flat = "3B",
+        premise = "Liverpool Prison",
+        street = "Slinn Street",
+        locality = "Brincliffe",
+        town = "Birmingham",
+        postalCode = "D7 5CC",
+        county = "West Midlands",
+        country = "England",
+        comment = "Comment Here",
+        primary = true,
+        noFixedAddress = false,
+        startDate = LocalDate.of(2012, 5, 1),
+        endDate = LocalDate.of(2016, 5, 1),
+        phones = listOf(
+          TelephoneDto(
+            number = "504 555 24302",
+            type = "BUS",
+            ext = "123",
+          ),
+        ),
+        addressUsages = listOf(
+          AddressUsageDto(
+            addressUsage = "HDC",
+            addressUsageDescription = "HDC Address",
+            activeFlag = true,
+          ),
+        ),
+      ),
+    )
   }
 }

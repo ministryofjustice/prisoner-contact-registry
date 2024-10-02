@@ -107,7 +107,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val personId: Long = 2187521
 
     prisonApiMockServer.stubGetOffenderContacts(prisonerId, contacts = ContactsDto(listOf(contactWithFullDetails)))
-    prisonApiMockServer.stubGetPersonAddressesFullAddress(personId)
+    prisonApiMockServer.stubGetPersonAddressesFullAddress(personId, createContactsAddressDto())
 
     val returnResult = callGetContacts(prisonerId)
       .expectStatus().isOk
@@ -128,7 +128,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val personId: Long = 2187521
 
     prisonApiMockServer.stubGetOffenderContacts(prisonerId, ContactsDto(listOf(contactWithFullDetails)))
-    prisonApiMockServer.stubGetPersonAddressesFullAddress(personId)
+    prisonApiMockServer.stubGetPersonAddressesFullAddress(personId, createContactsAddressDto())
 
     val returnResult = callGetContacts(prisonerId, true)
       .expectStatus().isOk
@@ -151,7 +151,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     val personId: Long = 2187521
 
     prisonApiMockServer.stubGetOffenderContacts(prisonerId, ContactsDto(listOf(contactWithFullDetails)))
-    prisonApiMockServer.stubGetPersonAddressesFullAddress(personId)
+    prisonApiMockServer.stubGetPersonAddressesFullAddress(personId, createContactsAddressDto())
 
     val returnResult = callGetContacts(prisonerId, withAddress = false)
       .expectStatus().isOk
