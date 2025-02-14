@@ -161,30 +161,18 @@ class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClien
     }
   }
 
-  private fun filterByPersonId(contacts: List<ContactDto>?, personId: Long): List<ContactDto> {
-    return contacts?.filter { it.personId == personId } ?: emptyList()
-  }
+  private fun filterByPersonId(contacts: List<ContactDto>?, personId: Long): List<ContactDto> = contacts?.filter { it.personId == personId } ?: emptyList()
 
-  private fun filterByContactType(contacts: List<ContactDto>?, contactType: String): List<ContactDto> {
-    return contacts?.filter { it.contactType.equals(contactType, true) } ?: emptyList()
-  }
+  private fun filterByContactType(contacts: List<ContactDto>?, contactType: String): List<ContactDto> = contacts?.filter { it.contactType.equals(contactType, true) } ?: emptyList()
 
-  private fun hasContactGotDateOfBirth(contact: ContactDto): Boolean {
-    return contact.dateOfBirth != null
-  }
+  private fun hasContactGotDateOfBirth(contact: ContactDto): Boolean = contact.dateOfBirth != null
 
-  private fun isContactBannedBeforeDate(contact: ContactDto, date: LocalDate): Boolean {
-    return contact.restrictions.any { hasBanForDate(it, date) }
-  }
+  private fun isContactBannedBeforeDate(contact: ContactDto, date: LocalDate): Boolean = contact.restrictions.any { hasBanForDate(it, date) }
 
-  private fun hasBanForDate(restriction: RestrictionDto, date: LocalDate): Boolean {
-    return restriction.restrictionType == RestrictionType.BANNED.toString() &&
-      isBannedForDate(restriction.expiryDate, date)
-  }
+  private fun hasBanForDate(restriction: RestrictionDto, date: LocalDate): Boolean = restriction.restrictionType == RestrictionType.BANNED.toString() &&
+    isBannedForDate(restriction.expiryDate, date)
 
-  private fun isBannedForDate(restrictionEndDate: LocalDate?, date: LocalDate): Boolean {
-    return (restrictionEndDate == null || (date <= restrictionEndDate))
-  }
+  private fun isBannedForDate(restrictionEndDate: LocalDate?, date: LocalDate): Boolean = (restrictionEndDate == null || (date <= restrictionEndDate))
 
   private fun getVisitors(prisonerId: String, visitorIds: List<Long>): List<ContactDto> {
     val contacts = getContactById(prisonerId, true)

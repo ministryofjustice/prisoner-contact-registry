@@ -299,7 +299,5 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     visitorIdsString: String,
     fromDate: LocalDate,
     toDate: LocalDate,
-  ): String {
-    return "v2/prisoners/$prisonerId/contacts/social/approved/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
-  }
+  ): String = "v2/prisoners/$prisonerId/contacts/social/approved/restrictions/banned/dateRange?visitors=$visitorIdsString&fromDate=$fromDate&toDate=$toDate"
 }

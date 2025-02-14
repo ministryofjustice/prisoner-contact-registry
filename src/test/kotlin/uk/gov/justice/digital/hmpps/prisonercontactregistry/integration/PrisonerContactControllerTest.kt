@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
@@ -17,7 +17,7 @@ import java.time.LocalDate
 
 @Suppress("ClassName")
 class PrisonerContactControllerTest : IntegrationTestBase() {
-  @SpyBean
+  @MockitoSpyBean
   private lateinit var prisonApiClient: PrisonApiClient
 
   private val expiredBannedRestriction = RestrictionDto(
@@ -63,11 +63,9 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
   fun callGetContacts(
     prisonerId: String,
     withAddress: Boolean? = null,
-  ): WebTestClient.ResponseSpec {
-    return webTestClient.get().uri("/prisoners/$prisonerId/contacts?${getContactsQueryParams(withAddress)}")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
-      .exchange()
-  }
+  ): WebTestClient.ResponseSpec = webTestClient.get().uri("/prisoners/$prisonerId/contacts?${getContactsQueryParams(withAddress)}")
+    .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+    .exchange()
 
   @Nested
   inner class authentication {
@@ -299,9 +297,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
       .expectStatus().isBadRequest
   }
 
-  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> {
-    return objectMapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
-  }
+  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = objectMapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
 
   private fun getContactsQueryParams(
     withAddress: Boolean? = null,
@@ -314,21 +310,19 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
     return queryParams.joinToString("&")
   }
 
-  fun createContactsDto(firstName: String, lastName: String, visitorId: Long = 1): ContactDto {
-    return ContactDto(
-      lastName = lastName,
-      middleName = "Danger",
-      firstName = firstName,
-      dateOfBirth = LocalDate.of(1912, 9, 13),
-      contactType = "S",
-      contactTypeDescription = "Social",
-      relationshipCode = "PROB",
-      relationshipDescription = "Probation Officer",
-      commentText = "Comment Here",
-      emergencyContact = false,
-      nextOfKin = false,
-      personId = visitorId,
-      approvedVisitor = false,
-    )
-  }
+  fun createContactsDto(firstName: String, lastName: String, visitorId: Long = 1): ContactDto = ContactDto(
+    lastName = lastName,
+    middleName = "Danger",
+    firstName = firstName,
+    dateOfBirth = LocalDate.of(1912, 9, 13),
+    contactType = "S",
+    contactTypeDescription = "Social",
+    relationshipCode = "PROB",
+    relationshipDescription = "Probation Officer",
+    commentText = "Comment Here",
+    emergencyContact = false,
+    nextOfKin = false,
+    personId = visitorId,
+    approvedVisitor = false,
+  )
 }

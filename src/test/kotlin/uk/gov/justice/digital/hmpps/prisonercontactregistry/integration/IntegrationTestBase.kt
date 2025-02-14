@@ -165,39 +165,35 @@ abstract class IntegrationTestBase {
     personId: Long,
     restrictions: List<RestrictionDto> = emptyList(),
     approvedVisitor: Boolean = true,
-  ): ContactDto {
-    return ContactDto(
-      lastName = lastName,
-      middleName = middleName,
-      firstName = firstName,
-      dateOfBirth = dateOfBirth,
-      contactType = contactType,
-      contactTypeDescription = contactTypeDescription,
-      relationshipCode = relationshipCode,
-      relationshipDescription = relationshipDescription,
-      commentText = commentText,
-      emergencyContact = emergencyContact,
-      nextOfKin = nextOfKin,
-      personId = personId,
-      approvedVisitor = approvedVisitor,
-      restrictions = restrictions,
-    )
-  }
+  ): ContactDto = ContactDto(
+    lastName = lastName,
+    middleName = middleName,
+    firstName = firstName,
+    dateOfBirth = dateOfBirth,
+    contactType = contactType,
+    contactTypeDescription = contactTypeDescription,
+    relationshipCode = relationshipCode,
+    relationshipDescription = relationshipDescription,
+    commentText = commentText,
+    emergencyContact = emergencyContact,
+    nextOfKin = nextOfKin,
+    personId = personId,
+    approvedVisitor = approvedVisitor,
+    restrictions = restrictions,
+  )
   final fun createBanRestriction(
     startDate: LocalDate,
     expiryDate: LocalDate? = null,
     globalRestriction: Boolean = false,
     comment: String = "Comment Here",
-  ): RestrictionDto {
-    return RestrictionDto(
-      restrictionType = RestrictionType.BANNED.toString(),
-      restrictionTypeDescription = "Banned",
-      startDate = startDate,
-      expiryDate = expiryDate,
-      globalRestriction = globalRestriction,
-      comment = comment,
-    )
-  }
+  ): RestrictionDto = RestrictionDto(
+    restrictionType = RestrictionType.BANNED.toString(),
+    restrictionTypeDescription = "Banned",
+    startDate = startDate,
+    expiryDate = expiryDate,
+    globalRestriction = globalRestriction,
+    comment = comment,
+  )
 
   fun createContactsDto(restrictions: List<RestrictionDto> = listOf(), visitorsId: List<Long>): ContactsDto {
     val contacts = visitorsId.mapIndexed { index: Int, visitorId: Long ->
@@ -222,38 +218,36 @@ abstract class IntegrationTestBase {
     return ContactsDto(contacts)
   }
 
-  fun createContactsAddressDto(): List<AddressDto> {
-    return listOf(
-      AddressDto(
-        addressType = "BUS",
-        flat = "3B",
-        premise = "Liverpool Prison",
-        street = "Slinn Street",
-        locality = "Brincliffe",
-        town = "Birmingham",
-        postalCode = "D7 5CC",
-        county = "West Midlands",
-        country = "England",
-        comment = "Comment Here",
-        primary = true,
-        noFixedAddress = false,
-        startDate = LocalDate.of(2012, 5, 1),
-        endDate = LocalDate.of(2016, 5, 1),
-        phones = listOf(
-          TelephoneDto(
-            number = "504 555 24302",
-            type = "BUS",
-            ext = "123",
-          ),
-        ),
-        addressUsages = listOf(
-          AddressUsageDto(
-            addressUsage = "HDC",
-            addressUsageDescription = "HDC Address",
-            activeFlag = true,
-          ),
+  fun createContactsAddressDto(): List<AddressDto> = listOf(
+    AddressDto(
+      addressType = "BUS",
+      flat = "3B",
+      premise = "Liverpool Prison",
+      street = "Slinn Street",
+      locality = "Brincliffe",
+      town = "Birmingham",
+      postalCode = "D7 5CC",
+      county = "West Midlands",
+      country = "England",
+      comment = "Comment Here",
+      primary = true,
+      noFixedAddress = false,
+      startDate = LocalDate.of(2012, 5, 1),
+      endDate = LocalDate.of(2016, 5, 1),
+      phones = listOf(
+        TelephoneDto(
+          number = "504 555 24302",
+          type = "BUS",
+          ext = "123",
         ),
       ),
-    )
-  }
+      addressUsages = listOf(
+        AddressUsageDto(
+          addressUsage = "HDC",
+          addressUsageDescription = "HDC Address",
+          activeFlag = true,
+        ),
+      ),
+    ),
+  )
 }

@@ -6,8 +6,6 @@ import org.springframework.http.MediaType
 
 class MockUtils {
   companion object {
-    fun createJsonResponseBuilder(): ResponseDefinitionBuilder {
-      return WireMock.aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-    }
+    fun createJsonResponseBuilder(): ResponseDefinitionBuilder = WireMock.aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
   }
 }

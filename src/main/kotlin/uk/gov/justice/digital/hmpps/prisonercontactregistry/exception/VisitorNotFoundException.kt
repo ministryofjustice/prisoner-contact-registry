@@ -5,7 +5,5 @@ import java.util.function.Supplier
 class VisitorNotFoundException(message: String? = null, cause: Throwable? = null) :
   RuntimeException(message, cause),
   Supplier<VisitorNotFoundException> {
-  override fun get(): VisitorNotFoundException {
-    return VisitorNotFoundException(message, cause)
-  }
+  override fun get(): VisitorNotFoundException = VisitorNotFoundException(message, cause)
 }

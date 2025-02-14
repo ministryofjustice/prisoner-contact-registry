@@ -42,8 +42,7 @@ class PrisonApiClient(
       .uri(uri)
       .retrieve()
       .bodyToMono(contacts)
-      .onErrorResume {
-          e ->
+      .onErrorResume { e ->
         if (!isNotFoundError(e)) {
           logger.error("get offender contacts Failed for get request $uri")
           Mono.error(e)
@@ -64,8 +63,7 @@ class PrisonApiClient(
       .uri(uri)
       .retrieve()
       .bodyToMono(addresses)
-      .onErrorResume {
-          e ->
+      .onErrorResume { e ->
         if (!isNotFoundError(e)) {
           logger.error("get contact address Failed for get request $uri")
           Mono.error(e)
@@ -80,6 +78,5 @@ class PrisonApiClient(
       }
   }
 
-  fun isNotFoundError(e: Throwable?) =
-    e is WebClientResponseException && e.statusCode == HttpStatus.NOT_FOUND
+  fun isNotFoundError(e: Throwable?) = e is WebClientResponseException && e.statusCode == HttpStatus.NOT_FOUND
 }
