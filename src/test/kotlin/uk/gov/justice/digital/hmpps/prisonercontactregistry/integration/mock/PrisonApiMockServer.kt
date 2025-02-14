@@ -152,12 +152,10 @@ class PrisonApiMockServer : WireMockServer(8092) {
     )
   }
 
-  private fun getJsonString(obj: Any): String {
-    return ObjectMapper()
-      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .registerModule(JavaTimeModule())
-      .writer()
-      .withDefaultPrettyPrinter()
-      .writeValueAsString(obj)
-  }
+  private fun getJsonString(obj: Any): String = ObjectMapper()
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    .registerModule(JavaTimeModule())
+    .writer()
+    .withDefaultPrettyPrinter()
+    .writeValueAsString(obj)
 }

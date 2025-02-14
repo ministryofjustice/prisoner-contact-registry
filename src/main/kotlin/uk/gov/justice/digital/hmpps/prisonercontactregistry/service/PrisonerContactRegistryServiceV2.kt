@@ -95,9 +95,7 @@ class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiCli
     )
   }
 
-  private fun getAddressesByContactId(contactId: Long): List<AddressDto> {
-    return prisonApiClient.getPersonAddress(contactId)!!
-  }
+  private fun getAddressesByContactId(contactId: Long): List<AddressDto> = prisonApiClient.getPersonAddress(contactId)!!
 
   private fun getContactsWithRestrictionType(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
     val contacts = getContactsByPrisonerId(prisonerId, true)
@@ -112,11 +110,7 @@ class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiCli
       .filter { it.restrictionType == restrictionType.toString() }
   }
 
-  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean): List<ContactDto> {
-    return prisonApiClient.getOffenderContacts(prisonerId, approvedContactsOnly).offenderContacts
-  }
+  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean): List<ContactDto> = prisonApiClient.getOffenderContacts(prisonerId, approvedContactsOnly).offenderContacts
 
-  private final fun getDefaultSortOrder(): Comparator<ContactDto> {
-    return compareBy({ it.lastName }, { it.firstName })
-  }
+  private final fun getDefaultSortOrder(): Comparator<ContactDto> = compareBy({ it.lastName }, { it.firstName })
 }

@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration
 
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 @Suppress("ClassName")
 class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
-  @SpyBean
+  @MockitoSpyBean
   private lateinit var prisonApiClient: PrisonApiClient
 
   @Nested
@@ -277,7 +277,5 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
   private fun createVisitorsClosedRestrictionUri(
     prisonerId: String,
     visitorIdsString: String,
-  ): String {
-    return "/prisoners/$prisonerId/approved/social/contacts/restrictions/closed?visitors=$visitorIdsString"
-  }
+  ): String = "/prisoners/$prisonerId/approved/social/contacts/restrictions/closed?visitors=$visitorIdsString"
 }

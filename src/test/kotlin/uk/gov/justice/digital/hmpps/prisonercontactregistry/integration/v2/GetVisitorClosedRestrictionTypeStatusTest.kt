@@ -277,7 +277,5 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
   private fun createVisitorsClosedRestrictionUri(
     prisonerId: String,
     visitorIdsString: String,
-  ): String {
-    return "v2/prisoners/$prisonerId/contacts/social/approved/restrictions/closed?visitors=$visitorIdsString"
-  }
+  ): String = "v2/prisoners/$prisonerId/contacts/social/approved/restrictions/closed?visitors=$visitorIdsString"
 }

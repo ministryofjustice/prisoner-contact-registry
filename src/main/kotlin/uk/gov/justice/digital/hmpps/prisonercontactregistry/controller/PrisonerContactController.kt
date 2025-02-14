@@ -224,9 +224,7 @@ class PrisonerContactController(
     ).sortedWith(getDefaultSortOrder())
   }
 
-  private final fun getDefaultSortOrder(): Comparator<ContactDto> {
-    return compareBy({ it.lastName }, { it.firstName })
-  }
+  private final fun getDefaultSortOrder(): Comparator<ContactDto> = compareBy({ it.lastName }, { it.firstName })
 
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(PRISON_GET_BANNED_DATE_RANGE_CONTROLLER_PATH)

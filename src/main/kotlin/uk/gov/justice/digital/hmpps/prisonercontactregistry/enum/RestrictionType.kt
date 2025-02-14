@@ -5,7 +5,5 @@ enum class RestrictionType(private val restriction: String) {
   CLOSED("CLOSED"),
   ;
 
-  override fun toString(): String {
-    return restriction
-  }
+  override fun toString(): String = restriction
 }
