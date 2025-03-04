@@ -7,7 +7,7 @@
   },
   "instrumentation": {
     "logging": {
-      "level": "INFO"
+      "level": "DEBUG"
     }
   },
   "selfDiagnostics": {
