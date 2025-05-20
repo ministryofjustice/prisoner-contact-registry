@@ -125,6 +125,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
 
     val restrictions = listOf(
       RestrictionDto(
+        restrictionId = 123,
         comment = "Comment Here",
         restrictionType = RestrictionType.CLOSED.toString(),
         restrictionTypeDescription = "CLOSED",
@@ -159,6 +160,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
 
     val restrictions = listOf(
       RestrictionDto(
+        restrictionId = 123,
         comment = "Comment Here",
         restrictionType = RestrictionType.CLOSED.toString(),
         restrictionTypeDescription = "CLOSED",
@@ -193,6 +195,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
 
     val restrictions = listOf(
       RestrictionDto(
+        restrictionId = 123,
         comment = "Comment Here",
         restrictionType = RestrictionType.CLOSED.toString(),
         restrictionTypeDescription = "CLOSED",
@@ -227,6 +230,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
 
     val restrictions = listOf(
       RestrictionDto(
+        restrictionId = 123,
         comment = "Comment Here",
         restrictionType = RestrictionType.CLOSED.toString(),
         restrictionTypeDescription = "CLOSED",

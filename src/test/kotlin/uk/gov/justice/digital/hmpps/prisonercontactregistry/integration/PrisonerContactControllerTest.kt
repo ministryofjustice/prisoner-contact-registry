@@ -21,6 +21,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
   private lateinit var prisonApiClient: PrisonApiClient
 
   private val expiredBannedRestriction = RestrictionDto(
+    restrictionId = 123,
     comment = "Comment Here",
     restrictionType = RestrictionType.BANNED.toString(),
     restrictionTypeDescription = "Banned",

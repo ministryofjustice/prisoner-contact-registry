@@ -153,6 +153,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
 
     val restrictions = listOf(
       RestrictionDto(
+        restrictionId = 123,
         comment = "Comment Here",
         restrictionType = RestrictionType.BANNED.toString(),
         restrictionTypeDescription = "Banned",
@@ -161,6 +162,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
         globalRestriction = false,
       ),
       RestrictionDto(
+        restrictionId = 321,
         comment = "Comment Here",
         restrictionType = RestrictionType.BANNED.toString(),
         restrictionTypeDescription = "Banned",
@@ -201,6 +203,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
 
     val restrictions = listOf(
       RestrictionDto(
+        restrictionId = 123,
         comment = "Comment Here",
         restrictionType = RestrictionType.BANNED.toString(),
         restrictionTypeDescription = "Banned",
@@ -242,6 +245,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
 
     val restrictions = listOf(
       RestrictionDto(
+        restrictionId = 123,
         comment = "Comment Here",
         restrictionType = RestrictionType.BANNED.toString(),
         restrictionTypeDescription = "Banned",

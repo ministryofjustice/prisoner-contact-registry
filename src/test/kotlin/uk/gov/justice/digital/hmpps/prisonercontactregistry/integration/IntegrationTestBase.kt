@@ -187,6 +187,7 @@ abstract class IntegrationTestBase {
     globalRestriction: Boolean = false,
     comment: String = "Comment Here",
   ): RestrictionDto = RestrictionDto(
+    restrictionId = 123,
     restrictionType = RestrictionType.BANNED.toString(),
     restrictionTypeDescription = "Banned",
     startDate = startDate,
