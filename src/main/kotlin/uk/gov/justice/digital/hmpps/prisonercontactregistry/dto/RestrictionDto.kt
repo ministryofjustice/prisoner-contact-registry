@@ -5,6 +5,8 @@ import java.time.LocalDate
 
 @Schema(description = "A contact for a prisoner")
 data class RestrictionDto(
+  @Schema(description = "Restriction ID", example = "123", required = true)
+  val restrictionId: Int,
   @Schema(description = "Restriction Type Code", example = "123", required = true)
   val restrictionType: String,
   @Schema(description = "Description of Restriction Type", example = "123", required = true)
