@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNo
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import java.time.LocalDate
 
+@Deprecated("Use PrisonerContactRegistryServiceV2 instead")
 @Service
 class PrisonerContactRegistryService(private val prisonApiClient: PrisonApiClient) {
   companion object {
