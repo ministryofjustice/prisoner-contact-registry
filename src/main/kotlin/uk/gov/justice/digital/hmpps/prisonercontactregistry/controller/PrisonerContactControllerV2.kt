@@ -26,12 +26,6 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryServiceV2
 import java.time.LocalDate
 
-// TODO: Get sessions date ranges ticket https://dsdmoj.atlassian.net/browse/VB-5723 for more detailed info
-//  A. New endpoint (similar to the BAN_DATE_RANGE endpoint structure)
-//  B. Takes a prisonerId, visitorIds, existing date range, list of supported restrictions
-//  C. Find all visitor restrictions, filter to only keep the ones that are in the list of supported restrictions
-//  D. Check if restrictions contains a null expiry (send back original date range), if not, get all date ranges (unique) into a List and return
-
 const val V2_PRISONER_CONTACTS_CONTROLLER_PATH: String = "v2/prisoners/{prisonerId}"
 const val V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$V2_PRISONER_CONTACTS_CONTROLLER_PATH/contacts/social"
 const val V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH/approved"
