@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 
-@Schema(description = "A contact for a prisoner")
+@Schema(description = "Request body for finding visitor restriction date ranges which would effect request visits")
 data class RequestVisitVisitorRestrictionsBodyDto(
   @param:Schema(description = "Prisoner Id of prisoner who the visit is for", required = true)
   @field:NotBlank
