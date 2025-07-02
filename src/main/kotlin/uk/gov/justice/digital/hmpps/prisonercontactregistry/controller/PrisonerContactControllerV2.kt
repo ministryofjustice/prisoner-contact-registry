@@ -256,16 +256,16 @@ class PrisonerContactControllerV2(
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @PostMapping(V2_PRISONER_GET_REQUEST_VISIT_RESTRICTION_DATE_RANGES_CONTROLLER_PATH)
   @Operation(
-    summary = "Get an updated date range for visitors if a visitor with ban restriction is found, else returns original date",
-    description = "Returns an updated date range for visitors if one is found with an active ban restriction. If not, it returns the original date range",
+    summary = "Get all date ranges of visitor restrictions which would cause a visit to be a request visit",
+    description = "Returns a List<DateRangeDto> containing all start/end date pairs of visitor restrictions which cause a visit to be a request visit",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Date range returned (original or adjusted)",
+        description = "Date ranges returned (empty if none cause sessions to be request visits)",
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Incorrect request to Get date range for prisoner visitors",
+        description = "Incorrect request to Get date ranges for prisoner visitors",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -275,12 +275,12 @@ class PrisonerContactControllerV2(
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Incorrect permissions to Get date range for prisoner visitors",
+        description = "Incorrect permissions to Get date ranges for prisoner visitors",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Prisoner, Visitor or Date range not found",
+        description = "Prisoner or Visitor not found",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
