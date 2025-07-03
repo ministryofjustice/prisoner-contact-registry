@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -12,6 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -19,6 +22,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryServiceV2
 import java.time.LocalDate
 
@@ -27,6 +31,7 @@ const val V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$V2_PRISONE
 const val V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH/approved"
 const val V2_PRISONER_GET_SOCIAL_RESTRICTION_CLOSED_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH/restrictions/closed"
 const val V2_PRISONER_GET_SOCIAL_RESTRICTION_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH/restrictions/banned/dateRange"
+const val V2_PRISONER_GET_REQUEST_VISIT_RESTRICTION_DATE_RANGES_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH/restrictions/visit-request/date-ranges"
 
 @RestController
 @Validated
@@ -247,4 +252,41 @@ class PrisonerContactControllerV2(
     )
     return contactService.getClosedRestrictionStatusForPrisonerContacts(prisonerId, visitorIds)
   }
+
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
+  @PostMapping(V2_PRISONER_GET_REQUEST_VISIT_RESTRICTION_DATE_RANGES_CONTROLLER_PATH)
+  @Operation(
+    summary = "Get all date ranges of visitor restrictions which would cause a visit to be a request visit",
+    description = "Returns a List<DateRangeDto> containing all start/end date pairs of visitor restrictions which cause a visit to be a request visit",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Date ranges returned (empty if none cause sessions to be request visits)",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to Get date ranges for prisoner visitors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to Get date ranges for prisoner visitors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Prisoner or Visitor not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getDateRangesForVisitorRestrictionsWhichEffectRequestVisits(
+    @RequestBody @Valid
+    requestVisitVisitorRestrictionsDto: RequestVisitVisitorRestrictionsBodyDto,
+  ): List<DateRangeDto> = contactService.getDateRangesForVisitorRestrictionsWhichEffectRequestVisits(requestVisitVisitorRestrictionsDto)
 }

@@ -9,11 +9,13 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import java.time.LocalDate
+import kotlin.collections.contains
 
 @Service
 class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiClient) {
@@ -62,9 +64,9 @@ class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiCli
 
     val dateRange = DateRangeDto(fromDate, toDate)
 
-    val contactsWithBanRestrictions = getContactsWithRestrictionType(prisonerId, visitorIds, RestrictionType.BANNED)
+    val allFoundBannedRestrictions = getContactsRestrictionDetails(prisonerId, visitorIds, RestrictionType.BANNED)
 
-    contactsWithBanRestrictions.forEach { restriction ->
+    allFoundBannedRestrictions.forEach { restriction ->
       restriction.expiryDate?.let { expiryDate ->
         if (expiryDate >= dateRange.toDate) {
           throw DateRangeNotFoundException(message = "Found visitor with restriction of 'BAN' with expiry date after our endDate, no date range possible")
@@ -86,18 +88,65 @@ class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiCli
       visitorIds,
     )
 
-    val contactsWithClosedRestrictions = getContactsWithRestrictionType(prisonerId, visitorIds, RestrictionType.CLOSED)
+    val allFoundClosedRestrictions = getContactsRestrictionDetails(prisonerId, visitorIds, RestrictionType.CLOSED)
 
     return HasClosedRestrictionDto(
-      contactsWithClosedRestrictions.any { restriction ->
+      allFoundClosedRestrictions.any { restriction ->
         restriction.expiryDate == null || LocalDate.now() <= restriction.expiryDate
       },
     )
   }
 
+  fun getDateRangesForVisitorRestrictionsWhichEffectRequestVisits(visitBookingDetails: RequestVisitVisitorRestrictionsBodyDto): List<DateRangeDto> {
+    log.info("getDateRangesForVisitorRestrictionsWhichAffectRequestVisits called with request: {}", visitBookingDetails)
+
+    // 1. Get & validate visitors
+    val visitors = getContactsByPrisonerId(visitBookingDetails.prisonerId, true)
+      .filter { it.personId.toString() in visitBookingDetails.visitorIds }
+    if (visitors.size != visitBookingDetails.visitorIds.size) {
+      throw VisitorNotFoundException(
+        "Not all visitors provided (${visitBookingDetails.visitorIds}) are contacts for prisoner ${visitBookingDetails.prisonerId}",
+      )
+    }
+
+    // 2. Collect only the “request visit” restrictions
+    val restrictions = visitors
+      .flatMap { it.restrictions }
+      .filter { it.restrictionType in visitBookingDetails.supportedVisitorRestrictionsCodesForRequestVisits }
+
+    if (restrictions.isEmpty()) {
+      return emptyList()
+    }
+
+    // 3. If there are permanent restrictions, handle them
+    restrictions
+      .filter { it.expiryDate == null }
+      .takeIf { it.isNotEmpty() }
+      ?.let { permanentRestrictions ->
+        // find the earliest permanent start AFTER the current booking window’s fromDate
+        val earliestAfterDate = permanentRestrictions
+          .map { it.startDate }
+          .filter { it.isAfter(visitBookingDetails.currentDateRange.fromDate) }
+          .minOrNull()
+
+        return if (earliestAfterDate != null) {
+          listOf(DateRangeDto(fromDate = earliestAfterDate, toDate = visitBookingDetails.currentDateRange.toDate))
+        } else {
+          listOf(visitBookingDetails.currentDateRange)
+        }
+      }
+
+    // 4. Else return all dated restrictions without duplications
+    return restrictions
+      .filter { it.expiryDate != null }
+      .map { DateRangeDto(it.startDate, it.expiryDate!!) }
+      .distinct()
+      .toList()
+  }
+
   private fun getAddressesByContactId(contactId: Long): List<AddressDto> = prisonApiClient.getPersonAddress(contactId)!!
 
-  private fun getContactsWithRestrictionType(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
+  private fun getContactsRestrictionDetails(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
     val contacts = getContactsByPrisonerId(prisonerId, true)
       .filter { visitorIds.contains(it.personId) }
 
