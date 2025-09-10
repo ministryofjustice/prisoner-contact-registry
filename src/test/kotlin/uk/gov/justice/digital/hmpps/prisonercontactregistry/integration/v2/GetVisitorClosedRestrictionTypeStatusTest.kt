@@ -278,6 +278,52 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     result.expectBody().jsonPath("$.value").isEqualTo(false)
   }
 
+  @Test
+  fun `Closed restriction endpoint should still process correctly even if duplicate visitorIds are found in contacts list`() {
+    // Given
+    val prisonerId = "A1234AA"
+    val visitorIds: List<Long> = listOf(2187529L)
+    val visitorIdsString = visitorIds.joinToString(",")
+    val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
+
+    val restrictions = listOf(
+      RestrictionDto(
+        restrictionId = 123,
+        comment = "Comment Here",
+        restrictionType = RestrictionType.CLOSED.toString(),
+        restrictionTypeDescription = "CLOSED",
+        startDate = LocalDate.of(2024, 1, 1),
+        expiryDate = null,
+        globalRestriction = false,
+      ),
+      RestrictionDto(
+        restrictionId = 123,
+        comment = "Comment Here",
+        restrictionType = RestrictionType.CLOSED.toString(),
+        restrictionTypeDescription = "CLOSED",
+        startDate = LocalDate.of(2024, 1, 1),
+        expiryDate = null,
+        globalRestriction = false,
+      ),
+    )
+    val duplicateVisitorsList = listOf(2187529L, 2187529L)
+
+    // 2 of the same visitorIds are returned
+    prisonApiMockServer.stubGetApprovedOffenderContacts(
+      prisonerId,
+      contacts = createContactsDto(restrictions, duplicateVisitorsList),
+    )
+
+    // When
+    val result = webTestClient.get().uri(uri)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
+      .exchange()
+
+    // Then
+    result.expectStatus().isOk
+    result.expectBody().jsonPath("$.value").isEqualTo(true)
+  }
+
   private fun createVisitorsClosedRestrictionUri(
     prisonerId: String,
     visitorIdsString: String,
