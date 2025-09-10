@@ -150,7 +150,7 @@ class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiCli
     val contacts = getContactsByPrisonerId(prisonerId, true)
       .filter { visitorIds.contains(it.personId) }
 
-    if (contacts.size != visitorIds.size) {
+    if (!contacts.map { it.personId }.containsAll(visitorIds)) {
       throw VisitorNotFoundException(message = "Not all visitors provided ($visitorIds) are listed contacts for prisoner $prisonerId")
     }
 
