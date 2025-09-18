@@ -1,0 +1,189 @@
+version: 2.1
+orbs:
+  hmpps: ministryofjustice/hmpps@11
+parameters:
+  alerts-slack-channel:
+    type: string
+    default: visits-alerts-nonprod
+  releases-slack-channel:
+    type: string
+    default: visits-releases
+jobs:
+  validate:
+    executor:
+      name: hmpps/java
+      tag: "21.0"
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle.kts" }}
+            - gradle-
+      - run:
+          command: ./gradlew check
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle.kts" }}
+      - store_test_results:
+          path: build/test-results
+      - store_artifacts:
+          path: build/reports/tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build/libs
+            - build.gradle.kts
+workflows:
+  version: 2
+  build-test-deploy-main:
+    jobs:
+      - validate:
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              only:
+                - main
+      - hmpps/helm_lint:
+          name: helm_lint
+          filters:
+            branches:
+              only:
+                - main
+      - hmpps/build_docker:
+          name: build_docker
+          filters:
+            branches:
+              only:
+                - main
+      - hmpps/deploy_env:
+          name: deploy_dev
+          env: "dev"
+          context:
+            - hmpps-common-vars
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - validate
+            - build_docker
+            - helm_lint
+      - hmpps/deploy_env:
+          name: deploy_staging
+          env: "staging"
+          context:
+            - visit-someone-in-prison-backend-svc-staging
+            - hmpps-common-vars
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - deploy_dev
+      - hmpps/deploy_env:
+          name: deploy_preprod
+          env: "preprod"
+          context:
+            - visit-someone-in-prison-backend-svc-preprod
+            - hmpps-common-vars
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - request-preprod-approval
+      - request-preprod-approval:
+          type: approval
+          requires:
+            - deploy_staging
+          filters:
+            branches:
+              only:
+                - main
+      - hmpps/deploy_env:
+          name: deploy_prod
+          env: "prod"
+          slack_notification: true
+          slack_channel_name: << pipeline.parameters.releases-slack-channel >>
+          context:
+            - hmpps-common-vars
+            - visit-someone-in-prison-backend-svc-prod
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - request-prod-approval
+      - request-prod-approval:
+          type: approval
+          requires:
+            - deploy_preprod
+          filters:
+            branches:
+              only:
+                - main
+  build-test-deploy-feature:
+    jobs:
+      - validate:
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              ignore:
+                - main
+      - hmpps/helm_lint:
+          name: helm_lint
+          filters:
+            branches:
+              ignore:
+                - main
+      - hmpps/build_docker:
+          name: build_docker
+          filters:
+            branches:
+              ignore:
+                - main
+      - hmpps/deploy_env:
+          name: deploy_dev
+          env: "dev"
+          context: hmpps-common-vars
+          requires:
+            - request-dev-approval
+          filters:
+            branches:
+              ignore:
+                - main
+      - request-dev-approval:
+          type: approval
+          requires:
+            - validate
+            - build_docker
+            - helm_lint
+          filters:
+            branches:
+              ignore:
+                - main
+      - hmpps/deploy_env:
+          name: deploy_staging
+          env: "staging"
+          context:
+            - visit-someone-in-prison-backend-svc-staging
+            - hmpps-common-vars
+          filters:
+            branches:
+              ignore:
+                - main
+          requires:
+            - request-staging-approval
+      - request-staging-approval:
+          type: approval
+          requires:
+            - validate
+            - build_docker
+            - helm_lint
+          filters:
+            branches:
+              ignore:
+                - main
