@@ -6,9 +6,9 @@ import java.time.LocalDate
 @Schema(description = "A date range")
 data class DateRangeDto(
 
-  @Schema(description = "The start of the date range")
+  @param:Schema(description = "The start of the date range")
   var fromDate: LocalDate,
 
-  @Schema(description = "The end of the date range")
+  @param:Schema(description = "The end of the date range")
   var toDate: LocalDate,
 )

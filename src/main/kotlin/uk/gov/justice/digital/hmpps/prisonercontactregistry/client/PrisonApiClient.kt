@@ -18,9 +18,9 @@ import java.time.Duration
 
 @Component
 class PrisonApiClient(
-  @Qualifier("prisonApiWebClient")
+  @param:Qualifier("prisonApiWebClient")
   private val webClient: WebClient,
-  @Value("\${prison.api.timeout:60s}")
+  @param:Value("\${prison.api.timeout:60s}")
   val apiTimeout: Duration,
 ) {
 
