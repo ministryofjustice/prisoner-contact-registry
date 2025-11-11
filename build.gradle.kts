@@ -45,7 +45,6 @@ java {
   targetCompatibility = JavaVersion.VERSION_24
 }
 
-
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24
