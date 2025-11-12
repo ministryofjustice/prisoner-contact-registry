@@ -15,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class WebClientConfiguration(
-  @Value("\${prison.api.url}")
+  @param:Value("\${prison.api.url}")
   private val prisonApiBaseUrl: String,
 ) {
 
