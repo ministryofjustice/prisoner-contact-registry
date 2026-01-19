@@ -298,7 +298,7 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
       .expectStatus().isBadRequest
   }
 
-  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = objectMapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
+  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
 
   private fun getContactsQueryParams(
     withAddress: Boolean? = null,

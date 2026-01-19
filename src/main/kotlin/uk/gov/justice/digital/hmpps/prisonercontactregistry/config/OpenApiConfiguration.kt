@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties) {
 
-  private val buildName: String = buildProperties.name
-  private val buildVersion: String = buildProperties.version
+  private val buildName: String? = buildProperties.name
+  private val buildVersion: String? = buildProperties.version
 
   @Value("\${info.app.description}")
   private val description: String = "Service for managing and sorting details about prison visitors. Currently a facade over visitor-orientated endpoints of the Prison API"

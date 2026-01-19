@@ -86,7 +86,7 @@ class PrisonerContactRegistryExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
-  fun handleValidationException(e: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse?>? {
+  fun handleValidationException(e: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse>? {
     log.info("Bad Request invalid argument {}", e.message)
     return ResponseEntity
       .status(HttpStatus.BAD_REQUEST)
@@ -100,7 +100,7 @@ class PrisonerContactRegistryExceptionHandler {
   }
 
   @ExceptionHandler(PrisonerNotFoundException::class)
-  fun handlePrisonerNotFoundException(e: PrisonerNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handlePrisonerNotFoundException(e: PrisonerNotFoundException): ResponseEntity<ErrorResponse>? {
     log.debug("Prisoner not found exception caught: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
@@ -114,7 +114,7 @@ class PrisonerContactRegistryExceptionHandler {
   }
 
   @ExceptionHandler(VisitorNotFoundException::class)
-  fun handleVisitorNotFoundException(e: VisitorNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleVisitorNotFoundException(e: VisitorNotFoundException): ResponseEntity<ErrorResponse>? {
     log.debug("One of the visitors provided could not be found exception caught: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
@@ -128,7 +128,7 @@ class PrisonerContactRegistryExceptionHandler {
   }
 
   @ExceptionHandler(DateRangeNotFoundException::class)
-  fun handleDateRangeNotFoundException(e: DateRangeNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleDateRangeNotFoundException(e: DateRangeNotFoundException): ResponseEntity<ErrorResponse>? {
     log.debug(
       "Visitor provided has a BAN restriction with either no expiry or expiry after toDate, no suitable date range found: {}",
       e.message,
@@ -145,7 +145,7 @@ class PrisonerContactRegistryExceptionHandler {
   }
 
   @ExceptionHandler(PersonNotFoundException::class)
-  fun handlePersonNotFoundException(e: PersonNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handlePersonNotFoundException(e: PersonNotFoundException): ResponseEntity<ErrorResponse>? {
     log.debug("Person not found exception caught: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
@@ -159,7 +159,7 @@ class PrisonerContactRegistryExceptionHandler {
   }
 
   @ExceptionHandler(java.lang.Exception::class)
-  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
+  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse>? {
     log.error("Unexpected exception", e)
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
