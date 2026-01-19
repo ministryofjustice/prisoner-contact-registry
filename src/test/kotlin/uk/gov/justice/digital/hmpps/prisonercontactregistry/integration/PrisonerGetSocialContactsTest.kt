@@ -175,9 +175,9 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     assertContactAddress(contact3.addresses[0])
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId)
   }
 
   @Test
@@ -291,8 +291,8 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     assertContactAddress(contact2.addresses[0])
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId)
   }
 
   @Test
@@ -335,9 +335,9 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     assertContactAddress(contact3.addresses[0])
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, false)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialUnapprovedContact.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId)
   }
 
   @Test
@@ -497,12 +497,12 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     responseSpec.expectStatus().isEqualTo(httpStatusCode)
     errorMessage?.let {
       val errorResponse =
-        objectMapper.readValue(responseSpec.expectBody().returnResult().responseBody, ErrorResponse::class.java)
+        TestObjectMapper.mapper.readValue(responseSpec.expectBody().returnResult().responseBody, ErrorResponse::class.java)
       assertThat(errorResponse.developerMessage).isEqualTo(errorMessage)
     }
   }
 
-  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = objectMapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
+  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
 
   private fun getContactsQueryParams(
     personId: Long? = null,

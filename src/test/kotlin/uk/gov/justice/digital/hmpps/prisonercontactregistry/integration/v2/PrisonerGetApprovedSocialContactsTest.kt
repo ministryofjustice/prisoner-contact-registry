@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISON
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 import java.time.LocalDate
 
 @Suppress("ClassName")
@@ -151,9 +152,9 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     assertContactAddress(contact3.addresses[0])
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId)
   }
 
   @Test
@@ -249,8 +250,8 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     assertContactAddress(contact2.addresses[0])
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId)
   }
 
   @Test
@@ -293,9 +294,9 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     assertContactAddress(contact3.addresses[0])
 
     verify(prisonApiClientSpy, times(1)).getOffenderContacts(prisonerId, true)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId!!)
-    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId!!)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredBannedRestriction.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithCurrentBannedRestriction.personId)
+    verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB.personId)
   }
 
   @Test
@@ -356,7 +357,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     responseSpec.expectStatus().isEqualTo(httpStatusCode)
     errorMessage?.let {
       val errorResponse =
-        objectMapper.readValue(responseSpec.expectBody().returnResult().responseBody, ErrorResponse::class.java)
+        TestObjectMapper.mapper.readValue(responseSpec.expectBody().returnResult().responseBody, ErrorResponse::class.java)
       assertThat(errorResponse.developerMessage).isEqualTo(errorMessage)
     }
   }
@@ -370,7 +371,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       .expectStatus().isBadRequest
   }
 
-  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = objectMapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
+  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
 
   private fun getContactsQueryParams(
     hasDateOfBirth: Boolean? = null,

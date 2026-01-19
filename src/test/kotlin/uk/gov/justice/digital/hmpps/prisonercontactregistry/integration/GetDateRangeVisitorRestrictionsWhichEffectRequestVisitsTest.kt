@@ -351,5 +351,5 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
       .exchange()
   }
 
-  private fun getResults(responseSpec: WebTestClient.ResponseSpec): List<DateRangeDto> = objectMapper.readValue(responseSpec.expectBody().returnResult().responseBody!!, object : TypeReference<List<DateRangeDto>>() {})
+  private fun getResults(responseSpec: WebTestClient.ResponseSpec): List<DateRangeDto> = TestObjectMapper.mapper.readValue(responseSpec.expectBody().returnResult().responseBody!!, object : TypeReference<List<DateRangeDto>>() {})
 }
