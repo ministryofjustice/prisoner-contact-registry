@@ -13,7 +13,7 @@ import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
 import uk.gov.justice.hmpps.kotlin.auth.service.GlobalPrincipalOAuth2AuthorizedClientService
 import java.time.Duration
 
-private const val CLIENT_REGISTRATION_ID = "prison-api"
+private const val CLIENT_REGISTRATION_ID = "hmpps-api"
 
 @Configuration
 class WebClientConfiguration(
