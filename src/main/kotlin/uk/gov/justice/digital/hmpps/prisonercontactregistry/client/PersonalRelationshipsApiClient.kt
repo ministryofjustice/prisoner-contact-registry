@@ -28,14 +28,14 @@ class PersonalRelationshipsApiClient(
   }
 
   fun getPrisonerContacts(prisonerId: String): List<ContactDto> {
-    var uri = "/prisoner/$prisonerId/contact"
+    val uri = "/prisoner/$prisonerId/contact"
 
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api")
 
-    val prisonerContactsList = webClient.get()
+    val restPageResponse = webClient.get()
       .uri(uri)
       .retrieve()
-      .bodyToMono(object : ParameterizedTypeReference<List<PersonalRelationshipsContactDto>>() {})
+      .bodyToMono(object : ParameterizedTypeReference<RestPage<PersonalRelationshipsContactDto>>() {})
       .onErrorResume { e ->
         if (!clientUtils.isNotFoundError(e)) {
           PrisonApiClient.Companion.logger.error("get prisoner contacts Failed for get request $uri")
@@ -47,7 +47,7 @@ class PersonalRelationshipsApiClient(
       }
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact not found for - $prisonerId on personal-relationships-api") }
 
-    return convertToContactDto(prisonerContactsList)
+    return convertToContactDto(restPageResponse.content)
   }
 
   private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>): List<ContactDto> = prisonerContactsList.map { c ->
@@ -65,6 +65,8 @@ class PersonalRelationshipsApiClient(
       emergencyContact = c.isEmergencyContact,
       nextOfKin = c.isNextOfKin,
       commentText = c.comments,
+      addresses = listOf(), // Set separately via a different call to get contacts addresses (Data not present in getPrisonerContacts call)
+      restrictions = listOf(), // TODO VB-5969: Make call to get the contacts restrictions and set here.
     )
   }
 }
