@@ -20,8 +20,11 @@ class WebClientConfiguration(
   @param:Value("\${prison.api.url}")
   private val prisonApiBaseUrl: String,
 
-  @param:Value("\${prison.api.timeout:10s}") private val apiTimeout: Duration,
-  @param:Value("\${prison.api.health-timeout:2s}") val healthTimeout: Duration,
+  @param:Value("\${personal-relationships.api.url}")
+  private val personalRelationshipsApiBaseUrl: String,
+
+  @param:Value("\${api.timeout:10s}") private val apiTimeout: Duration,
+  @param:Value("\${api.health-timeout:2s}") val healthTimeout: Duration,
 ) {
   @Bean
   fun prisonApiWebClient(
@@ -31,6 +34,15 @@ class WebClientConfiguration(
 
   @Bean
   fun prisonApiHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(prisonApiBaseUrl, healthTimeout)
+
+  @Bean
+  fun personalRelationshipsApiWebClient(
+    authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: WebClient.Builder,
+  ): WebClient = getWebClient(personalRelationshipsApiBaseUrl, authorizedClientManager, builder)
+
+  @Bean
+  fun personalRelationshipsApiHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(personalRelationshipsApiBaseUrl, healthTimeout)
 
   @Bean
   fun authorizedClientManager(

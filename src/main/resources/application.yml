@@ -72,7 +72,6 @@ management:
       cache:
         time-to-live: 2000ms
 
-prison:
-  api:
-    timeout: 10s
+api:
+  timeout: 10s
 

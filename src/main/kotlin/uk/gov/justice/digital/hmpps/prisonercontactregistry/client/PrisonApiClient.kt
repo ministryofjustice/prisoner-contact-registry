@@ -5,23 +5,23 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.utils.ClientUtils
 import java.time.Duration
 
 @Component
 class PrisonApiClient(
   @param:Qualifier("prisonApiWebClient")
   private val webClient: WebClient,
-  @param:Value("\${prison.api.timeout:60s}")
-  val apiTimeout: Duration,
+  @param:Value("\${api.timeout:60s}")
+  private val apiTimeout: Duration,
+  private val clientUtils: ClientUtils,
 ) {
 
   companion object {
@@ -43,7 +43,7 @@ class PrisonApiClient(
       .retrieve()
       .bodyToMono(contacts)
       .onErrorResume { e ->
-        if (!isNotFoundError(e)) {
+        if (!clientUtils.isNotFoundError(e)) {
           logger.error("get offender contacts Failed for get request $uri")
           Mono.error(e)
         } else {
@@ -64,7 +64,7 @@ class PrisonApiClient(
       .retrieve()
       .bodyToMono(addresses)
       .onErrorResume { e ->
-        if (!isNotFoundError(e)) {
+        if (!clientUtils.isNotFoundError(e)) {
           logger.error("get contact address Failed for get request $uri")
           Mono.error(e)
         } else {
@@ -77,6 +77,4 @@ class PrisonApiClient(
         logger.debug("Get person address called for $personId")
       }
   }
-
-  fun isNotFoundError(e: Throwable?) = e is WebClientResponseException && e.statusCode == HttpStatus.NOT_FOUND
 }
