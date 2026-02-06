@@ -35,6 +35,7 @@ class PersonalRelationshipsApiClient(
 
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api")
 
+    // 1 - Get the contacts
     val restPageResponse = webClient.get()
       .uri { uriBuilder ->
         uriBuilder
@@ -57,13 +58,19 @@ class PersonalRelationshipsApiClient(
       }
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }
 
+    logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api returned ${restPageResponse.content.size} contacts, relationshipType = S")
+
+    // 2 - Get the "prisoner-contact" restrictions
     val allPrisonerContactRestrictions = getPrisonerContactRestrictions(restPageResponse.content.map { it.prisonerContactId })
 
+    // 3 - Convert the contacts + restrictions into the expected ContactDto shape
     return convertToContactDto(restPageResponse.content, allPrisonerContactRestrictions)
   }
 
   private fun getPrisonerContactRestrictions(prisonerContactRelationshipIds: List<Long>): PrisonerContactRestrictionsResponseDto {
     val uri = "/prisoner-contact/restrictions"
+
+    logger.info("Get prisoner contact restrictions called $uri, via the personal-relationships-api")
 
     return webClient
       .post()
@@ -114,6 +121,8 @@ class PersonalRelationshipsApiClient(
           keySelector = { it.first },
           valueTransform = { it.second },
         )
+
+    logger.info("Converted contact restrictions into Map (contactId -> List<Restrictions>), restrictionsByContactId size = ${restrictionsByContactId.size}")
 
     return prisonerContactsList.map { c ->
       ContactDto(
