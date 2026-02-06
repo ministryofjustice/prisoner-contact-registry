@@ -9,7 +9,10 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactIdsRequestDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.utils.ClientUtils
 import java.time.Duration
@@ -38,42 +41,98 @@ class PersonalRelationshipsApiClient(
           .path(uri)
           .queryParam("relationshipType", "S")
           .queryParam("page", 0)
-          .queryParam("size", 100)
+          .queryParam("size", 100) // TODO VB-5969: What would be the best size here? Also should "active" be set?
           .build(prisonerId)
       }
       .retrieve()
       .bodyToMono(object : ParameterizedTypeReference<RestPage<PersonalRelationshipsContactDto>>() {})
       .onErrorResume { e ->
         if (!clientUtils.isNotFoundError(e)) {
-          PrisonApiClient.Companion.logger.error("get prisoner contacts Failed for get request $uri")
+          logger.error("get prisoner contacts Failed for get request $uri")
           Mono.error(e)
         } else {
-          PrisonApiClient.Companion.logger.error("get prisoner contacts returned NOT_FOUND for get request $uri")
+          logger.error("get prisoner contacts returned NOT_FOUND for get request $uri")
           Mono.error { PrisonerNotFoundException("Contacts not found for - $prisonerId on personal-relationships-api") }
         }
       }
-      .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact not found for - $prisonerId on personal-relationships-api") }
+      .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }
 
-    return convertToContactDto(restPageResponse.content)
+    val allPrisonerContactRestrictions = getPrisonerContactRestrictions(restPageResponse.content.map { it.prisonerContactId })
+
+    return convertToContactDto(restPageResponse.content, allPrisonerContactRestrictions)
   }
 
-  private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>): List<ContactDto> = prisonerContactsList.map { c ->
-    ContactDto(
-      personId = c.contactId,
-      firstName = c.firstName,
-      middleName = c.middleNames,
-      lastName = c.lastName,
-      dateOfBirth = c.dateOfBirth,
-      relationshipCode = c.relationshipToPrisonerCode,
-      relationshipDescription = c.relationshipToPrisonerDescription,
-      contactType = c.relationshipTypeCode,
-      contactTypeDescription = c.relationshipTypeDescription,
-      approvedVisitor = c.isApprovedVisitor,
-      emergencyContact = c.isEmergencyContact,
-      nextOfKin = c.isNextOfKin,
-      commentText = c.comments,
-      addresses = listOf(), // Set separately via a different call to get contacts addresses (Data not present in getPrisonerContacts call)
-      restrictions = listOf(), // TODO VB-5969: Make call to get the contacts restrictions and set here.
-    )
+  private fun getPrisonerContactRestrictions(prisonerContactRelationshipIds: List<Long>): PrisonerContactRestrictionsResponseDto {
+    val uri = "/prisoner-contact/restrictions"
+
+    return webClient
+      .post()
+      .uri(uri)
+      .bodyValue(PrisonerContactIdsRequestDto(prisonerContactRelationshipIds))
+      .retrieve()
+      .bodyToMono(object : ParameterizedTypeReference<PrisonerContactRestrictionsResponseDto>() {})
+      .onErrorResume { e ->
+        logger.error("get prisoner contacts restrictions returned an error for post to $uri")
+        Mono.error(e)
+      }
+      .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact restrictions for uri $uri on personal-relationships-api") }
+  }
+
+  private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto): List<ContactDto> {
+    // Pre-index once: contactId -> restrictions to avoid multiple loops over these restrictions per contact in the next step.
+    val restrictionsByContactId: Map<Long, List<RestrictionDto>> =
+      prisonerContactRestrictions.prisonerContactRestrictions
+        .flatMap { group ->
+          val prisonerScoped = group.prisonerContactRestrictions.map { r ->
+            r.contactId to RestrictionDto(
+              restrictionId = r.prisonerContactRestrictionId.toInt(),
+              restrictionType = r.restrictionType,
+              restrictionTypeDescription = r.restrictionTypeDescription,
+              startDate = r.startDate,
+              expiryDate = r.expiryDate,
+              globalRestriction = false,
+              comment = r.comments,
+            )
+          }
+
+          val global = group.globalContactRestrictions.map { r ->
+            r.contactId to RestrictionDto(
+              restrictionId = r.contactRestrictionId.toInt(),
+              restrictionType = r.restrictionType,
+              restrictionTypeDescription = r.restrictionTypeDescription,
+              startDate = r.startDate,
+              expiryDate = r.expiryDate,
+              globalRestriction = true,
+              comment = r.comments,
+            )
+          }
+
+          prisonerScoped + global
+        }
+        // This groupBy forms the Map<contactId, List<RestrictionDto>>
+        .groupBy(
+          keySelector = { it.first },
+          valueTransform = { it.second },
+        )
+
+    return prisonerContactsList.map { c ->
+      ContactDto(
+        personId = c.contactId,
+        firstName = c.firstName,
+        middleName = c.middleNames,
+        lastName = c.lastName,
+        dateOfBirth = c.dateOfBirth,
+        relationshipCode = c.relationshipToPrisonerCode,
+        relationshipDescription = c.relationshipToPrisonerDescription,
+        contactType = c.relationshipTypeCode,
+        contactTypeDescription = c.relationshipTypeDescription,
+        approvedVisitor = c.isApprovedVisitor,
+        emergencyContact = c.isEmergencyContact,
+        nextOfKin = c.isNextOfKin,
+        commentText = c.comments,
+        addresses = listOf(), // Set separately via a different call to get contacts addresses (Data not present in getPrisonerContacts call)
+        restrictions = restrictionsByContactId[c.contactId].orEmpty(), // Map contacts using lookup to the previously grouped restrictions map in step 1
+      )
+    }
   }
 }

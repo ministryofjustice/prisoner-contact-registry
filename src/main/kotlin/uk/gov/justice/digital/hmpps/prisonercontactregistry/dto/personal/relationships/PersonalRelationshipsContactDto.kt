@@ -7,6 +7,9 @@ data class PersonalRelationshipsContactDto(
   @param:Schema(description = "Identifier for this contact", example = "5871791")
   val contactId: Long,
 
+  @param:Schema(description = "Identifier for the prisoner / contact relationship", example = "5871791")
+  val prisonerContactId: Long,
+
   @param:Schema(description = "First name", example = "John", required = true)
   val firstName: String,
 
