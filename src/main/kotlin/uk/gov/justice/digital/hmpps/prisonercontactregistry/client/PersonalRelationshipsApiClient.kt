@@ -42,7 +42,8 @@ class PersonalRelationshipsApiClient(
           .path(uri)
           .queryParam("relationshipType", "S")
           .queryParam("page", 0)
-          .queryParam("size", 100) // TODO VB-5969: What would be the best size here? Also should "active" be set?
+          // TODO VB-5969: Find out the average / max amount of contacts for a prisoner? Also confirm if we should be filtering on active relationships or not?
+          .queryParam("size", 100)
           .build(prisonerId)
       }
       .retrieve()
@@ -85,13 +86,30 @@ class PersonalRelationshipsApiClient(
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact restrictions for uri $uri on personal-relationships-api") }
   }
 
+  /**
+   * Builds ContactDto entries from Personal Relationships API data to preserve the contract we have with calling APIs.
+   *
+   * Notes:
+   * - The same contactId can appear multiple times, each containing a different
+   *   relationship to the prisoner (identified by prisonerContactId).
+   * - Restrictions can be relationship-level (local) or contact-level (global).
+   *
+   * This method:
+   * - Attaches local restrictions to the correct relationship using prisonerContactId.
+   * - Attaches global restrictions to all relationships for the same contactId.
+   * - Preserves duplicate contact entries where relationships differ.
+   *
+   * Returns:
+   * - A ContactDto list [to keep the exact structure as the previous client prison-api, had]
+   */
+
   private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto): List<ContactDto> {
-    // Pre-index once: contactId -> restrictions to avoid multiple loops over these restrictions per contact in the next step.
-    val restrictionsByContactId: Map<Long, List<RestrictionDto>> =
+    // 1) Index LOCAL restrictions by prisonerContactId (relationship-level)
+    val localByPrisonerContactId: Map<Long, List<RestrictionDto>> =
       prisonerContactRestrictions.prisonerContactRestrictions
-        .flatMap { group ->
-          val prisonerScoped = group.prisonerContactRestrictions.map { r ->
-            r.contactId to RestrictionDto(
+        .associate { group ->
+          group.prisonerContactId to group.prisonerContactRestrictions.map { r ->
+            RestrictionDto(
               restrictionId = r.prisonerContactRestrictionId.toInt(),
               restrictionType = r.restrictionType,
               restrictionTypeDescription = r.restrictionTypeDescription,
@@ -101,8 +119,13 @@ class PersonalRelationshipsApiClient(
               comment = r.comments,
             )
           }
+        }
 
-          val global = group.globalContactRestrictions.map { r ->
+    // 2) Index GLOBAL restrictions by contactId (contact-level)
+    val globalByContactId: Map<Long, List<RestrictionDto>> =
+      prisonerContactRestrictions.prisonerContactRestrictions
+        .flatMap { group ->
+          group.globalContactRestrictions.map { r ->
             r.contactId to RestrictionDto(
               restrictionId = r.contactRestrictionId.toInt(),
               restrictionType = r.restrictionType,
@@ -113,8 +136,6 @@ class PersonalRelationshipsApiClient(
               comment = r.comments,
             )
           }
-
-          prisonerScoped + global
         }
         // This groupBy forms the Map<contactId, List<RestrictionDto>>
         .groupBy(
@@ -122,9 +143,13 @@ class PersonalRelationshipsApiClient(
           valueTransform = { it.second },
         )
 
-    logger.info("Converted contact restrictions into Map (contactId -> List<Restrictions>), restrictionsByContactId size = ${restrictionsByContactId.size}")
+    logger.info("Indexed restrictions: localByPrisonerContactId=${localByPrisonerContactId.size}, globalByContactId=${globalByContactId.size}")
 
+    // 3) Map contacts: relationship keeps its own locals + contact's globals
     return prisonerContactsList.map { c ->
+      val local = localByPrisonerContactId[c.prisonerContactId].orEmpty()
+      val global = globalByContactId[c.contactId].orEmpty()
+
       ContactDto(
         personId = c.contactId,
         firstName = c.firstName,
@@ -139,8 +164,8 @@ class PersonalRelationshipsApiClient(
         emergencyContact = c.isEmergencyContact,
         nextOfKin = c.isNextOfKin,
         commentText = c.comments,
-        addresses = listOf(), // Set separately via a different call to get contacts addresses (Data not present in getPrisonerContacts call)
-        restrictions = restrictionsByContactId[c.contactId].orEmpty(), // Map contacts using lookup to the previously grouped restrictions map in step 1
+        addresses = listOf(),
+        restrictions = local + global,
       )
     }
   }
