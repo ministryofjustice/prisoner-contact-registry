@@ -33,7 +33,14 @@ class PersonalRelationshipsApiClient(
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api")
 
     val restPageResponse = webClient.get()
-      .uri(uri)
+      .uri { uriBuilder ->
+        uriBuilder
+          .path(uri)
+          .queryParam("relationshipType", "S")
+          .queryParam("page", 0)
+          .queryParam("size", 100)
+          .build(prisonerId)
+      }
       .retrieve()
       .bodyToMono(object : ParameterizedTypeReference<RestPage<PersonalRelationshipsContactDto>>() {})
       .onErrorResume { e ->
