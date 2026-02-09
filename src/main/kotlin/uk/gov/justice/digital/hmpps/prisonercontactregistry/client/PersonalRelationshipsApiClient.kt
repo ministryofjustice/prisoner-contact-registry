@@ -30,11 +30,11 @@ class PersonalRelationshipsApiClient(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun getPrisonerContacts(prisonerId: String): List<ContactDto> {
+  fun getPrisonerContacts(prisonerId: String, approvedVisitorOnly: Boolean): List<ContactDto> {
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api")
 
     // 1 - Get the contacts
-    val prisonerContacts = getAllContacts(prisonerId)
+    val prisonerContacts = getAllContacts(prisonerId, approvedVisitorOnly)
 
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api returned ${prisonerContacts.size} contacts, relationshipType = S")
 
@@ -45,7 +45,7 @@ class PersonalRelationshipsApiClient(
     return convertToContactDto(prisonerContacts, allPrisonerContactRestrictions)
   }
 
-  private fun getAllContacts(prisonerId: String): List<PersonalRelationshipsContactDto> {
+  private fun getAllContacts(prisonerId: String, approvedVisitorOnly: Boolean): List<PersonalRelationshipsContactDto> {
     val uri = "/prisoner/$prisonerId/contact"
 
     return webClient.get()
@@ -55,6 +55,7 @@ class PersonalRelationshipsApiClient(
           .queryParam("relationshipType", "S")
           .queryParam("page", 0)
           .queryParam("size", 350)
+          .queryParam("approvedVisitor", approvedVisitorOnly)
           .build(prisonerId)
       }
       .retrieve()
