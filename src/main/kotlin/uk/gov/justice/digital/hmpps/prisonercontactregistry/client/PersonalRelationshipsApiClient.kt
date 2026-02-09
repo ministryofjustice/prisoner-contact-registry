@@ -54,8 +54,7 @@ class PersonalRelationshipsApiClient(
           .path(uri)
           .queryParam("relationshipType", "S")
           .queryParam("page", 0)
-          // TODO VB-5969: Find out the average / max amount of contacts for a prisoner? Also confirm if we should be filtering on active relationships or not?
-          .queryParam("size", 100)
+          .queryParam("size", 350)
           .build(prisonerId)
       }
       .retrieve()
