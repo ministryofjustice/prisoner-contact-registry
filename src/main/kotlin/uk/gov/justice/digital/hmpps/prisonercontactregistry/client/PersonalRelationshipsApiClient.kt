@@ -31,12 +31,24 @@ class PersonalRelationshipsApiClient(
   }
 
   fun getPrisonerContacts(prisonerId: String): List<ContactDto> {
-    val uri = "/prisoner/$prisonerId/contact"
-
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api")
 
     // 1 - Get the contacts
-    val restPageResponse = webClient.get()
+    val prisonerContacts = getAllContacts(prisonerId)
+
+    logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api returned ${prisonerContacts.size} contacts, relationshipType = S")
+
+    // 2 - Get the "prisoner-contact" restrictions
+    val allPrisonerContactRestrictions = getPrisonerContactRestrictions(prisonerContacts.map { it.prisonerContactId })
+
+    // 3 - Convert the contacts + restrictions into the expected ContactDto shape, to preseve the existing DTO
+    return convertToContactDto(prisonerContacts, allPrisonerContactRestrictions)
+  }
+
+  private fun getAllContacts(prisonerId: String): List<PersonalRelationshipsContactDto> {
+    val uri = "/prisoner/$prisonerId/contact"
+
+    return webClient.get()
       .uri { uriBuilder ->
         uriBuilder
           .path(uri)
@@ -57,15 +69,8 @@ class PersonalRelationshipsApiClient(
           Mono.error { PrisonerNotFoundException("Contacts not found for - $prisonerId on personal-relationships-api") }
         }
       }
-      .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }
-
-    logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api returned ${restPageResponse.content.size} contacts, relationshipType = S")
-
-    // 2 - Get the "prisoner-contact" restrictions
-    val allPrisonerContactRestrictions = getPrisonerContactRestrictions(restPageResponse.content.map { it.prisonerContactId })
-
-    // 3 - Convert the contacts + restrictions into the expected ContactDto shape
-    return convertToContactDto(restPageResponse.content, allPrisonerContactRestrictions)
+      .blockOptional(apiTimeout)
+      .orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }.content
   }
 
   private fun getPrisonerContactRestrictions(prisonerContactRelationshipIds: List<Long>): PrisonerContactRestrictionsResponseDto {
