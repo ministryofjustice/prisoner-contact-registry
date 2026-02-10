@@ -4,10 +4,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISONER_GET_SOCIAL_RESTRICTION_CLOSED_CONTROLLER_PATH
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 import java.time.LocalDate
 
@@ -59,9 +57,21 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
       val visitorIdsString = visitorIds.joinToString(",")
       val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-      prisonApiMockServer.stubGetApprovedOffenderContacts(
-        prisonerId,
-        contacts = createContactsDto(restrictions = listOf(), visitorIds),
+      val prisonerContactIds = listOf(999001L)
+      val prContacts = createPersonalRelationshipsContactsDto(
+        contactIds = visitorIds,
+        prisonerContactIds = prisonerContactIds,
+        isApproved = true,
+      )
+
+      personalRelationshipsApiMockServer.stubGetAllContacts(
+        prisonerId = prisonerId,
+        contacts = prContacts,
+        approvedVisitorOnly = true,
+      )
+
+      personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+        prisonerContactIds = prisonerContactIds,
       )
 
       // When
@@ -78,27 +88,28 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
   fun `Get visitor closed restriction status visitorId not found within list of prisoner contacts`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187524, 2187525)
+    val visitorIds: List<Long> = listOf(2187524L, 2187525L)
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val contactWithMinimumDetails = ContactDto(
-      lastName = "Ireron",
-      firstName = "Ehicey",
-      contactType = "S",
-      relationshipCode = "PROB",
-      relationshipDescription = "Probation Officer",
-      commentText = "Comment Here",
-      emergencyContact = false,
-      nextOfKin = false,
-      personId = 2187521,
-      approvedVisitor = false,
-      restrictions = listOf(),
+    val returnedContactIds = listOf(2187521L)
+    val returnedPrisonerContactIds = listOf(999001L)
+
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = returnedContactIds,
+      prisonerContactIds = returnedPrisonerContactIds,
+      isApproved = true,
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = ContactsDto(listOf(contactWithMinimumDetails)),
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    // Client will still call this after GET, so stub it as well (empty is fine)
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = returnedPrisonerContactIds,
     )
 
     // When
@@ -120,24 +131,42 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187529L)
+    val prisonerContactIds = listOf(999001L)
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val restrictions = listOf(
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.CLOSED.toString(),
-        restrictionTypeDescription = "CLOSED",
-        startDate = LocalDate.of(2024, 1, 1),
-        expiryDate = null,
-        globalRestriction = false,
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    val restrictionResponse = PrisonerContactRestrictionsResponseDto(
+      prisonerContactRestrictions = listOf(
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[0],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 123L,
+              prisonerContactId = prisonerContactIds[0],
+              contactId = visitorIds[0],
+              prisonerNumber = prisonerId,
+              expiryDate = null,
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
       ),
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions, visitorIds),
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
+      response = restrictionResponse,
     )
 
     // When
@@ -155,24 +184,42 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187529L)
+    val prisonerContactIds = listOf(999001L)
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val restrictions = listOf(
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.CLOSED.toString(),
-        restrictionTypeDescription = "CLOSED",
-        startDate = LocalDate.of(2024, 1, 1),
-        expiryDate = LocalDate.now().plusDays(1),
-        globalRestriction = false,
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    val restrictionResponse = PrisonerContactRestrictionsResponseDto(
+      prisonerContactRestrictions = listOf(
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[0],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 123L,
+              prisonerContactId = prisonerContactIds[0],
+              contactId = visitorIds[0],
+              prisonerNumber = prisonerId,
+              expiryDate = LocalDate.now().plusDays(10),
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
       ),
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions, visitorIds),
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
+      response = restrictionResponse,
     )
 
     // When
@@ -190,24 +237,42 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187529L)
+    val prisonerContactIds = listOf(999001L)
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val restrictions = listOf(
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.CLOSED.toString(),
-        restrictionTypeDescription = "CLOSED",
-        startDate = LocalDate.of(2024, 1, 1),
-        expiryDate = LocalDate.now(),
-        globalRestriction = false,
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    val restrictionResponse = PrisonerContactRestrictionsResponseDto(
+      prisonerContactRestrictions = listOf(
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[0],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 123L,
+              prisonerContactId = prisonerContactIds[0],
+              contactId = visitorIds[0],
+              prisonerNumber = prisonerId,
+              expiryDate = LocalDate.now(),
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
       ),
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions, visitorIds),
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
+      response = restrictionResponse,
     )
 
     // When
@@ -225,24 +290,42 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     // Given
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187529L)
+    val prisonerContactIds = listOf(999001L)
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val restrictions = listOf(
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.CLOSED.toString(),
-        restrictionTypeDescription = "CLOSED",
-        startDate = LocalDate.of(2024, 1, 1),
-        expiryDate = LocalDate.now().minusDays(10),
-        globalRestriction = false,
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    val restrictionResponse = PrisonerContactRestrictionsResponseDto(
+      prisonerContactRestrictions = listOf(
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[0],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 123L,
+              prisonerContactId = prisonerContactIds[0],
+              contactId = visitorIds[0],
+              prisonerNumber = prisonerId,
+              expiryDate = LocalDate.now().minusDays(10),
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
       ),
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions, visitorIds),
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
+      response = restrictionResponse,
     )
 
     // When
@@ -259,13 +342,25 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
   fun `Closed restriction status returned as 'false' if no closed restriction found for visitors`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187529L)
+    val visitorIds: List<Long> = listOf(2187525)
+    val prisonerContactIds = listOf(999001L)
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions = listOf(), visitorIds),
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+      isApproved = true,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
     )
 
     // When
@@ -286,32 +381,55 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val restrictions = listOf(
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.CLOSED.toString(),
-        restrictionTypeDescription = "CLOSED",
-        startDate = LocalDate.of(2024, 1, 1),
-        expiryDate = null,
-        globalRestriction = false,
-      ),
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.CLOSED.toString(),
-        restrictionTypeDescription = "CLOSED",
-        startDate = LocalDate.of(2024, 1, 1),
-        expiryDate = null,
-        globalRestriction = false,
+    // Duplicate visitorId/contactId returned twice (two relationships)
+    val duplicateContactIds = listOf(2187529L, 2187529L)
+    val prisonerContactIds = listOf(999001L, 999002L)
+
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = duplicateContactIds,
+      prisonerContactIds = prisonerContactIds,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    val restrictionResponse = PrisonerContactRestrictionsResponseDto(
+      prisonerContactRestrictions = listOf(
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[0],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 123L,
+              prisonerContactId = prisonerContactIds[0],
+              contactId = visitorIds[0],
+              prisonerNumber = prisonerId,
+              expiryDate = LocalDate.now().plusDays(10),
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[1],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 124L,
+              prisonerContactId = prisonerContactIds[1],
+              contactId = visitorIds[0],
+              prisonerNumber = prisonerId,
+              expiryDate = LocalDate.now().plusDays(10),
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
       ),
     )
-    val duplicateVisitorsList = listOf(2187529L, 2187529L)
 
-    // 2 of the same visitorIds are returned
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions, duplicateVisitorsList),
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
+      response = restrictionResponse,
     )
 
     // When

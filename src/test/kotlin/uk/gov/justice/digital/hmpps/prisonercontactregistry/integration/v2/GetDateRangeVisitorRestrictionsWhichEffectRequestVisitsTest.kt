@@ -1,7 +1,7 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.v1
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.v2
 
 import com.fasterxml.jackson.core.type.TypeReference
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
@@ -33,7 +33,10 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
         prisonerId = "A1234AA",
         visitorIds = listOf("2187525"),
         supportedVisitorRestrictionsCodesForRequestVisits = listOf("CHILD"),
-        currentDateRange = DateRangeDto(fromDate = LocalDate.now().plusDays(2), toDate = LocalDate.now().plusDays(28)),
+        currentDateRange = DateRangeDto(
+          fromDate = LocalDate.now().plusDays(2),
+          toDate = LocalDate.now().plusDays(28),
+        ),
       )
 
       // When
@@ -50,7 +53,10 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
         prisonerId = "A1234AA",
         visitorIds = listOf("2187525"),
         supportedVisitorRestrictionsCodesForRequestVisits = listOf("CHILD"),
-        currentDateRange = DateRangeDto(fromDate = LocalDate.now().plusDays(2), toDate = LocalDate.now().plusDays(28)),
+        currentDateRange = DateRangeDto(
+          fromDate = LocalDate.now().plusDays(2),
+          toDate = LocalDate.now().plusDays(28),
+        ),
       )
 
       prisonApiMockServer.stubGetApprovedOffenderContacts(
@@ -191,7 +197,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     result.expectStatus().isOk
     val foundDateRanges = getResults(result)
     val expected = listOf(DateRangeDto(fromDate = LocalDate.now().plusDays(5), toDate = LocalDate.now().plusDays(28)))
-    assertThat(foundDateRanges).isEqualTo(expected)
+    Assertions.assertThat(foundDateRanges).isEqualTo(expected)
   }
 
   @Test
@@ -238,7 +244,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     val foundDateRanges = getResults(result)
     val expected = listOf(DateRangeDto(fromDate = LocalDate.now().plusDays(2), toDate = LocalDate.now().plusDays(28)))
 
-    assertThat(foundDateRanges).isEqualTo(expected)
+    Assertions.assertThat(foundDateRanges).isEqualTo(expected)
   }
 
   @Test
@@ -288,7 +294,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
       DateRangeDto(fromDate = LocalDate.now().plusDays(5), toDate = LocalDate.now().plusDays(10)),
     )
 
-    assertThat(foundDateRanges).containsExactlyInAnyOrderElementsOf(expected)
+    Assertions.assertThat(foundDateRanges).containsExactlyInAnyOrderElementsOf(expected)
   }
 
   @Test
@@ -337,7 +343,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
       DateRangeDto(fromDate = LocalDate.now().plusDays(5), toDate = LocalDate.now().plusDays(10)),
     )
 
-    assertThat(foundDateRanges).containsExactlyInAnyOrderElementsOf(expected)
+    Assertions.assertThat(foundDateRanges).containsExactlyInAnyOrderElementsOf(expected)
   }
 
   private fun callDateRangeVisitorRestrictionsWhichEffectRequestVisitsUri(

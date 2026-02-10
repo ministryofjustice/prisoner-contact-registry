@@ -18,6 +18,9 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.HmppsAuthExtension
@@ -220,6 +223,79 @@ abstract class IntegrationTestBase {
 
     return ContactsDto(contacts)
   }
+
+  fun createPersonalRelationshipsContactsDto(
+    contactIds: List<Long>,
+    prisonerContactIds: List<Long>,
+    isApproved: Boolean = true,
+  ): List<PersonalRelationshipsContactDto> {
+    require(contactIds.size == prisonerContactIds.size) {
+      "contactIds and prisonerContactIds must be the same size"
+    }
+
+    return contactIds.mapIndexed { index, contactId ->
+      PersonalRelationshipsContactDto(
+        contactId = contactId,
+        prisonerContactId = prisonerContactIds[index],
+        firstName = "test",
+        middleNames = "middle",
+        lastName = "user",
+        dateOfBirth = LocalDate.of(1912, 9, 13),
+        relationshipToPrisonerCode = "FRI",
+        relationshipToPrisonerDescription = "Friend",
+        relationshipTypeCode = "S",
+        relationshipTypeDescription = "Social",
+        isApprovedVisitor = isApproved,
+        isEmergencyContact = false,
+        isNextOfKin = false,
+        comments = "Comment Here",
+      )
+    }
+  }
+
+  fun createLocalRestriction(
+    prisonerContactRestrictionId: Long = 1L,
+    prisonerContactId: Long,
+    contactId: Long,
+    prisonerNumber: String,
+    restrictionType: String = "CLOSED",
+    restrictionTypeDescription: String = restrictionType,
+    startDate: LocalDate = LocalDate.of(2024, 1, 1),
+    expiryDate: LocalDate? = null,
+    comments: String? = "Comment",
+    enteredByDisplayName: String = "Test User",
+  ): PrisonerContactRestrictionDto = PrisonerContactRestrictionDto(
+    prisonerContactRestrictionId = prisonerContactRestrictionId,
+    prisonerContactId = prisonerContactId,
+    contactId = contactId,
+    prisonerNumber = prisonerNumber,
+    restrictionType = restrictionType,
+    restrictionTypeDescription = restrictionTypeDescription,
+    startDate = startDate,
+    expiryDate = expiryDate,
+    comments = comments,
+    enteredByDisplayName = enteredByDisplayName,
+  )
+
+  fun createGlobalRestriction(
+    contactRestrictionId: Long = 1L,
+    contactId: Long,
+    restrictionType: String = "ANY",
+    restrictionTypeDescription: String = restrictionType,
+    startDate: LocalDate = LocalDate.of(2024, 1, 1),
+    expiryDate: LocalDate? = null,
+    comments: String? = "Comment",
+    enteredByDisplayName: String = "Test User",
+  ): GlobalContactRestrictionDto = GlobalContactRestrictionDto(
+    contactRestrictionId = contactRestrictionId,
+    contactId = contactId,
+    restrictionType = restrictionType,
+    restrictionTypeDescription = restrictionTypeDescription,
+    startDate = startDate,
+    expiryDate = expiryDate,
+    comments = comments,
+    enteredByDisplayName = enteredByDisplayName,
+  )
 
   fun createContactsAddressDto(): List<AddressDto> = listOf(
     AddressDto(
