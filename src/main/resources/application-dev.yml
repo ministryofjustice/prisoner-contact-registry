@@ -12,9 +12,10 @@ prison:
   api:
     url: https://prison-api-dev.prison.service.justice.gov.uk
 
-personal-relationships:
-  api:
-    url: https://prison-api-dev.prison.service.justice.gov.uk
+personal:
+  relationships:
+    api:
+      url: https://prison-api-dev.prison.service.justice.gov.uk
 
 api:
   timeout: 10s

@@ -20,7 +20,7 @@ class WebClientConfiguration(
   @param:Value("\${prison.api.url}")
   private val prisonApiBaseUrl: String,
 
-  @param:Value("\${personal-relationships.api.url}")
+  @param:Value("\${personal.relationships.api.url}")
   private val personalRelationshipsApiBaseUrl: String,
 
   @param:Value("\${api.timeout:10s}") private val apiTimeout: Duration,

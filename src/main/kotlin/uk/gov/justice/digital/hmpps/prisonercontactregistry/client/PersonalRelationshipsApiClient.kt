@@ -21,7 +21,7 @@ import java.time.Duration
 class PersonalRelationshipsApiClient(
   @param:Qualifier("personalRelationshipsApiWebClient")
   private val webClient: WebClient,
-  @param:Value("\${api.timeout:60s}")
+  @param:Value("\${api.timeout:10s}")
   private val apiTimeout: Duration,
   private val clientUtils: ClientUtils,
 ) {
@@ -38,10 +38,10 @@ class PersonalRelationshipsApiClient(
 
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api returned ${prisonerContacts.size} contacts, relationshipType = S")
 
-    // 2 - Get the "prisoner-contact" restrictions
+    // 2 - Get the "local + global" prisoner-contact restrictions
     val allPrisonerContactRestrictions = getPrisonerContactRestrictions(prisonerContacts.map { it.prisonerContactId })
 
-    // 3 - Convert the contacts + restrictions into the expected ContactDto shape, to preseve the existing DTO
+    // 3 - Convert the contacts + restrictions into the expected ContactDto shape, to preserve the existing DTO
     return convertToContactDto(prisonerContacts, allPrisonerContactRestrictions)
   }
 
@@ -56,7 +56,7 @@ class PersonalRelationshipsApiClient(
           .queryParam("page", 0)
           .queryParam("size", 350)
           .queryParam("approvedVisitor", approvedVisitorOnly)
-          .build(prisonerId)
+          .build()
       }
       .retrieve()
       .bodyToMono(object : ParameterizedTypeReference<RestPage<PersonalRelationshipsContactDto>>() {})
@@ -114,15 +114,7 @@ class PersonalRelationshipsApiClient(
       prisonerContactRestrictions.prisonerContactRestrictions
         .associate { group ->
           group.prisonerContactId to group.prisonerContactRestrictions.map { r ->
-            RestrictionDto(
-              restrictionId = r.prisonerContactRestrictionId.toInt(),
-              restrictionType = r.restrictionType,
-              restrictionTypeDescription = r.restrictionTypeDescription,
-              startDate = r.startDate,
-              expiryDate = r.expiryDate,
-              globalRestriction = false,
-              comment = r.comments,
-            )
+            RestrictionDto(personalRelationshipsLocalRestriction = r)
           }
         }
 
@@ -131,15 +123,7 @@ class PersonalRelationshipsApiClient(
       prisonerContactRestrictions.prisonerContactRestrictions
         .flatMap { group ->
           group.globalContactRestrictions.map { r ->
-            r.contactId to RestrictionDto(
-              restrictionId = r.contactRestrictionId.toInt(),
-              restrictionType = r.restrictionType,
-              restrictionTypeDescription = r.restrictionTypeDescription,
-              startDate = r.startDate,
-              expiryDate = r.expiryDate,
-              globalRestriction = true,
-              comment = r.comments,
-            )
+            r.contactId to RestrictionDto(personalRelationshipsGlobalRestriction = r)
           }
         }
         // This groupBy forms the Map<contactId, List<RestrictionDto>>
@@ -150,28 +134,12 @@ class PersonalRelationshipsApiClient(
 
     logger.info("Indexed restrictions: localByPrisonerContactId=${localByPrisonerContactId.size}, globalByContactId=${globalByContactId.size}")
 
-    // 3) Map contacts: relationship keeps its own locals + contact's globals
+    // 3) Map contacts: relationship keeps its own local restrictions + contact's global restrictions
     return prisonerContactsList.map { c ->
       val local = localByPrisonerContactId[c.prisonerContactId].orEmpty()
       val global = globalByContactId[c.contactId].orEmpty()
 
-      ContactDto(
-        personId = c.contactId,
-        firstName = c.firstName,
-        middleName = c.middleNames,
-        lastName = c.lastName,
-        dateOfBirth = c.dateOfBirth,
-        relationshipCode = c.relationshipToPrisonerCode,
-        relationshipDescription = c.relationshipToPrisonerDescription,
-        contactType = c.relationshipTypeCode,
-        contactTypeDescription = c.relationshipTypeDescription,
-        approvedVisitor = c.isApprovedVisitor,
-        emergencyContact = c.isEmergencyContact,
-        nextOfKin = c.isNextOfKin,
-        commentText = c.comments,
-        addresses = listOf(),
-        restrictions = local + global,
-      )
+      ContactDto(personalRelationshipsContact = c, restrictions = local + global, addresses = emptyList())
     }
   }
 }
