@@ -61,7 +61,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     fun `requires correct role PRISONER_CONTACT_REGISTRY`() {
       // Given
       val prisonerId = "A1234AA"
-      val visitorIds: List<Long> = listOf(2187525)
+      val visitorIds: List<Long> = listOf(2187525L)
 
       val prisonerContactIds = listOf(999001L)
       val prContacts = createPersonalRelationshipsContactsDto(
@@ -473,7 +473,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
   fun `when personal relationship API restrictions call fails with BAD_REQUEST then entire call fails`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187525)
+    val visitorIds: List<Long> = listOf(2187525L)
 
     val prisonerContactIds = listOf(999001L)
     val prContacts = createPersonalRelationshipsContactsDto(

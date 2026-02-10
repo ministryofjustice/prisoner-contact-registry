@@ -19,7 +19,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     fun `Get date range for visitors with banned restrictions requires authentication`() {
       // Given
       val prisonerId = "A1234AA"
-      val visitorIds: List<Long> = listOf(2187525)
+      val visitorIds: List<Long> = listOf(2187525L)
       val visitorIdsString = visitorIds.joinToString(",")
       val fromDate: LocalDate = LocalDate.now()
       val toDate: LocalDate = LocalDate.now()
@@ -37,7 +37,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     fun `Get date range for visitors with banned restrictions requires correct role`() {
       // Given
       val prisonerId = "A1234AA"
-      val visitorIds: List<Long> = listOf(2187525)
+      val visitorIds: List<Long> = listOf(2187525L)
       val visitorIdsString = visitorIds.joinToString(",")
       val fromDate: LocalDate = LocalDate.now()
       val toDate: LocalDate = LocalDate.now()
@@ -112,7 +112,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
   fun `Get date range for visitors with banned restrictions visitorId not found within list of prisoner contacts`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187524, 2187525)
+    val visitorIds: List<Long> = listOf(2187524L, 2187525L)
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.now().minusDays(2)
     val toDate: LocalDate = LocalDate.now().minusDays(2)

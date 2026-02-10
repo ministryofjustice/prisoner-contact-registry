@@ -19,7 +19,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     fun `requires authentication`() {
       // Given
       val prisonerId = "A1234AA"
-      val visitorIds: List<Long> = listOf(2187525)
+      val visitorIds: List<Long> = listOf(2187525L)
       val visitorIdsString = visitorIds.joinToString(",")
       val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
@@ -35,7 +35,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     fun `Get visitor closed restriction status requires correct role`() {
       // Given
       val prisonerId = "A1234AA"
-      val visitorIds: List<Long> = listOf(2187525)
+      val visitorIds: List<Long> = listOf(2187525L)
       val visitorIdsString = visitorIds.joinToString(",")
       val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
@@ -53,7 +53,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     fun `Get visitor closed restriction status requires correct role PRISONER_CONTACT_REGISTRY`() {
       // Given
       val prisonerId = "A1234AA"
-      val visitorIds: List<Long> = listOf(2187525)
+      val visitorIds: List<Long> = listOf(2187525L)
       val visitorIdsString = visitorIds.joinToString(",")
       val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
@@ -342,7 +342,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
   fun `Closed restriction status returned as 'false' if no closed restriction found for visitors`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187525)
+    val visitorIds: List<Long> = listOf(2187525L)
     val prisonerContactIds = listOf(999001L)
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
