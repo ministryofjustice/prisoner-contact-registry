@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import java.time.LocalDate
 
 @Schema(description = "A contact for a prisoner")
@@ -35,4 +36,22 @@ data class ContactDto(
   var addresses: List<AddressDto> = listOf(),
   @param:Schema(description = "Additional Information", example = "This is a comment text", required = false)
   val commentText: String? = null,
-)
+) {
+  constructor(personalRelationshipsContact: PersonalRelationshipsContactDto, restrictions: List<RestrictionDto>, addresses: List<AddressDto>) : this(
+    personId = personalRelationshipsContact.contactId,
+    firstName = personalRelationshipsContact.firstName,
+    middleName = personalRelationshipsContact.middleNames,
+    lastName = personalRelationshipsContact.lastName,
+    dateOfBirth = personalRelationshipsContact.dateOfBirth,
+    relationshipCode = personalRelationshipsContact.relationshipToPrisonerCode,
+    relationshipDescription = personalRelationshipsContact.relationshipToPrisonerDescription,
+    contactType = personalRelationshipsContact.relationshipTypeCode,
+    contactTypeDescription = personalRelationshipsContact.relationshipTypeDescription,
+    approvedVisitor = personalRelationshipsContact.isApprovedVisitor,
+    emergencyContact = personalRelationshipsContact.isEmergencyContact,
+    nextOfKin = personalRelationshipsContact.isNextOfKin,
+    commentText = personalRelationshipsContact.comments,
+    addresses = addresses,
+    restrictions = restrictions,
+  )
+}

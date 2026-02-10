@@ -11,5 +11,11 @@ hmpps.auth.url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
 prison:
   api:
     url: https://prison-api-dev.prison.service.justice.gov.uk
-    #url: http://localhost:8091
-    timeout: 10s
+
+personal:
+  relationships:
+    api:
+      url: https://prison-api-dev.prison.service.justice.gov.uk
+
+api:
+  timeout: 10s

@@ -19,7 +19,7 @@ spring:
           jwk-set-uri: ${hmpps.auth.url}/.well-known/jwks.json
       client:
         registration:
-          prison-api:
+          hmpps-api:
             provider: hmpps-auth
             client-id: ${system.client.id}
             client-secret: ${system.client.secret}
@@ -72,7 +72,6 @@ management:
       cache:
         time-to-live: 2000ms
 
-prison:
-  api:
-    timeout: 10s
+api:
+  timeout: 10s
 

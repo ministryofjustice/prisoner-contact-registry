@@ -23,4 +23,11 @@ hmpps.auth.url: http://localhost:8090/auth
 prison:
   api:
     url: http://localhost:8092
-    timeout: 5s
+
+personal:
+  relationships:
+    api:
+      url: http://localhost:8093 # TODO VB-5969: Plug this in to a mock server later in PR.
+
+api:
+  timeout: 5s
