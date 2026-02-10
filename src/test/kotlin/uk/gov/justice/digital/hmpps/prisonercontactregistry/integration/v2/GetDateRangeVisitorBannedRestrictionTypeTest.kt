@@ -4,9 +4,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISONER_GET_SOCIAL_RESTRICTION_BANNED_DATE_RANGE_CONTROLLER_PATH
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 import java.time.LocalDate
@@ -14,7 +13,6 @@ import java.time.LocalDate
 @Suppress("ClassName")
 @DisplayName("PrisonerContactControllerV2 - $V2_PRISONER_GET_SOCIAL_RESTRICTION_BANNED_DATE_RANGE_CONTROLLER_PATH")
 class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
-
   @Nested
   inner class authentication {
     @Test
@@ -59,15 +57,27 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     fun `Get date range for visitors with banned restrictions requires correct role PRISONER_CONTACT_REGISTRY`() {
       // Given
       val prisonerId = "A1234AA"
-      val visitorIds: List<Long> = listOf(2187525)
+      val visitorIds: List<Long> = listOf(2187525L)
       val visitorIdsString = visitorIds.joinToString(",")
       val fromDate: LocalDate = LocalDate.now()
       val toDate: LocalDate = LocalDate.now()
       val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-      prisonApiMockServer.stubGetApprovedOffenderContacts(
-        prisonerId,
-        contacts = createContactsDto(restrictions = listOf(), visitorIds),
+      val prisonerContactIds = listOf(999001L)
+      val prContacts = createPersonalRelationshipsContactsDto(
+        contactIds = listOf(2187525L),
+        prisonerContactIds = prisonerContactIds,
+        isApproved = true,
+      )
+
+      personalRelationshipsApiMockServer.stubGetAllContacts(
+        prisonerId = prisonerId,
+        contacts = prContacts,
+        approvedVisitorOnly = true,
+      )
+
+      personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+        prisonerContactIds = prisonerContactIds,
       )
 
       // When
@@ -108,23 +118,21 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val toDate: LocalDate = LocalDate.now().minusDays(2)
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    val contactWithMinimumDetails = ContactDto(
-      lastName = "Ireron",
-      firstName = "Ehicey",
-      contactType = "S",
-      relationshipCode = "PROB",
-      relationshipDescription = "Probation Officer",
-      commentText = "Comment Here",
-      emergencyContact = false,
-      nextOfKin = false,
-      personId = 2187521,
-      approvedVisitor = false,
-      restrictions = listOf(),
+    val prisonerContactIds = listOf(999001L)
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = listOf(2187524L),
+      prisonerContactIds = prisonerContactIds,
+      isApproved = true,
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = ContactsDto(listOf(contactWithMinimumDetails)),
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
     )
 
     // When
@@ -145,36 +153,65 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
   fun `Get date range for visitors with banned restrictions No applicable date range found due to visitor having open ended BAN restriction`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187529L, 2187526)
+    val visitorIds: List<Long> = listOf(2187529L, 2187526L)
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.now().minusDays(2)
     val toDate: LocalDate = LocalDate.now().plusDays(2)
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    val restrictions = listOf(
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.BANNED.toString(),
-        restrictionTypeDescription = "Banned",
-        startDate = fromDate,
-        expiryDate = null,
-        globalRestriction = false,
-      ),
-      RestrictionDto(
-        restrictionId = 321,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.BANNED.toString(),
-        restrictionTypeDescription = "Banned",
-        startDate = fromDate,
-        expiryDate = toDate.plusDays(1),
-        globalRestriction = false,
+    val prisonerContactIds = listOf(999001L, 999002L)
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+      isApproved = true,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    val restrictionResponse = PrisonerContactRestrictionsResponseDto(
+      prisonerContactRestrictions = listOf(
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[0],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 123L,
+              prisonerContactId = prisonerContactIds[0],
+              contactId = 2187524L,
+              prisonerNumber = prisonerId,
+              restrictionType = RestrictionType.BANNED.toString(),
+              restrictionTypeDescription = "Banned",
+              startDate = fromDate,
+              expiryDate = null,
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[1],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 124L,
+              prisonerContactId = prisonerContactIds[1],
+              contactId = 2187525L,
+              prisonerNumber = prisonerId,
+              restrictionType = RestrictionType.BANNED.toString(),
+              restrictionTypeDescription = "Banned",
+              startDate = fromDate,
+              expiryDate = toDate.plusDays(1),
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
       ),
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions, visitorIds),
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
+      response = restrictionResponse,
     )
 
     // When
@@ -195,27 +232,49 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
   fun `Get date range for visitors with banned restrictions No applicable date range found due to visitor having BAN restriction expiring after our endDate`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187526)
+    val visitorIds: List<Long> = listOf(2187526L)
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.of(2024, 5, 1)
     val toDate: LocalDate = LocalDate.of(2024, 5, 10)
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    val restrictions = listOf(
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.BANNED.toString(),
-        restrictionTypeDescription = "Banned",
-        startDate = fromDate,
-        expiryDate = toDate.plusDays(1),
-        globalRestriction = false,
+    val prisonerContactIds = listOf(999001L)
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+      isApproved = true,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    val restrictionResponse = PrisonerContactRestrictionsResponseDto(
+      prisonerContactRestrictions = listOf(
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[0],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 123L,
+              prisonerContactId = prisonerContactIds[0],
+              contactId = 2187524L,
+              prisonerNumber = prisonerId,
+              restrictionType = RestrictionType.BANNED.toString(),
+              restrictionTypeDescription = "Banned",
+              startDate = fromDate,
+              expiryDate = toDate.plusDays(1),
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
       ),
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions, visitorIds),
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
+      response = restrictionResponse,
     )
 
     // When
@@ -243,21 +302,43 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val toDate: LocalDate = LocalDate.of(2024, 5, 10)
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    val restrictions = listOf(
-      RestrictionDto(
-        restrictionId = 123,
-        comment = "Comment Here",
-        restrictionType = RestrictionType.BANNED.toString(),
-        restrictionTypeDescription = "Banned",
-        startDate = fromDate,
-        expiryDate = toDate,
-        globalRestriction = false,
+    val prisonerContactIds = listOf(999001L)
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+      isApproved = true,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    val restrictionResponse = PrisonerContactRestrictionsResponseDto(
+      prisonerContactRestrictions = listOf(
+        PrisonerContactRestrictionsDto(
+          prisonerContactId = prisonerContactIds[0],
+          prisonerContactRestrictions = listOf(
+            createLocalRestriction(
+              prisonerContactRestrictionId = 123L,
+              prisonerContactId = prisonerContactIds[0],
+              contactId = 2187524L,
+              prisonerNumber = prisonerId,
+              restrictionType = RestrictionType.BANNED.toString(),
+              restrictionTypeDescription = "Banned",
+              startDate = fromDate,
+              expiryDate = toDate,
+            ),
+          ),
+          globalContactRestrictions = emptyList(),
+        ),
       ),
     )
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions, visitorIds),
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
+      response = restrictionResponse,
     )
 
     // When
@@ -278,15 +359,27 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
   fun `Get date range for visitors with banned restrictions Date range is returned successfully when visitors have no BAN restrictions`() {
     // Given
     val prisonerId = "A1234AA"
-    val visitorIds: List<Long> = listOf(2187525)
+    val visitorIds: List<Long> = listOf(2187525L)
     val visitorIdsString = visitorIds.joinToString(",")
     val fromDate: LocalDate = LocalDate.now()
     val toDate: LocalDate = LocalDate.now()
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
-    prisonApiMockServer.stubGetApprovedOffenderContacts(
-      prisonerId,
-      contacts = createContactsDto(restrictions = listOf(), visitorIds),
+    val prisonerContactIds = listOf(999001L)
+    val prContacts = createPersonalRelationshipsContactsDto(
+      contactIds = visitorIds,
+      prisonerContactIds = prisonerContactIds,
+      isApproved = true,
+    )
+
+    personalRelationshipsApiMockServer.stubGetAllContacts(
+      prisonerId = prisonerId,
+      contacts = prContacts,
+      approvedVisitorOnly = true,
+    )
+
+    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
+      prisonerContactIds = prisonerContactIds,
     )
 
     // When
