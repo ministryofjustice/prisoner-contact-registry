@@ -81,7 +81,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
   }
 
   @Test
-  fun `Get date ranges for visitors restrictions which effect request visits - bad request`() {
+  fun `Get date ranges for visitors restrictions which effect request visits - internal server error`() {
     // Given
     val requestDto = RequestVisitVisitorRestrictionsBodyDto(
       prisonerId = "AA12345",
