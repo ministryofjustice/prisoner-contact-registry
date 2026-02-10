@@ -172,7 +172,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     // Then
     result.expectStatus().isOk
     val foundDateRanges = getResults(result)
-    assert(foundDateRanges.isEmpty())
+    Assertions.assertThat(foundDateRanges).isEmpty()
   }
 
   @Test
