@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.v1
 
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 import java.time.LocalDate
 
 @Suppress("ClassName")

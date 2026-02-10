@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.HmppsAuthExtension
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.PersonalRelationshipsApiMockServer
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.PrisonApiMockServer
 import java.time.LocalDate
 
@@ -38,17 +39,20 @@ abstract class IntegrationTestBase {
 
   companion object {
     internal val prisonApiMockServer = PrisonApiMockServer()
+    internal val personalRelationshipsApiMockServer = PersonalRelationshipsApiMockServer()
 
     @BeforeAll
     @JvmStatic
     fun startMocks() {
       prisonApiMockServer.start()
+      personalRelationshipsApiMockServer.start()
     }
 
     @AfterAll
     @JvmStatic
     fun stopMocks() {
       prisonApiMockServer.stop()
+      personalRelationshipsApiMockServer.stop()
     }
   }
 
@@ -60,6 +64,7 @@ abstract class IntegrationTestBase {
   @BeforeEach
   fun resetStubs() {
     prisonApiMockServer.resetAll()
+    personalRelationshipsApiMockServer.resetAll()
   }
 
   internal fun setAuthorisation(

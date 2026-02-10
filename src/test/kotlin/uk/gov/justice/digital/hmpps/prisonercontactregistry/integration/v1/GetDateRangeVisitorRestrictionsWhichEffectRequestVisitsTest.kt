@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.v1
 
 import com.fasterxml.jackson.core.type.TypeReference
 import org.assertj.core.api.Assertions.assertThat
@@ -14,6 +14,8 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 import java.time.LocalDate
 
 @Suppress("ClassName")

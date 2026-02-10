@@ -55,8 +55,12 @@ class PersonalRelationshipsApiClient(
           .queryParam("relationshipType", "S")
           .queryParam("page", 0)
           .queryParam("size", 350)
-          .queryParam("approvedVisitor", approvedVisitorOnly)
-          .build()
+          .apply {
+            // Only set this param if it's true. Setting it to false returns only unapproved visitors (we do not want this).
+            if (approvedVisitorOnly) {
+              queryParam("approvedVisitor", true)
+            }
+          }.build()
       }
       .retrieve()
       .bodyToMono(object : ParameterizedTypeReference<RestPage<PersonalRelationshipsContactDto>>() {})

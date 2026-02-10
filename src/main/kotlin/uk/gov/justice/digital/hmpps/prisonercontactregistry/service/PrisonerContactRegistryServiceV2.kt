@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.prisonercontactregistry.service
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
@@ -15,10 +16,12 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeN
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import java.time.LocalDate
-import kotlin.collections.contains
 
 @Service
-class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiClient) {
+class PrisonerContactRegistryServiceV2(
+  private val prisonApiClient: PrisonApiClient,
+  private val personalRelationshipsApiClient: PersonalRelationshipsApiClient,
+) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
@@ -32,7 +35,6 @@ class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiCli
     log.debug("getSocialContactList called with parameters : prisonerId - {}, withAddress - {}, hasDateOfBirth - {}, approvedContactsOnly - {}", prisonerId, withAddress, hasDateOfBirth, approvedContactsOnly)
 
     var socialContacts = getContactsByPrisonerId(prisonerId, approvedContactsOnly)
-      .filter { it.contactType.equals("S", true) }
 
     if (withAddress) {
       socialContacts.forEach {
@@ -159,7 +161,7 @@ class PrisonerContactRegistryServiceV2(private val prisonApiClient: PrisonApiCli
       .filter { it.restrictionType == restrictionType.toString() }
   }
 
-  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean): List<ContactDto> = prisonApiClient.getOffenderContacts(prisonerId, approvedContactsOnly).offenderContacts
+  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean): List<ContactDto> = personalRelationshipsApiClient.getPrisonerContacts(prisonerId, approvedContactsOnly)
 
   private final fun getDefaultSortOrder(): Comparator<ContactDto> = compareBy({ it.lastName }, { it.firstName })
 }
