@@ -224,7 +224,7 @@ abstract class IntegrationTestBase {
     return ContactsDto(contacts)
   }
 
-  fun createPersonalRelationshipsContactsDto(
+  fun createPersonalRelationshipsContactDtoList(
     contactIds: List<Long>,
     prisonerContactIds: List<Long>,
     isApproved: Boolean = true,

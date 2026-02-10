@@ -56,7 +56,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
       )
 
       val prisonerContactIds = listOf(999001L)
-      val prContacts = createPersonalRelationshipsContactsDto(
+      val prContacts = createPersonalRelationshipsContactDtoList(
         contactIds = listOf(2187525L),
         prisonerContactIds = prisonerContactIds,
         isApproved = true,
@@ -110,7 +110,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     )
 
     val prisonerContactIds = listOf(999001L)
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = listOf(2187524L),
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -150,7 +150,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     )
 
     val prisonerContactIds = listOf(999001L, 999002L)
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = listOf(2187524L, 2187525L),
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -188,7 +188,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     )
 
     val prisonerContactIds = listOf(999001L, 999002L)
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = listOf(2187524L, 2187525L),
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -265,7 +265,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     )
 
     val prisonerContactIds = listOf(999001L, 999002L)
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = listOf(2187524L, 2187525L),
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -343,7 +343,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     )
 
     val prisonerContactIds = listOf(999001L, 999002L)
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = listOf(2187524L, 2187525L),
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -424,7 +424,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
     )
 
     val prisonerContactIds = listOf(999001L, 999002L)
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = listOf(2187524L, 2187525L),
       prisonerContactIds = prisonerContactIds,
       isApproved = true,

@@ -30,7 +30,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   private lateinit var prisonApiClientSpy: PrisonApiClient
 
   @MockitoSpyBean
-  private lateinit var personalRelationshipsApiClient: PersonalRelationshipsApiClient
+  private lateinit var personalRelationshipsApiClientSpy: PersonalRelationshipsApiClient
 
   val socialContactWithRestrictionId = 1L
   val socialContactWithExpiredRestrictionId = 2L
@@ -64,7 +64,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       val visitorIds: List<Long> = listOf(2187525L)
 
       val prisonerContactIds = listOf(999001L)
-      val prContacts = createPersonalRelationshipsContactsDto(
+      val prContacts = createPersonalRelationshipsContactDtoList(
         contactIds = visitorIds,
         prisonerContactIds = prisonerContactIds,
         isApproved = false,
@@ -93,7 +93,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val visitorIds: List<Long> = listOf(socialContactWithRestrictionId, socialContactWithExpiredRestrictionId)
     val prisonerContactIds = listOf(999001L, 999002L)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = false,
@@ -154,7 +154,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     assertThat(contacts.map { it.personId }).containsExactlyInAnyOrder(visitorIds[0], visitorIds[1])
     assertThat(contacts).allSatisfy { contact -> assertThat(contact.addresses).isEmpty() }
 
-    verify(personalRelationshipsApiClient, times(1)).getPrisonerContacts(prisonerId, false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, false)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
   }
 
@@ -167,7 +167,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val prContacts = mutableListOf<PersonalRelationshipsContactDto>()
 
     prContacts.addAll(
-      createPersonalRelationshipsContactsDto(
+      createPersonalRelationshipsContactDtoList(
         contactIds = visitorIds,
         prisonerContactIds = prisonerContactIds,
         isApproved = false,
@@ -253,7 +253,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       assertContactAddress(contact.addresses[0])
     }
 
-    verify(personalRelationshipsApiClient, times(1)).getPrisonerContacts(prisonerId, false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, false)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithRestrictionId)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredRestrictionId)
   }
@@ -267,7 +267,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val prContacts = mutableListOf<PersonalRelationshipsContactDto>()
 
     prContacts.addAll(
-      createPersonalRelationshipsContactsDto(
+      createPersonalRelationshipsContactDtoList(
         contactIds = visitorIds,
         prisonerContactIds = prisonerContactIds,
         isApproved = false,
@@ -353,7 +353,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       assertContactAddress(contact.addresses[0])
     }
 
-    verify(personalRelationshipsApiClient, times(1)).getPrisonerContacts(prisonerId, false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, false)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithRestrictionId)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithExpiredRestrictionId)
     verify(prisonApiClientSpy, times(1)).getPersonAddress(socialContactWithNoDOB)
@@ -373,7 +373,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val responseSpec = callGetSocialContacts(prisonerId, withAddress = false)
       .expectStatus().isNotFound
 
-    verify(personalRelationshipsApiClient, times(1)).getPrisonerContacts(prisonerId, false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, false)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
     assertErrorResult(responseSpec, HttpStatus.NOT_FOUND, "Contacts not found for - $prisonerId on personal-relationships-api")
   }
@@ -393,7 +393,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     callGetSocialContacts(prisonerId, withAddress = false)
       .expectStatus().isBadRequest
 
-    verify(personalRelationshipsApiClient, times(1)).getPrisonerContacts(prisonerId, false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, false)
     verify(prisonApiClientSpy, times(0)).getPersonAddress(any())
   }
 
@@ -403,7 +403,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val visitorIds: List<Long> = listOf(socialContactWithRestrictionId, socialContactWithExpiredRestrictionId)
     val prisonerContactIds = listOf(999001L, 999002L)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = false,
@@ -466,7 +466,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       assertThat(contact.addresses).hasSize(0)
     }
 
-    verify(personalRelationshipsApiClient, times(1)).getPrisonerContacts(prisonerId, false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, false)
     verify(prisonApiClientSpy, times(2)).getPersonAddress(any())
   }
 
@@ -477,7 +477,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val visitorIds: List<Long> = listOf(2187525L)
 
     val prisonerContactIds = listOf(999001L)
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = false,

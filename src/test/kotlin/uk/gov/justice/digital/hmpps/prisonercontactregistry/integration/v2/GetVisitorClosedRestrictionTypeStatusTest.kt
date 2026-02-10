@@ -58,7 +58,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
       val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
       val prisonerContactIds = listOf(999001L)
-      val prContacts = createPersonalRelationshipsContactsDto(
+      val prContacts = createPersonalRelationshipsContactDtoList(
         contactIds = visitorIds,
         prisonerContactIds = prisonerContactIds,
         isApproved = true,
@@ -95,7 +95,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     val returnedContactIds = listOf(2187521L)
     val returnedPrisonerContactIds = listOf(999001L)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = returnedContactIds,
       prisonerContactIds = returnedPrisonerContactIds,
       isApproved = true,
@@ -135,7 +135,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
     )
@@ -188,7 +188,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
     )
@@ -241,7 +241,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
     )
@@ -294,7 +294,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
     )
@@ -347,7 +347,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     val visitorIdsString = visitorIds.joinToString(",")
     val uri = createVisitorsClosedRestrictionUri(prisonerId, visitorIdsString)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -385,7 +385,7 @@ class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
     val duplicateContactIds = listOf(2187529L, 2187529L)
     val prisonerContactIds = listOf(999001L, 999002L)
 
-    val prContacts = createPersonalRelationshipsContactsDto(
+    val prContacts = createPersonalRelationshipsContactDtoList(
       contactIds = duplicateContactIds,
       prisonerContactIds = prisonerContactIds,
     )
