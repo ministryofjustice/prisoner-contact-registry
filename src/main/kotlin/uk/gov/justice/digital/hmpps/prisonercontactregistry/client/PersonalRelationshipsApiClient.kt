@@ -63,7 +63,7 @@ class PersonalRelationshipsApiClient(
           }.build()
       }
       .retrieve()
-      .bodyToMono(object : ParameterizedTypeReference<RestPage<PersonalRelationshipsContactDto>>() {})
+      .bodyToMono(object : ParameterizedTypeReference<PagedResponse<PersonalRelationshipsContactDto>>() {})
       .onErrorResume { e ->
         if (!clientUtils.isNotFoundError(e)) {
           logger.error("get prisoner contacts Failed for get request $uri")
@@ -74,7 +74,8 @@ class PersonalRelationshipsApiClient(
         }
       }
       .blockOptional(apiTimeout)
-      .orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }.content
+      .orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }
+      .content
   }
 
   private fun getPrisonerContactRestrictions(prisonerContactRelationshipIds: List<Long>): PrisonerContactRestrictionsResponseDto {

@@ -11,7 +11,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.RestPage
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PageMetadata
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PagedResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
@@ -29,44 +30,40 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
   ) {
     val uri = "/prisoner/$prisonerId/contact"
 
-    val response =
-      if (contacts == null) {
-        aResponse()
-          .withStatus(httpStatus.value())
-      } else {
-        aResponse()
-          .withStatus(httpStatus.value())
-          .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-          .withBody(
-            TestObjectMapper.mapper.writeValueAsString(
-              RestPage(
-                content = contacts,
+    val response = if (contacts == null) {
+      aResponse().withStatus(httpStatus.value())
+    } else {
+      val totalElements = contacts.size.toLong()
+      val totalPages = if (size <= 0) 0 else kotlin.math.ceil(totalElements.toDouble() / size.toDouble()).toInt()
+
+      aResponse()
+        .withStatus(httpStatus.value())
+        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withBody(
+          TestObjectMapper.mapper.writeValueAsString(
+            PagedResponse(
+              content = contacts,
+              page = PageMetadata(
                 size = size,
-                total = contacts.size.toLong(),
-                page = page,
+                number = page,
+                totalElements = totalElements,
+                totalPages = totalPages,
               ),
             ),
-          )
-      }
-
-    if (approvedVisitorOnly) {
-      stubFor(
-        get(urlPathEqualTo(uri))
-          .withQueryParam("relationshipType", equalTo("S"))
-          .withQueryParam("page", equalTo(page.toString()))
-          .withQueryParam("size", equalTo(size.toString()))
-          .withQueryParam("approvedVisitor", equalTo("true"))
-          .willReturn(response),
-      )
-    } else {
-      stubFor(
-        get(urlPathEqualTo(uri))
-          .withQueryParam("relationshipType", equalTo("S"))
-          .withQueryParam("page", equalTo(page.toString()))
-          .withQueryParam("size", equalTo(size.toString()))
-          .willReturn(response),
-      )
+          ),
+        )
     }
+
+    val mapping = get(urlPathEqualTo(uri))
+      .withQueryParam("relationshipType", equalTo("S"))
+      .withQueryParam("page", equalTo(page.toString()))
+      .withQueryParam("size", equalTo(size.toString()))
+      .apply {
+        if (approvedVisitorOnly) withQueryParam("approvedVisitor", equalTo("true"))
+      }
+      .willReturn(response)
+
+    stubFor(mapping)
   }
 
   fun stubPrisonerContactRestrictions(
