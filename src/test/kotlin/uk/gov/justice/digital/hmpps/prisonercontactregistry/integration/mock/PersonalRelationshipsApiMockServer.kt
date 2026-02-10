@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.RestPage
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
@@ -20,27 +21,33 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObje
 class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
   fun stubGetAllContacts(
     prisonerId: String,
-    contacts: List<PersonalRelationshipsContactDto>,
+    contacts: List<PersonalRelationshipsContactDto>? = null,
     approvedVisitorOnly: Boolean = false,
     page: Int = 0,
     size: Int = 350,
+    httpStatus: HttpStatus = HttpStatus.OK,
   ) {
     val uri = "/prisoner/$prisonerId/contact"
 
     val response =
-      aResponse()
-        .withStatus(200)
-        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .withBody(
-          TestObjectMapper.mapper.writeValueAsString(
-            RestPage(
-              content = contacts,
-              size = contacts.size,
-              total = contacts.size.toLong(),
-              page = page,
+      if (contacts == null) {
+        aResponse()
+          .withStatus(httpStatus.value())
+      } else {
+        aResponse()
+          .withStatus(httpStatus.value())
+          .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+          .withBody(
+            TestObjectMapper.mapper.writeValueAsString(
+              RestPage(
+                content = contacts,
+                size = contacts.size,
+                total = contacts.size.toLong(),
+                page = page,
+              ),
             ),
-          ),
-        )
+          )
+      }
 
     if (approvedVisitorOnly) {
       stubFor(
@@ -64,23 +71,33 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
 
   fun stubPrisonerContactRestrictions(
     prisonerContactIds: List<Long>,
-    response: PrisonerContactRestrictionsResponseDto = defaultRestrictionsResponse(prisonerContactIds),
+    response: PrisonerContactRestrictionsResponseDto? = defaultRestrictionsResponse(prisonerContactIds),
+    httpStatus: HttpStatus = HttpStatus.OK,
   ) {
     val uri = "/prisoner-contact/restrictions"
 
-    val expectedRequestJson = TestObjectMapper.mapper.writeValueAsString(PrisonerContactIdsRequestDto(prisonerContactIds))
+    val expectedRequestJson =
+      TestObjectMapper.mapper.writeValueAsString(
+        PrisonerContactIdsRequestDto(prisonerContactIds),
+      )
+
+    val wiremockResponse =
+      if (response == null) {
+        aResponse()
+          .withStatus(httpStatus.value())
+      } else {
+        aResponse()
+          .withStatus(httpStatus.value())
+          .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+          .withBody(TestObjectMapper.mapper.writeValueAsString(response))
+      }
 
     stubFor(
       post(urlPathEqualTo(uri))
         .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
         // ignoreArrayOrder = true, ignoreExtraElements = true
         .withRequestBody(equalToJson(expectedRequestJson, true, true))
-        .willReturn(
-          aResponse()
-            .withStatus(200)
-            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .withBody(TestObjectMapper.mapper.writeValueAsString(response)),
-        ),
+        .willReturn(wiremockResponse),
     )
   }
 
