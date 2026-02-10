@@ -41,7 +41,7 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
             TestObjectMapper.mapper.writeValueAsString(
               RestPage(
                 content = contacts,
-                size = contacts.size,
+                size = size,
                 total = contacts.size.toLong(),
                 page = page,
               ),
