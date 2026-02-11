@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relatio
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.utils.ClientUtils
 import java.time.Duration
+import java.time.LocalDate
 
 @Component
 class PersonalRelationshipsApiClient(
@@ -119,7 +120,7 @@ class PersonalRelationshipsApiClient(
         .associate { group ->
           group.prisonerContactId to group.prisonerContactRestrictions.map { r ->
             RestrictionDto(personalRelationshipsLocalRestriction = r)
-          }
+          }.filter { it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate) }
         }
 
     // 2) Index GLOBAL restrictions by contactId (contact-level) — DEDUPED by contactRestrictionId
@@ -127,7 +128,8 @@ class PersonalRelationshipsApiClient(
       prisonerContactRestrictions.prisonerContactRestrictions
         .asSequence()
         .flatMap { group -> group.globalContactRestrictions.asSequence() }
-        .distinctBy { it.contactRestrictionId } // ✅ key fix
+        .distinctBy { it.contactRestrictionId }
+        .filter { it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate) }
         .groupBy(
           keySelector = { it.contactId },
           valueTransform = { RestrictionDto(personalRelationshipsGlobalRestriction = it) },

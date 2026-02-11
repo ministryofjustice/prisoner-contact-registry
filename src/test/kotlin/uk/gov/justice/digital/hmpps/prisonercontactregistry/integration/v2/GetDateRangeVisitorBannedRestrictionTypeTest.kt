@@ -234,8 +234,8 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187526L)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.of(2024, 5, 1)
-    val toDate: LocalDate = LocalDate.of(2024, 5, 10)
+    val fromDate: LocalDate = LocalDate.now().minusDays(1)
+    val toDate: LocalDate = LocalDate.now().plusDays(14)
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
     val prisonerContactIds = listOf(999001L)
@@ -297,8 +297,8 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val prisonerId = "A1234AA"
     val visitorIds: List<Long> = listOf(2187529L)
     val visitorIdsString = visitorIds.joinToString(",")
-    val fromDate: LocalDate = LocalDate.of(2024, 5, 9)
-    val toDate: LocalDate = LocalDate.of(2024, 5, 10)
+    val fromDate: LocalDate = LocalDate.now().minusDays(1)
+    val toDate: LocalDate = LocalDate.now().plusDays(14)
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
     val prisonerContactIds = listOf(999001L)
