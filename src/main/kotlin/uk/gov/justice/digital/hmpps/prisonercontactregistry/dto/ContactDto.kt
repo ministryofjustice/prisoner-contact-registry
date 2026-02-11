@@ -39,9 +39,9 @@ data class ContactDto(
 ) {
   constructor(personalRelationshipsContact: PersonalRelationshipsContactDto, restrictions: List<RestrictionDto>, addresses: List<AddressDto>) : this(
     personId = personalRelationshipsContact.contactId,
-    firstName = personalRelationshipsContact.firstName,
-    middleName = personalRelationshipsContact.middleNames,
-    lastName = personalRelationshipsContact.lastName,
+    firstName = personalRelationshipsContact.firstName.toNormalCase()!!,
+    middleName = personalRelationshipsContact.middleNames.toNormalCase(),
+    lastName = personalRelationshipsContact.lastName.toNormalCase()!!,
     dateOfBirth = personalRelationshipsContact.dateOfBirth,
     relationshipCode = personalRelationshipsContact.relationshipToPrisonerCode,
     relationshipDescription = personalRelationshipsContact.relationshipToPrisonerDescription,
@@ -55,3 +55,10 @@ data class ContactDto(
     restrictions = restrictions,
   )
 }
+
+private fun String?.toNormalCase(): String? = this
+  ?.lowercase()
+  ?.split(" ")
+  ?.joinToString(" ") { word ->
+    word.replaceFirstChar { it.uppercase() }
+  }

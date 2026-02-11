@@ -1,6 +1,6 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.v1
 
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -13,6 +13,8 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 import java.time.LocalDate
 
 @Suppress("ClassName")
@@ -113,10 +115,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
       .expectBody()
 
     val contacts = getContactResults(returnResult)
-    assertThat(contacts.size).isEqualTo(1)
+    Assertions.assertThat(contacts.size).isEqualTo(1)
     val contact = contacts[0]
     assertContact(contact)
-    assertThat(contact.addresses.size).isEqualTo(1)
+    Assertions.assertThat(contact.addresses.size).isEqualTo(1)
     val contactAddress = contact.addresses[0]
     assertContactAddress(contactAddress)
   }
@@ -134,10 +136,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
       .expectBody()
 
     val contacts = getContactResults(returnResult)
-    assertThat(contacts.size).isEqualTo(1)
+    Assertions.assertThat(contacts.size).isEqualTo(1)
     val contact = contacts[0]
     assertContact(contact)
-    assertThat(contact.addresses.size).isEqualTo(1)
+    Assertions.assertThat(contact.addresses.size).isEqualTo(1)
     val contactAddress = contact.addresses[0]
     assertContactAddress(contactAddress)
 
@@ -157,10 +159,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
       .expectBody()
 
     val contacts = getContactResults(returnResult)
-    assertThat(contacts.size).isEqualTo(1)
+    Assertions.assertThat(contacts.size).isEqualTo(1)
     val contact = contacts[0]
     assertContact(contact)
-    assertThat(contact.addresses.size).isEqualTo(0)
+    Assertions.assertThat(contact.addresses.size).isEqualTo(0)
 
     verify(prisonApiClient, times(0)).getPersonAddress(any())
   }
@@ -178,10 +180,10 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
       .expectBody()
 
     val contacts = getContactResults(returnResult)
-    assertThat(contacts.size).isEqualTo(1)
+    Assertions.assertThat(contacts.size).isEqualTo(1)
     val contact = contacts[0]
     assertMinimumContact(contact)
-    assertThat(contact.addresses.size).isEqualTo(1)
+    Assertions.assertThat(contact.addresses.size).isEqualTo(1)
   }
 
   @Test

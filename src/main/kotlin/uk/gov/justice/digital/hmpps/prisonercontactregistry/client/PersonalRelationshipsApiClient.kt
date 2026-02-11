@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relatio
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.utils.ClientUtils
 import java.time.Duration
+import java.time.LocalDate
 
 @Component
 class PersonalRelationshipsApiClient(
@@ -55,11 +56,15 @@ class PersonalRelationshipsApiClient(
           .queryParam("relationshipType", "S")
           .queryParam("page", 0)
           .queryParam("size", 350)
-          .queryParam("approvedVisitor", approvedVisitorOnly)
-          .build()
+          .apply {
+            // Only set this param if it's true. Setting it to false returns only unapproved visitors (we do not want this).
+            if (approvedVisitorOnly) {
+              queryParam("approvedVisitor", true)
+            }
+          }.build()
       }
       .retrieve()
-      .bodyToMono(object : ParameterizedTypeReference<RestPage<PersonalRelationshipsContactDto>>() {})
+      .bodyToMono(object : ParameterizedTypeReference<PagedResponse<PersonalRelationshipsContactDto>>() {})
       .onErrorResume { e ->
         if (!clientUtils.isNotFoundError(e)) {
           logger.error("get prisoner contacts Failed for get request $uri")
@@ -70,7 +75,8 @@ class PersonalRelationshipsApiClient(
         }
       }
       .blockOptional(apiTimeout)
-      .orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }.content
+      .orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }
+      .content
   }
 
   private fun getPrisonerContactRestrictions(prisonerContactRelationshipIds: List<Long>): PrisonerContactRestrictionsResponseDto {
@@ -107,7 +113,6 @@ class PersonalRelationshipsApiClient(
    * Returns:
    * - A ContactDto list [to keep the exact structure as the previous client prison-api, had]
    */
-
   private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto): List<ContactDto> {
     // 1) Index LOCAL restrictions by prisonerContactId (relationship-level)
     val localByPrisonerContactId: Map<Long, List<RestrictionDto>> =
@@ -115,21 +120,19 @@ class PersonalRelationshipsApiClient(
         .associate { group ->
           group.prisonerContactId to group.prisonerContactRestrictions.map { r ->
             RestrictionDto(personalRelationshipsLocalRestriction = r)
-          }
+          }.filter { it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate) }
         }
 
-    // 2) Index GLOBAL restrictions by contactId (contact-level)
+    // 2) Index GLOBAL restrictions by contactId (contact-level) — DEDUPED by contactRestrictionId
     val globalByContactId: Map<Long, List<RestrictionDto>> =
       prisonerContactRestrictions.prisonerContactRestrictions
-        .flatMap { group ->
-          group.globalContactRestrictions.map { r ->
-            r.contactId to RestrictionDto(personalRelationshipsGlobalRestriction = r)
-          }
-        }
-        // This groupBy forms the Map<contactId, List<RestrictionDto>>
+        .asSequence()
+        .flatMap { group -> group.globalContactRestrictions.asSequence() }
+        .distinctBy { it.contactRestrictionId }
+        .filter { it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate) }
         .groupBy(
-          keySelector = { it.first },
-          valueTransform = { it.second },
+          keySelector = { it.contactId },
+          valueTransform = { RestrictionDto(personalRelationshipsGlobalRestriction = it) },
         )
 
     logger.info("Indexed restrictions: localByPrisonerContactId=${localByPrisonerContactId.size}, globalByContactId=${globalByContactId.size}")
