@@ -112,7 +112,6 @@ class PersonalRelationshipsApiClient(
    * Returns:
    * - A ContactDto list [to keep the exact structure as the previous client prison-api, had]
    */
-
   private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto): List<ContactDto> {
     // 1) Index LOCAL restrictions by prisonerContactId (relationship-level)
     val localByPrisonerContactId: Map<Long, List<RestrictionDto>> =
@@ -123,18 +122,15 @@ class PersonalRelationshipsApiClient(
           }
         }
 
-    // 2) Index GLOBAL restrictions by contactId (contact-level)
+    // 2) Index GLOBAL restrictions by contactId (contact-level) — DEDUPED by contactRestrictionId
     val globalByContactId: Map<Long, List<RestrictionDto>> =
       prisonerContactRestrictions.prisonerContactRestrictions
-        .flatMap { group ->
-          group.globalContactRestrictions.map { r ->
-            r.contactId to RestrictionDto(personalRelationshipsGlobalRestriction = r)
-          }
-        }
-        // This groupBy forms the Map<contactId, List<RestrictionDto>>
+        .asSequence()
+        .flatMap { group -> group.globalContactRestrictions.asSequence() }
+        .distinctBy { it.contactRestrictionId } // ✅ key fix
         .groupBy(
-          keySelector = { it.first },
-          valueTransform = { it.second },
+          keySelector = { it.contactId },
+          valueTransform = { RestrictionDto(personalRelationshipsGlobalRestriction = it) },
         )
 
     logger.info("Indexed restrictions: localByPrisonerContactId=${localByPrisonerContactId.size}, globalByContactId=${globalByContactId.size}")
