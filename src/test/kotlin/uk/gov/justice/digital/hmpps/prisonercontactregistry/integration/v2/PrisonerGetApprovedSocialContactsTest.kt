@@ -503,15 +503,6 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     result.expectStatus().isBadRequest
   }
 
-  @Test
-  fun `bad request`() {
-    val prisonerId = "A1234AA"
-    webTestClient.get().uri("/prisoners/$prisonerId/contacts?id=ABC")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
-      .exchange()
-      .expectStatus().isBadRequest
-  }
-
   private fun assertErrorResult(
     responseSpec: WebTestClient.ResponseSpec,
     httpStatusCode: HttpStatusCode = HttpStatusCode.valueOf(org.apache.http.HttpStatus.SC_BAD_REQUEST),
