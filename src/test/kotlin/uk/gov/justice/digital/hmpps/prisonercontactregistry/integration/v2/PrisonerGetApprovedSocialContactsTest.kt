@@ -8,9 +8,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
@@ -24,9 +22,6 @@ import java.time.LocalDate
 @Suppress("ClassName")
 @DisplayName("PrisonerContactControllerV2 - $V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH")
 class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
-  @MockitoSpyBean
-  private lateinit var personalRelationshipsApiClientSpy: PersonalRelationshipsApiClient
-
   val socialContactWithRestrictionId = 1L
   val socialContactWithExpiredRestrictionId = 2L
   val socialContactWithNoDOB = 3L

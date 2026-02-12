@@ -111,7 +111,7 @@ class PersonalRelationshipsApiClient(
    * - Preserves duplicate contact entries where relationships differ.
    *
    * Returns:
-   * - A ContactDto list [to keep the exact structure as the previous client prison-api, had]
+   * - A ContactDto list [to keep the exact structure as the previous client prison-api had]
    */
   private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto): List<ContactDto> {
     // 1) Index LOCAL restrictions by prisonerContactId (relationship-level)

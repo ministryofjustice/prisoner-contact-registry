@@ -11,7 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
@@ -33,6 +35,9 @@ abstract class IntegrationTestBase {
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthHelper
 
+  @MockitoSpyBean
+  protected lateinit var personalRelationshipsApiClientSpy: PersonalRelationshipsApiClient
+
   companion object {
     internal val personalRelationshipsApiMockServer = PersonalRelationshipsApiMockServer()
 
@@ -47,11 +52,6 @@ abstract class IntegrationTestBase {
     fun stopMocks() {
       personalRelationshipsApiMockServer.stop()
     }
-  }
-
-  init {
-    // Resolves an issue where Wiremock keeps previous sockets open from other tests causing connection resets
-    System.setProperty("http.keepAlive", "false")
   }
 
   @BeforeEach
