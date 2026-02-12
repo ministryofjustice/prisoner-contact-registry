@@ -34,10 +34,12 @@ data class ContactDto(
   val restrictions: List<RestrictionDto> = listOf(),
   @param:Schema(description = "List of addresses associated with the contact", required = false)
   var addresses: List<AddressDto> = listOf(),
+  @param:Schema(description = "Address associated with the contact", required = false)
+  val address: AddressDto? = null,
   @param:Schema(description = "Additional Information", example = "This is a comment text", required = false)
   val commentText: String? = null,
 ) {
-  constructor(personalRelationshipsContact: PersonalRelationshipsContactDto, restrictions: List<RestrictionDto>, addresses: List<AddressDto>) : this(
+  constructor(personalRelationshipsContact: PersonalRelationshipsContactDto, restrictions: List<RestrictionDto>) : this(
     personId = personalRelationshipsContact.contactId,
     firstName = personalRelationshipsContact.firstName.toNormalCase()!!,
     middleName = personalRelationshipsContact.middleNames.toNormalCase(),
@@ -50,9 +52,10 @@ data class ContactDto(
     approvedVisitor = personalRelationshipsContact.isApprovedVisitor,
     emergencyContact = personalRelationshipsContact.isEmergencyContact,
     nextOfKin = personalRelationshipsContact.isNextOfKin,
-    commentText = personalRelationshipsContact.comments,
-    addresses = addresses,
     restrictions = restrictions,
+    addresses = listOf(AddressDto(personalRelationshipsContact)),
+    address = AddressDto(personalRelationshipsContact),
+    commentText = personalRelationshipsContact.comments,
   )
 }
 
