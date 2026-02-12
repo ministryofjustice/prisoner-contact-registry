@@ -13,11 +13,9 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressUsageDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionDto
@@ -132,27 +130,16 @@ abstract class IntegrationTestBase {
   }
 
   fun assertContactAddress(contactAddress: AddressDto) {
-    assertThat(contactAddress.addressType).isEqualTo("BUS")
-    assertThat(contactAddress.flat).isEqualTo("3B")
-    assertThat(contactAddress.premise).isEqualTo("Liverpool Prison")
-    assertThat(contactAddress.street).isEqualTo("Slinn Street")
-    assertThat(contactAddress.locality).isEqualTo("Brincliffe")
-    assertThat(contactAddress.town).isEqualTo("Birmingham")
-    assertThat(contactAddress.postalCode).isEqualTo("D7 5CC")
-    assertThat(contactAddress.county).isEqualTo("West Midlands")
+    assertThat(contactAddress.flat).isEqualTo("Flat 1")
+    assertThat(contactAddress.premise).isEqualTo("221B")
+    assertThat(contactAddress.street).isEqualTo("Baker Street")
+    assertThat(contactAddress.locality).isEqualTo("Marylebone")
+    assertThat(contactAddress.town).isEqualTo("London")
+    assertThat(contactAddress.postalCode).isEqualTo("NW1 6XE")
+    assertThat(contactAddress.county).isEqualTo("Greater London")
     assertThat(contactAddress.country).isEqualTo("England")
-    assertThat(contactAddress.primary).isEqualTo(true)
-    assertThat(contactAddress.noFixedAddress).isEqualTo(false)
-    assertThat(contactAddress.startDate).isEqualTo("2012-05-01")
-    assertThat(contactAddress.endDate).isEqualTo("2016-05-01")
-    assertThat(contactAddress.phones.size).isEqualTo(1)
-    assertThat(contactAddress.phones[0].number).isEqualTo("504 555 24302")
-    assertThat(contactAddress.phones[0].type).isEqualTo("BUS")
-    assertThat(contactAddress.phones[0].ext).isEqualTo("123")
-    assertThat(contactAddress.addressUsages.size).isEqualTo(1)
-    assertThat(contactAddress.addressUsages[0].addressUsage).isEqualTo("HDC")
-    assertThat(contactAddress.addressUsages[0].addressUsageDescription).isEqualTo("HDC Address")
-    assertThat(contactAddress.addressUsages[0].activeFlag).isEqualTo(true)
+    assertThat(contactAddress.primary).isTrue()
+    assertThat(contactAddress.noFixedAddress).isFalse()
   }
 
   final fun createContact(
@@ -249,6 +236,16 @@ abstract class IntegrationTestBase {
         isEmergencyContact = false,
         isNextOfKin = false,
         comments = "Comment Here",
+        flat = "Flat 1",
+        property = "221B",
+        street = "Baker Street",
+        area = "Marylebone",
+        cityDescription = "London",
+        countyDescription = "Greater London",
+        postcode = "NW1 6XE",
+        countryDescription = "England",
+        noFixedAddress = false,
+        primaryAddress = true,
       )
     }
   }
@@ -299,34 +296,17 @@ abstract class IntegrationTestBase {
 
   fun createContactsAddressDto(): List<AddressDto> = listOf(
     AddressDto(
-      addressType = "BUS",
-      flat = "3B",
-      premise = "Liverpool Prison",
-      street = "Slinn Street",
-      locality = "Brincliffe",
-      town = "Birmingham",
-      postalCode = "D7 5CC",
-      county = "West Midlands",
+      flat = "Flat 1",
+      premise = "221B",
+      street = "Baker Street",
+      locality = "Marylebone",
+      town = "London",
+      postalCode = "NW1 6XE",
+      county = "Greater London",
       country = "England",
       comment = "Comment Here",
       primary = true,
       noFixedAddress = false,
-      startDate = LocalDate.of(2012, 5, 1),
-      endDate = LocalDate.of(2016, 5, 1),
-      phones = listOf(
-        TelephoneDto(
-          number = "504 555 24302",
-          type = "BUS",
-          ext = "123",
-        ),
-      ),
-      addressUsages = listOf(
-        AddressUsageDto(
-          addressUsage = "HDC",
-          addressUsageDescription = "HDC Address",
-          activeFlag = true,
-        ),
-      ),
     ),
   )
 }

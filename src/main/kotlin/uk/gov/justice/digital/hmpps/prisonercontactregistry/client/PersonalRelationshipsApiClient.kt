@@ -142,7 +142,7 @@ class PersonalRelationshipsApiClient(
       val local = localByPrisonerContactId[c.prisonerContactId].orEmpty()
       val global = globalByContactId[c.contactId].orEmpty()
 
-      ContactDto(personalRelationshipsContact = c, restrictions = local + global, addresses = emptyList())
+      ContactDto(personalRelationshipsContact = c, restrictions = local + global)
     }
   }
 }

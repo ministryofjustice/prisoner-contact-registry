@@ -45,4 +45,34 @@ data class PersonalRelationshipsContactDto(
 
   @param:Schema(description = "Additional Information", example = "This is a comment text", required = false)
   val comments: String? = null,
+
+  @param:Schema(description = "Flat", example = "Flat 1", required = false)
+  val flat: String? = null,
+
+  @param:Schema(description = "Property", example = "123", required = false)
+  val property: String? = null,
+
+  @param:Schema(description = "Street", example = "Baker Street", required = false)
+  val street: String? = null,
+
+  @param:Schema(description = "Area", example = "Marylebone", required = false)
+  val area: String? = null,
+
+  @param:Schema(description = "City description", example = "Sheffield", required = false)
+  val cityDescription: String? = null,
+
+  @param:Schema(description = "County description", example = "South Yorkshire", required = false)
+  val countyDescription: String? = null,
+
+  @param:Schema(description = "Postcode", example = "NW1 6XE", required = false)
+  val postcode: String? = null,
+
+  @param:Schema(description = "Country description", example = "England", required = false)
+  val countryDescription: String? = null,
+
+  @param:Schema(description = "No Fixed Address", example = "false", required = false)
+  val noFixedAddress: Boolean? = null,
+
+  @param:Schema(description = "Primary Address", example = "true", required = false)
+  val primaryAddress: Boolean? = null,
 )

@@ -4,8 +4,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
@@ -13,15 +11,11 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import java.time.LocalDate
 
 @Service
-class PrisonerContactRegistryServiceV2(
-  private val prisonApiClient: PrisonApiClient,
-  private val personalRelationshipsApiClient: PersonalRelationshipsApiClient,
-) {
+class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClient: PersonalRelationshipsApiClient) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
@@ -35,19 +29,6 @@ class PrisonerContactRegistryServiceV2(
     log.debug("getSocialContactList called with parameters : prisonerId - {}, withAddress - {}, hasDateOfBirth - {}, approvedContactsOnly - {}", prisonerId, withAddress, hasDateOfBirth, approvedContactsOnly)
 
     var socialContacts = getContactsByPrisonerId(prisonerId, approvedContactsOnly)
-
-    if (withAddress) {
-      socialContacts.forEach {
-        try {
-          // In NOMIS a contact does not require a personId
-          it.addresses = it.personId?.let { id -> getAddressesByContactId(id) } ?: emptyList()
-        } catch (e: PersonNotFoundException) {
-          // Nomis data quality issue - treat as no address data available
-          log.warn("Person not found for prisoner $prisonerId contact ${it.personId}")
-          it.addresses = emptyList()
-        }
-      }
-    }
 
     if (hasDateOfBirth) {
       socialContacts = socialContacts.filter { it.dateOfBirth != null }
@@ -145,8 +126,6 @@ class PrisonerContactRegistryServiceV2(
       .distinct()
       .toList()
   }
-
-  private fun getAddressesByContactId(contactId: Long): List<AddressDto> = prisonApiClient.getPersonAddress(contactId)!!
 
   private fun getContactsRestrictionDetails(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
     val contacts = getContactsByPrisonerId(prisonerId, true)

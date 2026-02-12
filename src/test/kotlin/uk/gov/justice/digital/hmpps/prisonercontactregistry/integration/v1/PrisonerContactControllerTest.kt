@@ -201,10 +201,6 @@ class PrisonerContactControllerTest : IntegrationTestBase() {
       .jsonPath("$[0].addresses.length()").isEqualTo(1)
       .jsonPath("$[0].addresses[0].primary").isEqualTo(true)
       .jsonPath("$[0].addresses[0].noFixedAddress").isEqualTo(false)
-      .jsonPath("$[0].addresses[0].phones.length()").isEqualTo(1)
-      .jsonPath("$[0].addresses[0].phones[0].number").isEqualTo("504 555 24302")
-      .jsonPath("$[0].addresses[0].phones[0].type").isEqualTo("BUS")
-      .jsonPath("$[0].addresses[0].addressUsages.length()").isEqualTo(1)
   }
 
   @Test
