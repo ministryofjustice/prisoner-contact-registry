@@ -15,7 +15,7 @@ prison:
 personal:
   relationships:
     api:
-      url: https://prison-api-dev.prison.service.justice.gov.uk
+      url: https://personal-relationships-api.hmpps.service.justice.gov.uk
 
 api:
   timeout: 10s
