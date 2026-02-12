@@ -14,11 +14,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PrisonApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressUsageDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.TelephoneDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import java.time.LocalDate
@@ -29,18 +27,7 @@ internal class PrisonerContactRegistryServiceTest {
 
   private val apiClient = mock<PrisonApiClient>()
 
-  private val personTelephone = TelephoneDto(
-    number = "0114 2345678",
-    type = "TEL",
-    ext = "123",
-  )
-  private val personAddressUsage = AddressUsageDto(
-    addressUsage = "HDC",
-    addressUsageDescription = "HDC Address",
-    activeFlag = false,
-  )
   private val personAddress = AddressDto(
-    addressType = "BUS",
     flat = "3B",
     premise = "Liverpool Prison",
     street = "Slinn Street",
@@ -52,10 +39,6 @@ internal class PrisonerContactRegistryServiceTest {
     comment = "This is a comment text",
     primary = false,
     noFixedAddress = false,
-    startDate = LocalDate.now(),
-    endDate = LocalDate.now(),
-    phones = listOf(personTelephone),
-    addressUsages = listOf(personAddressUsage),
   )
   private val contactRestriction = RestrictionDto(
     restrictionId = 123,
