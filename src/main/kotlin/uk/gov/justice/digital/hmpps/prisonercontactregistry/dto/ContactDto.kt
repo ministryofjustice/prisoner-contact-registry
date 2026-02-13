@@ -32,8 +32,6 @@ data class ContactDto(
   val nextOfKin: Boolean,
   @param:Schema(description = "List of restrictions associated with the contact", required = false)
   val restrictions: List<RestrictionDto> = listOf(),
-  @param:Schema(description = "List of addresses associated with the contact", required = false)
-  var addresses: List<AddressDto> = listOf(),
   @param:Schema(description = "Address associated with the contact", required = false)
   val address: AddressDto? = null,
   @param:Schema(description = "Additional Information", example = "This is a comment text", required = false)
@@ -53,7 +51,6 @@ data class ContactDto(
     emergencyContact = personalRelationshipsContact.isEmergencyContact,
     nextOfKin = personalRelationshipsContact.isNextOfKin,
     restrictions = restrictions,
-    addresses = listOf(AddressDto(personalRelationshipsContact)),
     address = AddressDto(personalRelationshipsContact),
     commentText = personalRelationshipsContact.comments,
   )

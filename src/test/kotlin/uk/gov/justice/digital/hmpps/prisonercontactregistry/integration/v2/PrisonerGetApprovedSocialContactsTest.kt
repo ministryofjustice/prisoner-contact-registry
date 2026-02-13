@@ -8,9 +8,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
@@ -24,9 +22,6 @@ import java.time.LocalDate
 @Suppress("ClassName")
 @DisplayName("PrisonerContactControllerV2 - $V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH")
 class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
-  @MockitoSpyBean
-  private lateinit var personalRelationshipsApiClientSpy: PersonalRelationshipsApiClient
-
   val socialContactWithRestrictionId = 1L
   val socialContactWithExpiredRestrictionId = 2L
   val socialContactWithNoDOB = 3L
@@ -181,8 +176,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     assertThat(contacts.map { it.personId }).containsExactlyInAnyOrder(visitorIds[0], visitorIds[1])
 
     contacts.forEach { contact ->
-      assertThat(contact.addresses).hasSize(1)
-      assertContactAddress(contact.addresses[0])
+      assertContactAddress(contact.address!!)
     }
 
     verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, true)
@@ -284,8 +278,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     assertThat(contacts.map { it.personId }).containsExactlyInAnyOrder(visitorIds[0], visitorIds[1], socialContactWithNoDOB)
 
     contacts.forEach { contact ->
-      assertThat(contact.addresses).hasSize(1)
-      assertContactAddress(contact.addresses[0])
+      assertContactAddress(contact.address!!)
     }
 
     verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, true)
@@ -303,7 +296,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       httpStatus = HttpStatus.NOT_FOUND,
     )
 
-    val responseSpec = callGetApprovedSocialContacts(prisonerId, withAddress = false).expectStatus().isNotFound
+    val responseSpec = callGetApprovedSocialContacts(prisonerId).expectStatus().isNotFound
 
     verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, true)
     assertErrorResult(responseSpec, HttpStatus.NOT_FOUND, "Contacts not found for - $prisonerId on personal-relationships-api")
@@ -321,7 +314,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       httpStatus = HttpStatus.BAD_REQUEST,
     )
 
-    callGetApprovedSocialContacts(prisonerId, withAddress = false)
+    callGetApprovedSocialContacts(prisonerId)
       .expectStatus().isBadRequest
 
     verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, true)
@@ -361,15 +354,6 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     result.expectStatus().isBadRequest
   }
 
-  @Test
-  fun `bad request`() {
-    val prisonerId = "A1234AA"
-    webTestClient.get().uri("/prisoners/$prisonerId/contacts?id=ABC")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
-      .exchange()
-      .expectStatus().isBadRequest
-  }
-
   private fun assertErrorResult(
     responseSpec: WebTestClient.ResponseSpec,
     httpStatusCode: HttpStatusCode = HttpStatusCode.valueOf(org.apache.http.HttpStatus.SC_BAD_REQUEST),
@@ -385,29 +369,16 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
 
   private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
 
-  private fun getContactsQueryParams(
-    hasDateOfBirth: Boolean? = null,
-    withAddress: Boolean? = null,
-  ): String {
-    val queryParams = ArrayList<String>()
-
-    hasDateOfBirth?.let {
-      queryParams.add("hasDateOfBirth=$it")
-    }
-
-    withAddress?.let {
-      queryParams.add("withAddress=$it")
-    }
-
-    return queryParams.joinToString("&")
-  }
-
   private fun callGetApprovedSocialContacts(
     prisonerId: String,
     hasDateOfBirth: Boolean? = null,
-    withAddress: Boolean? = null,
   ): WebTestClient.ResponseSpec {
-    val uri = "v2/prisoners/$prisonerId/contacts/social/approved?${getContactsQueryParams(hasDateOfBirth, withAddress)}"
+    val uri = if (hasDateOfBirth == true) {
+      "v2/prisoners/$prisonerId/contacts/social/approved?hasDateOfBirth=$hasDateOfBirth"
+    } else {
+      "v2/prisoners/$prisonerId/contacts/social/approved"
+    }
+
     return webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()

@@ -7,7 +7,7 @@
 
 This is a Spring Boot application, written in Kotlin, providing prisoner contact information. Used by [Visits UI](https://github.com/ministryofjustice/book-a-prison-visit-staff-ui).
 
-Initially a facade over the NOMIS **Prison API** enabling access to data held in **NOMIS**
+A facade over the NOMIS **Personal relationships API** enabling access to contact data
 
 ## Building
 
@@ -43,19 +43,6 @@ Ports
 | Service                   | Port |  
 |---------------------------|------|
 | prisoner-contact-registry | 8082 |
-
-Alternatively the service can be run using docker-compose which will allow you to connect to a local version of prison-api.
-edit the application-dev.yml file by changing the `prison.api.url` to `http://localhost:8091`. Then run:
-```
-docker-compose up
-```
-
-Ports
-
-| Service                   | Port |  
-|---------------------------|------|
-| prisoner-contact-registry | 8082 |
-| prison-api                | 8091 |
 
 
 To create a Token via curl (local):
