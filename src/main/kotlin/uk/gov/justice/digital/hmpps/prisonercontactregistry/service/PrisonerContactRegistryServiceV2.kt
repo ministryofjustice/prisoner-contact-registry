@@ -22,11 +22,10 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
 
   fun getSocialContactList(
     prisonerId: String,
-    withAddress: Boolean,
     hasDateOfBirth: Boolean,
     approvedContactsOnly: Boolean,
   ): List<ContactDto> {
-    log.debug("getSocialContactList called with parameters : prisonerId - {}, withAddress - {}, hasDateOfBirth - {}, approvedContactsOnly - {}", prisonerId, withAddress, hasDateOfBirth, approvedContactsOnly)
+    log.debug("getSocialContactList called with parameters : prisonerId - {}, hasDateOfBirth - {}, approvedContactsOnly - {}", prisonerId, hasDateOfBirth, approvedContactsOnly)
 
     var socialContacts = getContactsByPrisonerId(prisonerId, approvedContactsOnly)
 
