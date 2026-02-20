@@ -82,15 +82,11 @@ class PrisonerContactControllerV2(
     @RequestParam(value = "hasDateOfBirth", required = false)
     @Parameter(description = "Defaults to false. By default when false, returns all contacts with or without a DOB. If true, returns only contacts with a DOB.", example = "false")
     hasDateOfBirth: Boolean? = false,
-    @RequestParam(value = "withAddress", required = false)
-    @Parameter(description = "by default returns addresses for all contacts, set to false if contact addresses not needed.", example = "false")
-    withAddress: Boolean? = true,
   ): List<ContactDto> {
-    log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, hasDateOfBirth = {}, withAddress = {}", prisonerId, hasDateOfBirth, withAddress)
+    log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, hasDateOfBirth = {}", prisonerId, hasDateOfBirth)
 
     return contactService.getSocialContactList(
       prisonerId = prisonerId,
-      withAddress = withAddress ?: true,
       hasDateOfBirth = hasDateOfBirth ?: false,
       approvedContactsOnly = false,
     )
@@ -135,15 +131,11 @@ class PrisonerContactControllerV2(
     @RequestParam(value = "hasDateOfBirth", required = false)
     @Parameter(description = "Defaults to false. By default when false, returns all contacts with or without a DOB. If true, returns only contacts with a DOB.", example = "false")
     hasDateOfBirth: Boolean? = false,
-    @RequestParam(value = "withAddress", required = false)
-    @Parameter(description = "by default returns addresses for all contacts, set to false if contact addresses not needed.", example = "false")
-    withAddress: Boolean? = true,
   ): List<ContactDto> {
-    log.debug("getPrisonersSocialContactsApproved called with params : Prisoner: {}, hasDateOfBirth = {}, withAddress = {}", prisonerId, hasDateOfBirth, withAddress)
+    log.debug("getPrisonersSocialContactsApproved called with params : Prisoner: {}, hasDateOfBirth = {}", prisonerId, hasDateOfBirth)
 
     return contactService.getSocialContactList(
       prisonerId = prisonerId,
-      withAddress = withAddress ?: true,
       hasDateOfBirth = hasDateOfBirth ?: false,
       approvedContactsOnly = true,
     )

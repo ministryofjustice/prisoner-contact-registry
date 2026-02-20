@@ -16,7 +16,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
   private val buildVersion: String? = buildProperties.version
 
   @Value("\${info.app.description}")
-  private val description: String = "Service for managing and sorting details about prison visitors. Currently a facade over visitor-orientated endpoints of the Prison API"
+  private val description: String = "Service for managing and sorting details about prison visitors. Currently a facade over visitor-orientated endpoints of the Personal relationships API"
 
   @Value("\${info.app.contact.name}")
   private val contactName: String = "Prison Visits Booking Project"

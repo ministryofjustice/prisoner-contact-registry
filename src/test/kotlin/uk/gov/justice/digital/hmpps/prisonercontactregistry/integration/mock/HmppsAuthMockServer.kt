@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.springframework.http.HttpStatus
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.MockUtils.Companion.createJsonResponseBuilder
+import org.springframework.http.MediaType
 
 class HmppsAuthExtension :
   BeforeAllCallback,
@@ -83,4 +84,6 @@ class HmppsAuthMockServer : WireMockServer(WIREMOCK_PORT) {
         ),
     )
   }
+
+  private fun createJsonResponseBuilder(): ResponseDefinitionBuilder = aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
 }
