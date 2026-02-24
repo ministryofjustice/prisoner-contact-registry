@@ -1,14 +1,12 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.MediaType
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactsDto
 
@@ -152,10 +150,6 @@ class PrisonApiMockServer : WireMockServer(8092) {
     )
   }
 
-  private fun getJsonString(obj: Any): String = ObjectMapper()
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    .registerModule(JavaTimeModule())
-    .writer()
-    .withDefaultPrettyPrinter()
+  private fun getJsonString(obj: Any): String = jacksonObjectMapper()
     .writeValueAsString(obj)
 }
