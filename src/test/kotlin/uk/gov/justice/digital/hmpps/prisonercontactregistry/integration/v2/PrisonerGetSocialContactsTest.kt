@@ -7,11 +7,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
@@ -24,9 +20,6 @@ import java.time.LocalDate
 @Suppress("ClassName")
 @DisplayName("PrisonerContactControllerV2 - $V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH")
 class PrisonerGetSocialContactsTest : IntegrationTestBase() {
-  @MockitoSpyBean
-  private lateinit var personalRelationshipsApiClientSpy: PersonalRelationshipsApiClient
-
   val socialContactWithRestrictionId = 1L
   val socialContactWithExpiredRestrictionId = 2L
   val socialContactWithNoDOB = 3L
@@ -179,8 +172,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     assertThat(contacts.map { it.personId }).containsExactlyInAnyOrder(visitorIds[0], visitorIds[1])
 
     contacts.forEach { contact ->
-      assertThat(contact.addresses).hasSize(1)
-      assertContactAddress(contact.addresses[0])
+      assertContactAddress(contact.address!!)
     }
 
     verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, false)
@@ -283,8 +275,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     assertThat(contacts.map { it.personId }).containsExactlyInAnyOrder(visitorIds[0], visitorIds[1], socialContactWithNoDOB)
 
     contacts.forEach { contact ->
-      assertThat(contact.addresses).hasSize(1)
-      assertContactAddress(contact.addresses[0])
+      assertContactAddress(contact.address!!)
     }
 
     verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId, false)
@@ -324,45 +315,20 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     result.expectStatus().isBadRequest
   }
 
-  private fun assertErrorResult(
-    responseSpec: WebTestClient.ResponseSpec,
-    httpStatusCode: HttpStatusCode = HttpStatusCode.valueOf(org.apache.http.HttpStatus.SC_BAD_REQUEST),
-    errorMessage: String? = null,
-  ) {
-    responseSpec.expectStatus().isEqualTo(httpStatusCode)
-    errorMessage?.let {
-      val errorResponse =
-        TestObjectMapper.mapper.readValue(responseSpec.expectBody().returnResult().responseBody, ErrorResponse::class.java)
-      assertThat(errorResponse.developerMessage).isEqualTo(errorMessage)
-    }
-  }
-
   private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
 
   private fun callGetSocialContacts(
     prisonerId: String,
     hasDateOfBirth: Boolean? = null,
-    withAddress: Boolean? = null,
   ): WebTestClient.ResponseSpec {
-    val uri = "v2/prisoners/$prisonerId/contacts/social?${getSocialContactsQueryParams(hasDateOfBirth, withAddress)}"
+    val uri = if (hasDateOfBirth == true) {
+      "v2/prisoners/$prisonerId/contacts/social?hasDateOfBirth=$hasDateOfBirth"
+    } else {
+      "v2/prisoners/$prisonerId/contacts/social"
+    }
+
     return webTestClient.get().uri(uri)
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_CONTACT_REGISTRY")))
       .exchange()
-  }
-
-  private fun getSocialContactsQueryParams(
-    hasDateOfBirth: Boolean? = null,
-    withAddress: Boolean? = null,
-  ): String {
-    val queryParams = ArrayList<String>()
-
-    hasDateOfBirth?.let {
-      queryParams.add("hasDateOfBirth=$it")
-    }
-    withAddress?.let {
-      queryParams.add("withAddress=$it")
-    }
-
-    return queryParams.joinToString("&")
   }
 }

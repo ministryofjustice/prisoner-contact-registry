@@ -8,10 +8,6 @@ management.endpoint:
 
 hmpps.auth.url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
 
-prison:
-  api:
-    url: https://prison-api-dev.prison.service.justice.gov.uk
-
 personal:
   relationships:
     api:
