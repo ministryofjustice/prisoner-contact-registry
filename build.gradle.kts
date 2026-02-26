@@ -21,8 +21,6 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.data:spring-data-commons")
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.25.0")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
 

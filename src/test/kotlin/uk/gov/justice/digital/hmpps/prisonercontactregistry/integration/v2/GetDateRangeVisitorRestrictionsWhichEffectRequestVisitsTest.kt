@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.v2
 
-import com.fasterxml.jackson.core.type.TypeReference
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,6 +13,8 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 import java.time.LocalDate
+import kotlin.Array
+import kotlin.jvm.java
 
 @Suppress("ClassName")
 class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationTestBase() {
@@ -504,5 +505,5 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
       .exchange()
   }
 
-  private fun getResults(responseSpec: WebTestClient.ResponseSpec): List<DateRangeDto> = TestObjectMapper.mapper.readValue(responseSpec.expectBody().returnResult().responseBody!!, object : TypeReference<List<DateRangeDto>>() {})
+  private fun getResults(responseSpec: WebTestClient.ResponseSpec): List<DateRangeDto> = TestObjectMapper.mapper.readValue(responseSpec.expectBody().returnResult().responseBody, Array<DateRangeDto>::class.java).toList()
 }
