@@ -15,14 +15,14 @@ repositories {
 }
 
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.0.2")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.data:spring-data-commons")
 
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.25.0")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
 
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
