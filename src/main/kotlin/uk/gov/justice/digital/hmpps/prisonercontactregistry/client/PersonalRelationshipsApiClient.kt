@@ -31,16 +31,20 @@ class PersonalRelationshipsApiClient(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun getPrisonerContacts(prisonerId: String, approvedVisitorOnly: Boolean): List<ContactDto> {
+  fun getPrisonerContacts(prisonerId: String, approvedVisitorOnly: Boolean, withRestrictions: Boolean): List<ContactDto> {
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api")
 
     // 1 - Get the contacts
     val prisonerContacts = getAllContacts(prisonerId, approvedVisitorOnly)
 
-    logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api returned ${prisonerContacts.size} contacts, relationshipType = S")
+    logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api returned ${prisonerContacts.size} contacts, relationshipType = S, withRestrictions = $withRestrictions, approvedVisitorOnly = $approvedVisitorOnly")
 
-    // 2 - Get the "local + global" prisoner-contact restrictions
-    val allPrisonerContactRestrictions = getPrisonerContactRestrictions(prisonerContacts.map { it.prisonerContactId })
+    // 2 - Optionally get the "local + global" prisoner-contact restrictions
+    val allPrisonerContactRestrictions = if (withRestrictions) {
+      getPrisonerContactRestrictions(prisonerContacts.map { it.prisonerContactId })
+    } else {
+      null
+    }
 
     // 3 - Convert the contacts + restrictions into the expected ContactDto shape, to preserve the existing DTO
     return convertToContactDto(prisonerContacts, allPrisonerContactRestrictions)
@@ -113,27 +117,37 @@ class PersonalRelationshipsApiClient(
    * Returns:
    * - A ContactDto list [to keep the exact structure as the previous client prison-api had]
    */
-  private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto): List<ContactDto> {
+  private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto?): List<ContactDto> {
     // 1) Index LOCAL restrictions by prisonerContactId (relationship-level)
-    val localByPrisonerContactId: Map<Long, List<RestrictionDto>> =
+    val localByPrisonerContactId: Map<Long, List<RestrictionDto>> = if (prisonerContactRestrictions != null) {
       prisonerContactRestrictions.prisonerContactRestrictions
         .associate { group ->
           group.prisonerContactId to group.prisonerContactRestrictions.map { r ->
             RestrictionDto(personalRelationshipsLocalRestriction = r)
-          }.filter { it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate) }
+          }.filter {
+            it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate)
+          }
         }
+    } else {
+      emptyMap()
+    }
 
     // 2) Index GLOBAL restrictions by contactId (contact-level) — DEDUPED by contactRestrictionId
-    val globalByContactId: Map<Long, List<RestrictionDto>> =
+    val globalByContactId: Map<Long, List<RestrictionDto>> = if (prisonerContactRestrictions != null) {
       prisonerContactRestrictions.prisonerContactRestrictions
         .asSequence()
         .flatMap { group -> group.globalContactRestrictions.asSequence() }
         .distinctBy { it.contactRestrictionId }
-        .filter { it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate) }
+        .filter {
+          it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate)
+        }
         .groupBy(
           keySelector = { it.contactId },
           valueTransform = { RestrictionDto(personalRelationshipsGlobalRestriction = it) },
         )
+    } else {
+      emptyMap()
+    }
 
     logger.info("Indexed restrictions: localByPrisonerContactId=${localByPrisonerContactId.size}, globalByContactId=${globalByContactId.size}")
 
