@@ -83,8 +83,8 @@ class PrisonerContactControllerV2(
     @Parameter(description = "Defaults to false. By default when false, returns all contacts with or without a DOB. If true, returns only contacts with a DOB.", example = "false")
     hasDateOfBirth: Boolean? = false,
     @RequestParam(value = "withRestrictions", required = false)
-    @Parameter(description = "Defaults to true. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
-    withRestrictions: Boolean? = true,
+    @Parameter(description = "Defaults to false. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
+    withRestrictions: Boolean? = false,
   ): List<ContactDto> {
     log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, hasDateOfBirth = {}, withRestrictions = {}", prisonerId, hasDateOfBirth, withRestrictions)
 
@@ -92,7 +92,7 @@ class PrisonerContactControllerV2(
       prisonerId = prisonerId,
       hasDateOfBirth = hasDateOfBirth ?: false,
       approvedContactsOnly = false,
-      withRestrictions = withRestrictions ?: true,
+      withRestrictions = withRestrictions ?: false,
     )
   }
 
@@ -136,8 +136,8 @@ class PrisonerContactControllerV2(
     @Parameter(description = "Defaults to false. By default when false, returns all contacts with or without a DOB. If true, returns only contacts with a DOB.", example = "false")
     hasDateOfBirth: Boolean? = false,
     @RequestParam(value = "withRestrictions", required = false)
-    @Parameter(description = "Defaults to true. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
-    withRestrictions: Boolean? = true,
+    @Parameter(description = "Defaults to false. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
+    withRestrictions: Boolean? = false,
   ): List<ContactDto> {
     log.debug("getPrisonersSocialContactsApproved called with params : Prisoner: {}, hasDateOfBirth = {}, withRestrictions = {}", prisonerId, hasDateOfBirth, withRestrictions)
 
@@ -145,7 +145,7 @@ class PrisonerContactControllerV2(
       prisonerId = prisonerId,
       hasDateOfBirth = hasDateOfBirth ?: false,
       approvedContactsOnly = true,
-      withRestrictions = withRestrictions ?: true,
+      withRestrictions = withRestrictions ?: false,
     )
   }
 

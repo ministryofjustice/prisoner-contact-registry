@@ -162,7 +162,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       response = restrictionResponse,
     )
 
-    val returnResult = callGetSocialContacts(prisonerId, hasDateOfBirth = true)
+    val returnResult = callGetSocialContacts(prisonerId, hasDateOfBirth = true, withRestrictions = true)
       .expectStatus().isOk
       .expectBody()
 
@@ -265,7 +265,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       response = restrictionResponse,
     )
 
-    val returnResult = callGetSocialContacts(prisonerId, hasDateOfBirth = false)
+    val returnResult = callGetSocialContacts(prisonerId, hasDateOfBirth = false, withRestrictions = true)
       .expectStatus().isOk
       .expectBody()
 
@@ -366,11 +366,6 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       prisonerId = prisonerId,
       contacts = prContacts,
       approvedVisitorOnly = false,
-    )
-
-    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
-      prisonerContactIds = prisonerContactIds,
-      response = null,
       httpStatus = HttpStatus.BAD_REQUEST,
     )
 
