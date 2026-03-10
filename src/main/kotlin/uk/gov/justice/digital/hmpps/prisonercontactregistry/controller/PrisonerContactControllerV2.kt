@@ -82,13 +82,17 @@ class PrisonerContactControllerV2(
     @RequestParam(value = "hasDateOfBirth", required = false)
     @Parameter(description = "Defaults to false. By default when false, returns all contacts with or without a DOB. If true, returns only contacts with a DOB.", example = "false")
     hasDateOfBirth: Boolean? = false,
+    @RequestParam(value = "withRestrictions", required = false)
+    @Parameter(description = "Defaults to true. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
+    withRestrictions: Boolean? = true,
   ): List<ContactDto> {
-    log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, hasDateOfBirth = {}", prisonerId, hasDateOfBirth)
+    log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, hasDateOfBirth = {}, withRestrictions = {}", prisonerId, hasDateOfBirth, withRestrictions)
 
     return contactService.getSocialContactList(
       prisonerId = prisonerId,
       hasDateOfBirth = hasDateOfBirth ?: false,
       approvedContactsOnly = false,
+      withRestrictions = withRestrictions ?: true,
     )
   }
 
@@ -131,13 +135,17 @@ class PrisonerContactControllerV2(
     @RequestParam(value = "hasDateOfBirth", required = false)
     @Parameter(description = "Defaults to false. By default when false, returns all contacts with or without a DOB. If true, returns only contacts with a DOB.", example = "false")
     hasDateOfBirth: Boolean? = false,
+    @RequestParam(value = "withRestrictions", required = false)
+    @Parameter(description = "Defaults to true. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
+    withRestrictions: Boolean? = true,
   ): List<ContactDto> {
-    log.debug("getPrisonersSocialContactsApproved called with params : Prisoner: {}, hasDateOfBirth = {}", prisonerId, hasDateOfBirth)
+    log.debug("getPrisonersSocialContactsApproved called with params : Prisoner: {}, hasDateOfBirth = {}, withRestrictions = {}", prisonerId, hasDateOfBirth, withRestrictions)
 
     return contactService.getSocialContactList(
       prisonerId = prisonerId,
       hasDateOfBirth = hasDateOfBirth ?: false,
       approvedContactsOnly = true,
+      withRestrictions = withRestrictions ?: true,
     )
   }
 

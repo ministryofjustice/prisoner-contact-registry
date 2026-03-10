@@ -24,10 +24,11 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
     prisonerId: String,
     hasDateOfBirth: Boolean,
     approvedContactsOnly: Boolean,
+    withRestrictions: Boolean,
   ): List<ContactDto> {
     log.debug("getSocialContactList called with parameters : prisonerId - {}, hasDateOfBirth - {}, approvedContactsOnly - {}", prisonerId, hasDateOfBirth, approvedContactsOnly)
 
-    var socialContacts = getContactsByPrisonerId(prisonerId, approvedContactsOnly)
+    var socialContacts = getContactsByPrisonerId(prisonerId, approvedContactsOnly, withRestrictions)
 
     if (hasDateOfBirth) {
       socialContacts = socialContacts.filter { it.dateOfBirth != null }
@@ -83,7 +84,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
     log.info("getDateRangesForVisitorRestrictionsWhichAffectRequestVisits called with request: {}", visitBookingDetails)
 
     // 1. Get & validate visitors
-    val visitors = getContactsByPrisonerId(visitBookingDetails.prisonerId, true)
+    val visitors = getContactsByPrisonerId(prisonerId = visitBookingDetails.prisonerId, approvedContactsOnly = true, withRestrictions = true)
       .filter { it.personId.toString() in visitBookingDetails.visitorIds }
     if (visitors.size != visitBookingDetails.visitorIds.size) {
       throw VisitorNotFoundException(
@@ -127,7 +128,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
   }
 
   private fun getContactsRestrictionDetails(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
-    val contacts = getContactsByPrisonerId(prisonerId, true)
+    val contacts = getContactsByPrisonerId(prisonerId = prisonerId, approvedContactsOnly = true, withRestrictions = true)
       .filter { visitorIds.contains(it.personId) }
 
     if (!contacts.map { it.personId }.containsAll(visitorIds)) {
@@ -139,7 +140,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
       .filter { it.restrictionType == restrictionType.toString() }
   }
 
-  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean): List<ContactDto> = personalRelationshipsApiClient.getPrisonerContacts(prisonerId, approvedContactsOnly)
+  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean, withRestrictions: Boolean): List<ContactDto> = personalRelationshipsApiClient.getPrisonerContacts(prisonerId, approvedContactsOnly, withRestrictions)
 
   private final fun getDefaultSortOrder(): Comparator<ContactDto> = compareBy({ it.lastName }, { it.firstName })
 }
