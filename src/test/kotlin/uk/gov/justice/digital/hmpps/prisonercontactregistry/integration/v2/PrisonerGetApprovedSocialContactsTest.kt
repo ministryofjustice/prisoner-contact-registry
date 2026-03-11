@@ -166,7 +166,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       response = restrictionResponse,
     )
 
-    val returnResult = callGetApprovedSocialContacts(prisonerId, hasDateOfBirth = true)
+    val returnResult = callGetApprovedSocialContacts(prisonerId, hasDateOfBirth = true, withRestrictions = true)
       .expectStatus().isOk
       .expectBody()
 
@@ -268,7 +268,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       response = restrictionResponse,
     )
 
-    val returnResult = callGetApprovedSocialContacts(prisonerId, hasDateOfBirth = false)
+    val returnResult = callGetApprovedSocialContacts(prisonerId, hasDateOfBirth = false, withRestrictions = true)
       .expectStatus().isOk
       .expectBody()
 
@@ -365,7 +365,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
 
     val responseSpec = callGetApprovedSocialContacts(prisonerId).expectStatus().isNotFound
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = false)
     assertErrorResult(responseSpec, HttpStatus.NOT_FOUND, "Contacts not found for - $prisonerId on personal-relationships-api")
   }
 
@@ -384,7 +384,7 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     callGetApprovedSocialContacts(prisonerId)
       .expectStatus().isBadRequest
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = false)
   }
 
   @Test
@@ -404,11 +404,6 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       prisonerId = prisonerId,
       contacts = prContacts,
       approvedVisitorOnly = true,
-    )
-
-    personalRelationshipsApiMockServer.stubPrisonerContactRestrictions(
-      prisonerContactIds = prisonerContactIds,
-      response = null,
       httpStatus = HttpStatus.BAD_REQUEST,
     )
 
