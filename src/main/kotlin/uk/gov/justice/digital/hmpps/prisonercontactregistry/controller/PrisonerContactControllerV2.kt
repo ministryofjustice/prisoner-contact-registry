@@ -33,6 +33,8 @@ const val V2_PRISONER_GET_SOCIAL_RESTRICTION_CLOSED_CONTROLLER_PATH: String = "$
 const val V2_PRISONER_GET_SOCIAL_RESTRICTION_BANNED_DATE_RANGE_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH/restrictions/banned/dateRange"
 const val V2_PRISONER_GET_REQUEST_VISIT_RESTRICTION_DATE_RANGES_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH/restrictions/visit-request/date-ranges"
 
+const val V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH: String = "$V2_PRISONER_CONTACTS_CONTROLLER_PATH/contacts/{contactId}/relationships/{relationshipId}"
+
 @RestController
 @Validated
 @RequestMapping(name = "Contact Resource v2", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -289,4 +291,59 @@ class PrisonerContactControllerV2(
     @RequestBody @Valid
     requestVisitVisitorRestrictionsDto: RequestVisitVisitorRestrictionsBodyDto,
   ): List<DateRangeDto> = contactService.getDateRangesForVisitorRestrictionsWhichEffectRequestVisits(requestVisitVisitorRestrictionsDto)
+
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
+  @GetMapping(V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH)
+  @Operation(
+    summary = "Get a single contact details via their prisoner / contact relationship",
+    description = "Get a single contact details via their prisoner / contact relationship",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Prisoner Contact Information Returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to retrieve prisoner's contact details",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to retrieve prisoner's contact details",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Prisoner not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getPrisonerContactDetailsViaRelationship(
+    @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
+    @PathVariable
+    prisonerId: String,
+
+    @Schema(description = "The ID of the contact which is associated with the prisoner", example = "57392371")
+    @PathVariable
+    contactId: String,
+
+    @Schema(description = "The ID of the prisoner / contact relationship", example = "23621947")
+    @PathVariable
+    relationshipId: Long,
+
+    @RequestParam(value = "withRestrictions", required = false)
+    @Parameter(description = "Defaults to false. Returns contact restrictions if set to true, skips grabbing restrictions if false", example = "false")
+    withRestrictions: Boolean? = false,
+  ): ContactDto = contactService.getPrisonerContactViaRelationship(
+    prisonerId,
+    contactId,
+    relationshipId,
+    withRestrictions ?: false,
+  )
 }

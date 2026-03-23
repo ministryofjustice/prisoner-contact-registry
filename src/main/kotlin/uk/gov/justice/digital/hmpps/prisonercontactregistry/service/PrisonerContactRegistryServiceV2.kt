@@ -127,6 +127,17 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
       .toList()
   }
 
+  fun getPrisonerContactViaRelationship(
+    prisonerId: String,
+    contactId: String,
+    relationshipId: Long,
+    withRestrictions: Boolean,
+  ): ContactDto {
+    log.info("getPrisonerContactViaRelationship called with parameters : prisonerId $prisonerId, contactId $contactId, relationshipId $relationshipId")
+
+    return personalRelationshipsApiClient.getPrisonerContactViaRelationshipId(prisonerId, contactId, relationshipId, withRestrictions)
+  }
+
   private fun getContactsRestrictionDetails(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
     val contacts = getContactsByPrisonerId(prisonerId = prisonerId, approvedContactsOnly = true, withRestrictions = true)
       .filter { visitorIds.contains(it.personId) }

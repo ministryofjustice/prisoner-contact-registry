@@ -31,6 +31,35 @@ class PersonalRelationshipsApiClient(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
+  fun getPrisonerContactViaRelationshipId(prisonerId: String, contactId: String, relationshipId: Long, withRestrictions: Boolean): ContactDto {
+    val uri = "/prisoner/$prisonerId/contact/$contactId"
+
+    val contactRelationships = webClient.get()
+      .uri(uri)
+      .retrieve()
+      .bodyToMono(object : ParameterizedTypeReference<List<PersonalRelationshipsContactDto>>() {})
+      .onErrorResume { e ->
+        if (!clientUtils.isNotFoundError(e)) {
+          logger.error("getPrisonerContactViaRelationshipId Failed for get request $uri")
+          Mono.error(e)
+        } else {
+          logger.error("getPrisonerContactViaRelationshipId returned NOT_FOUND for get request $uri")
+          Mono.error { PrisonerNotFoundException("Contact $contactId not found for prisoner $prisonerId on personal-relationships-api") }
+        }
+      }
+      .blockOptional(apiTimeout)
+      .orElseThrow { IllegalStateException("Timeout getting contact $contactId for prisoner $prisonerId on personal-relationships-api") }
+      .filter { it.prisonerContactId == relationshipId }
+
+    val allPrisonerContactRestrictions = if (withRestrictions) {
+      getPrisonerContactRestrictions(listOf(relationshipId))
+    } else {
+      null
+    }
+
+    return convertToContactDto(contactRelationships, allPrisonerContactRestrictions).first()
+  }
+
   fun getPrisonerContacts(prisonerId: String, approvedVisitorOnly: Boolean, withRestrictions: Boolean): List<ContactDto> {
     logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api")
 
