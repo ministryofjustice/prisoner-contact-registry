@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relatio
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
-import java.time.LocalDate
 
 @Suppress("ClassName")
 @DisplayName("PrisonerContactControllerV2 - $V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH")
@@ -144,7 +143,7 @@ class PrisonerGetContactViaRelationshipIdTest : IntegrationTestBase() {
       contactId = chosenContact,
       relationshipId = 999001L,
       withRestrictions = false,
-      )
+    )
       .expectStatus().isOk
       .expectBody()
 

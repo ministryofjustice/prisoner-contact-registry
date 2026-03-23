@@ -328,15 +328,12 @@ class PrisonerContactControllerV2(
     @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
     @PathVariable
     prisonerId: String,
-
     @Schema(description = "The ID of the contact which is associated with the prisoner", example = "57392371")
     @PathVariable
     contactId: String,
-
     @Schema(description = "The ID of the prisoner / contact relationship", example = "23621947")
     @PathVariable
     relationshipId: Long,
-
     @RequestParam(value = "withRestrictions", required = false)
     @Parameter(description = "Defaults to false. Returns contact restrictions if set to true, skips grabbing restrictions if false", example = "false")
     withRestrictions: Boolean? = false,
