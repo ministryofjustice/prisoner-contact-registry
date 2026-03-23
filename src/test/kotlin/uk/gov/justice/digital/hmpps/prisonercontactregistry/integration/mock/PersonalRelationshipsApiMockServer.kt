@@ -20,6 +20,26 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relatio
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 
 class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
+  fun stubGetPrisonerContactViaRelationshipId(
+    prisonerId: String,
+    contactId: Long,
+    relationships: List<PersonalRelationshipsContactDto>? = null,
+    httpStatus: HttpStatus = HttpStatus.OK,
+  ) {
+    val uri = "/prisoner/$prisonerId/contact/$contactId"
+
+    val response = if (relationships == null) {
+      aResponse().withStatus(httpStatus.value())
+    } else {
+      aResponse()
+        .withStatus(httpStatus.value())
+        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withBody(TestObjectMapper.mapper.writeValueAsString(relationships))
+    }
+
+    stubFor(get(urlPathEqualTo(uri)).willReturn(response))
+  }
+
   fun stubGetAllContacts(
     prisonerId: String,
     contacts: List<PersonalRelationshipsContactDto>? = null,
