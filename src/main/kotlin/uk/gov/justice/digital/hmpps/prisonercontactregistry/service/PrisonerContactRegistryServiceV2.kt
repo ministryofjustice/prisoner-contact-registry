@@ -135,7 +135,12 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
   ): ContactDto {
     log.info("getPrisonerContactViaRelationship called with parameters : prisonerId $prisonerId, contactId $contactId, relationshipId $relationshipId")
 
-    return personalRelationshipsApiClient.getPrisonerContactViaRelationshipId(prisonerId, contactId, relationshipId, withRestrictions)
+    val contact = personalRelationshipsApiClient.getPrisonerContactViaRelationshipId(prisonerId, contactId, relationshipId, withRestrictions)
+    if (contact == null) {
+      throw VisitorNotFoundException(message = "Contact with id $contactId not found for prisoner $prisonerId, for relationship (prisonerContactId) $relationshipId")
+    }
+
+    return contact
   }
 
   private fun getContactsRestrictionDetails(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {

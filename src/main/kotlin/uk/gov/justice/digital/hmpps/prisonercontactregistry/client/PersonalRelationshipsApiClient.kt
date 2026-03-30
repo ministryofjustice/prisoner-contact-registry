@@ -31,7 +31,7 @@ class PersonalRelationshipsApiClient(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun getPrisonerContactViaRelationshipId(prisonerId: String, contactId: String, relationshipId: Long, withRestrictions: Boolean): ContactDto {
+  fun getPrisonerContactViaRelationshipId(prisonerId: String, contactId: String, relationshipId: Long, withRestrictions: Boolean): ContactDto? {
     val uri = "/prisoner/$prisonerId/contact/$contactId"
 
     val contactRelationships = webClient.get()
@@ -49,15 +49,19 @@ class PersonalRelationshipsApiClient(
       }
       .blockOptional(apiTimeout)
       .orElseThrow { IllegalStateException("Timeout getting contact $contactId for prisoner $prisonerId on personal-relationships-api") }
-      .filter { it.prisonerContactId == relationshipId }
+      .firstOrNull { it.prisonerContactId == relationshipId }
+
+    if (contactRelationships == null) {
+      return null
+    }
 
     val allPrisonerContactRestrictions = if (withRestrictions) {
-      getPrisonerContactRestrictions(listOf(relationshipId))
+      getPrisonerContactRestrictions(listOf(contactRelationships.prisonerContactId))
     } else {
       null
     }
 
-    return convertToContactDto(contactRelationships, allPrisonerContactRestrictions).first()
+    return convertToContactDto(listOf(contactRelationships), allPrisonerContactRestrictions).firstOrNull()
   }
 
   fun getPrisonerContacts(prisonerId: String, approvedVisitorOnly: Boolean, withRestrictions: Boolean): List<ContactDto> {
