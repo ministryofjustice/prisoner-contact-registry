@@ -66,7 +66,7 @@ class ContactsController(
     @Schema(description = "The ID of the contact whose global restrictions are sought.", example = "57392371")
     @PathVariable
     contactId: Long,
-  ): List<GlobalContactRestrictionDto>? {
+  ): List<GlobalContactRestrictionDto> {
     log.debug("getContactRestrictions called with params : contactId: {}", contactId)
 
     return contactService.getContactGlobalRestrictions(contactId)

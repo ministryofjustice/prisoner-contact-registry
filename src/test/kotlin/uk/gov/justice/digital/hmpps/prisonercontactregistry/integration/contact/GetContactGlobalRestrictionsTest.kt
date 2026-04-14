@@ -20,22 +20,18 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
   inner class authentication {
     @Test
     fun `requires authentication`() {
-      val prisonerId = "A1234AA"
       val contactId = 2187525L
-      val relationshipId = 999001L
 
-      webTestClient.get().uri("v2/prisoners/$prisonerId/contacts/$contactId/relationships/$relationshipId")
+      webTestClient.get().uri("contacts/$contactId/restrictions")
         .exchange()
         .expectStatus().isUnauthorized
     }
 
     @Test
     fun `requires correct role`() {
-      val prisonerId = "A1234AA"
       val contactId = 2187525L
-      val relationshipId = 999001L
 
-      webTestClient.get().uri("v2/prisoners/$prisonerId/contacts/$contactId/relationships/$relationshipId")
+      webTestClient.get().uri("contacts/$contactId/restrictions")
         .headers(setAuthorisation(roles = listOf("AnyThingWillDo")))
         .exchange()
         .expectStatus().isForbidden
@@ -84,7 +80,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `when personal relationship API restrictions call fails with NOT_FOUND then empty list is returned`() {
+  fun `when personal relationship API restrictions call fails with NOT_FOUND then entire call fails`() {
     val contactId = 2187525L
     val globalRestrictions = null
 

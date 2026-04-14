@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relatio
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PersonNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.PrisonerNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.utils.ClientUtils
 import java.time.Duration
@@ -136,7 +137,7 @@ class PersonalRelationshipsApiClient(
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact restrictions for uri $uri on personal-relationships-api") }
   }
 
-  fun getContactGlobalRestrictions(contactId: Long): List<GlobalContactRestrictionDto>? {
+  fun getContactGlobalRestrictions(contactId: Long): List<GlobalContactRestrictionDto> {
     val uri = "/contact/$contactId/restriction"
 
     logger.info("Get a contact's global restrictions called $uri, via the personal-relationships-api")
@@ -152,7 +153,7 @@ class PersonalRelationshipsApiClient(
           Mono.error(e)
         } else {
           logger.error("get contact's global restrictions returned NOT_FOUND for get request $uri")
-          Mono.error(e)
+          Mono.error { PersonNotFoundException("Contact with id $contactId not found") }
         }
       }
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting a contact's global restrictions for uri $uri on personal-relationships-api") }

@@ -146,7 +146,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
 
   fun getContactGlobalRestrictions(
     contactId: Long,
-  ): List<GlobalContactRestrictionDto>? {
+  ): List<GlobalContactRestrictionDto> {
     log.info("getContactGlobalRestrictions called with parameters : contactId $contactId")
     return personalRelationshipsApiClient.getContactGlobalRestrictions(contactId)
   }
