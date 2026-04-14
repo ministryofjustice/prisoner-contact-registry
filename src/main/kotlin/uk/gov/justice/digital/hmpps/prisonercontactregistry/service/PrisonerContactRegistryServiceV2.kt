@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
@@ -141,6 +142,13 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
     }
 
     return contact
+  }
+
+  fun getContactGlobalRestrictions(
+    contactId: Long,
+  ): List<GlobalContactRestrictionDto>? {
+    log.info("getContactGlobalRestrictions called with parameters : contactId $contactId")
+    return personalRelationshipsApiClient.getContactGlobalRestrictions(contactId)
   }
 
   private fun getContactsRestrictionDetails(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {

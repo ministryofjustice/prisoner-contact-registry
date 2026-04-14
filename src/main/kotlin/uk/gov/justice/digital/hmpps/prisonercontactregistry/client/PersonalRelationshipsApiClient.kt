@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
@@ -132,6 +134,28 @@ class PersonalRelationshipsApiClient(
         Mono.error(e)
       }
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting contact restrictions for uri $uri on personal-relationships-api") }
+  }
+
+  fun getContactGlobalRestrictions(contactId: Long): List<GlobalContactRestrictionDto>? {
+    val uri = "/contact/$contactId/restriction"
+
+    logger.info("Get a contact's global restrictions called $uri, via the personal-relationships-api")
+
+    return webClient
+      .get()
+      .uri(uri)
+      .retrieve()
+      .bodyToMono<List<GlobalContactRestrictionDto>>()
+      .onErrorResume { e ->
+        if (!clientUtils.isNotFoundError(e)) {
+          logger.error("get contact's global restrictions returned an error for get request $uri")
+          Mono.error(e)
+        } else {
+          logger.error("get contact's global restrictions returned NOT_FOUND for get request $uri")
+          Mono.error(e)
+        }
+      }
+      .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting a contact's global restrictions for uri $uri on personal-relationships-api") }
   }
 
   /**
