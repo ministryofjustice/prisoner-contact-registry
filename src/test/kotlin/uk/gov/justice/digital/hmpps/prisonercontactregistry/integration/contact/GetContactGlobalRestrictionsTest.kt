@@ -41,7 +41,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `when call to get global restrictions are made then any existing restrictions are returned`() {
+  fun `when call to get global restrictions is made then all existing global restrictions are returned`() {
     val contactId = 2187525L
     val restriction1 = createGlobalRestriction(contactRestrictionId = 1L, contactId = contactId, restrictionType = "BAN")
     val restriction2 = createGlobalRestriction(contactRestrictionId = 2L, contactId = contactId, restrictionType = "CLOSED")
