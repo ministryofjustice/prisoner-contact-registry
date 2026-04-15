@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryServiceV2
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.ContactsService
 
 const val CONTACTS_CONTROLLER_PATH: String = "v2/contacts/{contactId}"
 const val GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/restrictions"
@@ -24,7 +24,7 @@ const val GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLL
 @Validated
 @RequestMapping(name = "Contact Resource v2", produces = [MediaType.APPLICATION_JSON_VALUE])
 class ContactsController(
-  private val contactService: PrisonerContactRegistryServiceV2,
+  private val contactsService: ContactsService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -66,9 +66,9 @@ class ContactsController(
     @Schema(description = "The ID of the contact whose global restrictions are sought.", example = "57392371")
     @PathVariable
     contactId: Long,
-  ): List<GlobalContactRestrictionDto> {
+  ): List<RestrictionDto> {
     log.debug("getContactGlobalRestrictions called with params : contactId: {}", contactId)
 
-    return contactService.getContactGlobalRestrictions(contactId)
+    return contactsService.getContactGlobalRestrictions(contactId)
   }
 }

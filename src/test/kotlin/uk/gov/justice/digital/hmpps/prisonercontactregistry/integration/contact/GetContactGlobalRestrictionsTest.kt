@@ -9,7 +9,7 @@ import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 
@@ -59,9 +59,9 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
     val restrictions = getResults(returnResult)
 
     assertThat(restrictions.size).isEqualTo(2)
-    assertThat(restrictions[0].contactRestrictionId).isEqualTo(restriction1.contactRestrictionId)
+    assertThat(restrictions[0].restrictionId).isEqualTo(restriction1.contactRestrictionId)
     assertThat(restrictions[0].restrictionType).isEqualTo(restriction1.restrictionType)
-    assertThat(restrictions[1].contactRestrictionId).isEqualTo(restriction2.contactRestrictionId)
+    assertThat(restrictions[1].restrictionId).isEqualTo(restriction2.contactRestrictionId)
     assertThat(restrictions[1].restrictionType).isEqualTo(restriction2.restrictionType)
 
     verify(personalRelationshipsApiClientSpy, times(1)).getContactGlobalRestrictions(contactId)
@@ -91,7 +91,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
       .expectBody()
   }
 
-  private fun getResults(returnResult: WebTestClient.BodyContentSpec): List<GlobalContactRestrictionDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<GlobalContactRestrictionDto>::class.java).toList()
+  private fun getResults(returnResult: WebTestClient.BodyContentSpec): List<RestrictionDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<RestrictionDto>::class.java).toList()
 
   private fun callGetContactGlobalRestrictions(
     contactId: Long,
