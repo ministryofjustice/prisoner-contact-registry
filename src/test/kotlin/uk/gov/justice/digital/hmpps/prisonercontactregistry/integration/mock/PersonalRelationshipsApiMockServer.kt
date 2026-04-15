@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PageMetadata
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PagedResponse
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
@@ -116,6 +117,25 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
         .withRequestBody(equalToJson(expectedRequestJson, true, true))
         .willReturn(wiremockResponse),
     )
+  }
+
+  fun stubGetContactGlobalRestrictions(
+    contactId: Long,
+    restrictions: List<GlobalContactRestrictionDto>? = null,
+    httpStatus: HttpStatus = HttpStatus.NOT_FOUND,
+  ) {
+    val uri = "/contact/$contactId/restriction"
+
+    val response = if (restrictions == null) {
+      aResponse().withStatus(httpStatus.value())
+    } else {
+      aResponse()
+        .withStatus(HttpStatus.OK.value())
+        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withBody(TestObjectMapper.mapper.writeValueAsString(restrictions))
+    }
+
+    stubFor(get(urlPathEqualTo(uri)).willReturn(response))
   }
 
   /**
