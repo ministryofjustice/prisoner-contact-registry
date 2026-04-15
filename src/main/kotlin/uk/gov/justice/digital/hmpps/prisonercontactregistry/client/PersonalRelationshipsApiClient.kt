@@ -153,7 +153,7 @@ class PersonalRelationshipsApiClient(
           Mono.error(e)
         } else {
           logger.error("get contact's global restrictions returned NOT_FOUND for get request $uri")
-          Mono.error { PersonNotFoundException("Contact with id $contactId not found") }
+          Mono.error { PersonNotFoundException("Contact with id $contactId not found", cause = e) }
         }
       }
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting a contact's global restrictions for uri $uri on personal-relationships-api") }
