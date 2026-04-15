@@ -17,7 +17,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryServiceV2
 
-const val CONTACTS_CONTROLLER_PATH: String = "contacts/{contactId}"
+const val CONTACTS_CONTROLLER_PATH: String = "v2/contacts/{contactId}"
 const val GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/restrictions"
 
 @RestController

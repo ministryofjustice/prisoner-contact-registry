@@ -22,7 +22,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
     fun `requires authentication`() {
       val contactId = 2187525L
 
-      webTestClient.get().uri("contacts/$contactId/restrictions")
+      webTestClient.get().uri(GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString()))
         .exchange()
         .expectStatus().isUnauthorized
     }
@@ -31,7 +31,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
     fun `requires correct role`() {
       val contactId = 2187525L
 
-      webTestClient.get().uri("contacts/$contactId/restrictions")
+      webTestClient.get().uri(GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString()))
         .headers(setAuthorisation(roles = listOf("AnyThingWillDo")))
         .exchange()
         .expectStatus().isForbidden
@@ -96,7 +96,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
   private fun callGetContactGlobalRestrictions(
     contactId: Long,
   ): WebTestClient.ResponseSpec {
-    val uri = "contacts/$contactId/restrictions"
+    val uri = GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString())
     return webTestClient
       .get()
       .uri(uri)
