@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.ContactsService
 
 const val CONTACTS_CONTROLLER_PATH: String = "v2/contacts/{contactId}"
-const val GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/restrictions"
+const val GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/restrictions"
 
 @RestController
 @Validated
@@ -31,7 +31,7 @@ class ContactsController(
   }
 
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
-  @GetMapping(GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH)
+  @GetMapping(GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH)
   @Operation(
     summary = "Get a contact's global restrictions",
     description = "Returns a contact's global restrictions",

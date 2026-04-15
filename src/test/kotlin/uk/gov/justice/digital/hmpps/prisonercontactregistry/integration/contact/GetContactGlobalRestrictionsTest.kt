@@ -8,13 +8,13 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 
 @Suppress("ClassName")
-@DisplayName("ContactsController - $GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH")
+@DisplayName("ContactsController - $GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH")
 class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
   @Nested
   inner class authentication {
@@ -22,7 +22,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
     fun `requires authentication`() {
       val contactId = 2187525L
 
-      webTestClient.get().uri(GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString()))
+      webTestClient.get().uri(GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString()))
         .exchange()
         .expectStatus().isUnauthorized
     }
@@ -31,7 +31,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
     fun `requires correct role`() {
       val contactId = 2187525L
 
-      webTestClient.get().uri(GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString()))
+      webTestClient.get().uri(GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString()))
         .headers(setAuthorisation(roles = listOf("AnyThingWillDo")))
         .exchange()
         .expectStatus().isForbidden
@@ -96,7 +96,7 @@ class GetContactGlobalRestrictionsTest : IntegrationTestBase() {
   private fun callGetContactGlobalRestrictions(
     contactId: Long,
   ): WebTestClient.ResponseSpec {
-    val uri = GET_CONTACT_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString())
+    val uri = GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH.replace("{contactId}", contactId.toString())
     return webTestClient
       .get()
       .uri(uri)

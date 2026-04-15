@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
@@ -146,7 +145,7 @@ class PersonalRelationshipsApiClient(
       .get()
       .uri(uri)
       .retrieve()
-      .bodyToMono<List<GlobalContactRestrictionDto>>()
+      .bodyToMono(object : ParameterizedTypeReference<List<GlobalContactRestrictionDto>>() {})
       .onErrorResume { e ->
         if (!clientUtils.isNotFoundError(e)) {
           logger.error("get contact's global restrictions returned an error for get request $uri")

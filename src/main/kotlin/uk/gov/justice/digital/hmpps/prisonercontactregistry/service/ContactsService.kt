@@ -15,7 +15,7 @@ class ContactsService(private val personalRelationshipsApiClient: PersonalRelati
   fun getContactGlobalRestrictions(
     contactId: Long,
   ): List<RestrictionDto> {
-    log.info("getContactGlobalRestrictions called with parameters : contactId $contactId")
+    log.debug("getContactGlobalRestrictions called with parameters : contactId {}", contactId)
     return personalRelationshipsApiClient.getContactGlobalRestrictions(contactId).map { RestrictionDto(it) }
   }
 }
