@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.ContactsService
 
 const val CONTACTS_CONTROLLER_PATH: String = "v2/contacts/{contactId}"
-const val GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/restrictions"
+const val GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/restrictions/global"
 
 @RestController
 @Validated
