@@ -73,4 +73,9 @@ management:
 api:
   timeout: 10s
 
-springdoc.swagger-ui.version: 5.32.1
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+    version: 5.32.1

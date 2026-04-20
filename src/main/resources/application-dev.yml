@@ -15,3 +15,9 @@ personal:
 
 api:
   timeout: 10s
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
