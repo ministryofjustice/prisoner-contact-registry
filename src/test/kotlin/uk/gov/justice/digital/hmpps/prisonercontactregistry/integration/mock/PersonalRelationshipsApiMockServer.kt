@@ -46,7 +46,7 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     contacts: List<PersonalRelationshipsContactDto>? = null,
     approvedVisitorOnly: Boolean = false,
     page: Int = 0,
-    size: Int = 350,
+    size: Int = 400,
     httpStatus: HttpStatus = HttpStatus.OK,
   ) {
     val uri = "/prisoner/$prisonerId/contact"

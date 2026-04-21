@@ -94,7 +94,7 @@ class PersonalRelationshipsApiClient(
           .path(uri)
           .queryParam("relationshipType", "S")
           .queryParam("page", 0)
-          .queryParam("size", 350)
+          .queryParam("size", 400)
           .apply {
             // Only set this param if it's true. Setting it to false returns only unapproved visitors (we do not want this).
             if (approvedVisitorOnly) {
