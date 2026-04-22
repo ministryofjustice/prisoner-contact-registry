@@ -53,6 +53,8 @@ class GetContactLinkedPrisonersTest : IntegrationTestBase() {
 
     val returnedContactLinkedPrisonersList = getResults(returnResult)
     assertThat(returnedContactLinkedPrisonersList.size).isEqualTo(1)
+    assertThat(returnedContactLinkedPrisonersList[0].prisonerNumber).isEqualTo("123")
+    assertThat(returnedContactLinkedPrisonersList[0].relationshipTypeCode).isEqualTo("S")
 
     verify(personalRelationshipsApiClientSpy, times(1)).getContactLinkedPrisoners(contactId)
   }
