@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.ContactsServ
 
 const val CONTACTS_CONTROLLER_PATH: String = "v2/contacts/{contactId}"
 
-const val GET_CONTACT_LINKED_PRISONERS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/linked-prisoners"
+const val GET_CONTACT_LINKED_PRISONERS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/linked-social-prisoners"
 const val GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/restrictions/global"
 
 @RestController
