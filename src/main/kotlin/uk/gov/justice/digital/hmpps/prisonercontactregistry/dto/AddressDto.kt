@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 
 @Schema(description = "An address")
 class AddressDto(
@@ -28,17 +28,17 @@ class AddressDto(
   @param:Schema(description = "No Fixed Address", example = "N", required = true)
   val noFixedAddress: Boolean,
 ) {
-  constructor(personalRelationshipsContactDto: PersonalRelationshipsContactDto) : this(
-    flat = personalRelationshipsContactDto.flat,
-    premise = personalRelationshipsContactDto.property,
-    street = personalRelationshipsContactDto.street,
-    locality = personalRelationshipsContactDto.area,
-    town = personalRelationshipsContactDto.cityDescription,
-    postalCode = personalRelationshipsContactDto.postcode,
-    county = personalRelationshipsContactDto.countyDescription,
-    country = personalRelationshipsContactDto.countryDescription,
-    comment = personalRelationshipsContactDto.comments,
-    primary = personalRelationshipsContactDto.primaryAddress ?: false,
-    noFixedAddress = personalRelationshipsContactDto.noFixedAddress ?: false,
+  constructor(personalRelationshipsPrisonerContactDto: PersonalRelationshipsPrisonerContactDto) : this(
+    flat = personalRelationshipsPrisonerContactDto.flat,
+    premise = personalRelationshipsPrisonerContactDto.property,
+    street = personalRelationshipsPrisonerContactDto.street,
+    locality = personalRelationshipsPrisonerContactDto.area,
+    town = personalRelationshipsPrisonerContactDto.cityDescription,
+    postalCode = personalRelationshipsPrisonerContactDto.postcode,
+    county = personalRelationshipsPrisonerContactDto.countyDescription,
+    country = personalRelationshipsPrisonerContactDto.countryDescription,
+    comment = personalRelationshipsPrisonerContactDto.comments,
+    primary = personalRelationshipsPrisonerContactDto.primaryAddress ?: false,
+    noFixedAddress = personalRelationshipsPrisonerContactDto.noFixedAddress ?: false,
   )
 }

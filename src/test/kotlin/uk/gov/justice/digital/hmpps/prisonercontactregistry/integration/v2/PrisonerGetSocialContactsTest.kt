@@ -9,8 +9,8 @@ import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
@@ -52,7 +52,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       val visitorIds: List<Long> = listOf(2187525L)
 
       val prisonerContactIds = listOf(999001L)
-      val prContacts = createPersonalRelationshipsContactDtoList(
+      val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
         contactIds = visitorIds,
         prisonerContactIds = prisonerContactIds,
         isApproved = false,
@@ -81,10 +81,10 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val visitorIds: List<Long> = listOf(socialContactWithRestrictionId, socialContactWithExpiredRestrictionId)
     val prisonerContactIds = listOf(999001L, 999002L)
 
-    val prContacts = mutableListOf<PersonalRelationshipsContactDto>()
+    val prContacts = mutableListOf<PersonalRelationshipsPrisonerContactDto>()
 
     prContacts.addAll(
-      createPersonalRelationshipsContactDtoList(
+      createPersonalRelationshipsPrisonerContactDtoList(
         contactIds = visitorIds,
         prisonerContactIds = prisonerContactIds,
         isApproved = false,
@@ -92,7 +92,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     )
 
     prContacts.add(
-      PersonalRelationshipsContactDto(
+      PersonalRelationshipsPrisonerContactDto(
         contactId = socialContactWithNoDOB,
         prisonerContactId = 999003L,
         firstName = "test",
@@ -184,10 +184,10 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val visitorIds: List<Long> = listOf(socialContactWithRestrictionId, socialContactWithExpiredRestrictionId)
     val prisonerContactIds = listOf(999001L, 999002L)
 
-    val prContacts = mutableListOf<PersonalRelationshipsContactDto>()
+    val prContacts = mutableListOf<PersonalRelationshipsPrisonerContactDto>()
 
     prContacts.addAll(
-      createPersonalRelationshipsContactDtoList(
+      createPersonalRelationshipsPrisonerContactDtoList(
         contactIds = visitorIds,
         prisonerContactIds = prisonerContactIds,
         isApproved = false,
@@ -195,7 +195,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     )
 
     prContacts.add(
-      PersonalRelationshipsContactDto(
+      PersonalRelationshipsPrisonerContactDto(
         contactId = socialContactWithNoDOB,
         prisonerContactId = 999003L,
         firstName = "test",
@@ -287,10 +287,10 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val visitorIds: List<Long> = listOf(socialContactWithRestrictionId, socialContactWithExpiredRestrictionId)
     val prisonerContactIds = listOf(999001L, 999002L)
 
-    val prContacts = mutableListOf<PersonalRelationshipsContactDto>()
+    val prContacts = mutableListOf<PersonalRelationshipsPrisonerContactDto>()
 
     prContacts.addAll(
-      createPersonalRelationshipsContactDtoList(
+      createPersonalRelationshipsPrisonerContactDtoList(
         contactIds = visitorIds,
         prisonerContactIds = prisonerContactIds,
         isApproved = false,
@@ -298,7 +298,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     )
 
     prContacts.add(
-      PersonalRelationshipsContactDto(
+      PersonalRelationshipsPrisonerContactDto(
         contactId = socialContactWithNoDOB,
         prisonerContactId = 999003L,
         firstName = "test",
@@ -356,7 +356,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     val visitorIds: List<Long> = listOf(2187525L)
 
     val prisonerContactIds = listOf(999001L)
-    val prContacts = createPersonalRelationshipsContactDtoList(
+    val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = false,
@@ -378,7 +378,7 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
     result.expectStatus().isBadRequest
   }
 
-  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<ContactDto>::class.java)
+  private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<PrisonerContactDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<PrisonerContactDto>::class.java)
 
   private fun callGetSocialContacts(
     prisonerId: String,

@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryServiceV2
 import java.time.LocalDate
@@ -87,7 +87,7 @@ class PrisonerContactControllerV2(
     @RequestParam(value = "withRestrictions", required = false)
     @Parameter(description = "Defaults to false. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
     withRestrictions: Boolean? = false,
-  ): List<ContactDto> {
+  ): List<PrisonerContactDto> {
     log.debug("getPrisonerSocialContacts called with params : Prisoner: {}, hasDateOfBirth = {}, withRestrictions = {}", prisonerId, hasDateOfBirth, withRestrictions)
 
     return contactService.getSocialContactList(
@@ -140,7 +140,7 @@ class PrisonerContactControllerV2(
     @RequestParam(value = "withRestrictions", required = false)
     @Parameter(description = "Defaults to false. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
     withRestrictions: Boolean? = false,
-  ): List<ContactDto> {
+  ): List<PrisonerContactDto> {
     log.debug("getPrisonersSocialContactsApproved called with params : Prisoner: {}, hasDateOfBirth = {}, withRestrictions = {}", prisonerId, hasDateOfBirth, withRestrictions)
 
     return contactService.getSocialContactList(
@@ -337,7 +337,7 @@ class PrisonerContactControllerV2(
     @RequestParam(value = "withRestrictions", required = false)
     @Parameter(description = "Defaults to false. Returns contact restrictions if set to true, skips grabbing restrictions if false", example = "false")
     withRestrictions: Boolean? = false,
-  ): ContactDto = contactService.getPrisonerContactViaRelationship(
+  ): PrisonerContactDto = contactService.getPrisonerContactViaRelationship(
     prisonerId,
     contactId,
     relationshipId,

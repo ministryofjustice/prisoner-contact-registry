@@ -64,7 +64,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
       val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
       val prisonerContactIds = listOf(999001L)
-      val prContacts = createPersonalRelationshipsContactDtoList(
+      val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
         contactIds = listOf(2187525L),
         prisonerContactIds = prisonerContactIds,
         isApproved = true,
@@ -119,7 +119,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
     val prisonerContactIds = listOf(999001L)
-    val prContacts = createPersonalRelationshipsContactDtoList(
+    val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
       contactIds = listOf(2187524L),
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -160,7 +160,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
     val prisonerContactIds = listOf(999001L, 999002L)
-    val prContacts = createPersonalRelationshipsContactDtoList(
+    val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -239,7 +239,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
     val prisonerContactIds = listOf(999001L)
-    val prContacts = createPersonalRelationshipsContactDtoList(
+    val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -302,7 +302,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
     val prisonerContactIds = listOf(999001L)
-    val prContacts = createPersonalRelationshipsContactDtoList(
+    val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = true,
@@ -365,7 +365,7 @@ class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
     val uri = createDateRangeBanUri(prisonerId, visitorIdsString, fromDate, toDate)
 
     val prisonerContactIds = listOf(999001L)
-    val prContacts = createPersonalRelationshipsContactDtoList(
+    val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
       contactIds = visitorIds,
       prisonerContactIds = prisonerContactIds,
       isApproved = true,

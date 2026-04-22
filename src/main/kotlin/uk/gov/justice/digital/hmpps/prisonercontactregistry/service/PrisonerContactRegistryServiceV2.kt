@@ -4,9 +4,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
@@ -25,7 +25,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
     hasDateOfBirth: Boolean,
     approvedContactsOnly: Boolean,
     withRestrictions: Boolean,
-  ): List<ContactDto> {
+  ): List<PrisonerContactDto> {
     log.debug("getSocialContactList called with parameters : prisonerId - {}, hasDateOfBirth - {}, approvedContactsOnly - {}", prisonerId, hasDateOfBirth, approvedContactsOnly)
 
     var socialContacts = getContactsByPrisonerId(prisonerId, approvedContactsOnly, withRestrictions)
@@ -132,7 +132,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
     contactId: String,
     relationshipId: Long,
     withRestrictions: Boolean,
-  ): ContactDto {
+  ): PrisonerContactDto {
     log.info("getPrisonerContactViaRelationship called with parameters : prisonerId $prisonerId, contactId $contactId, relationshipId $relationshipId")
 
     val contact = personalRelationshipsApiClient.getPrisonerContactViaRelationshipId(prisonerId, contactId, relationshipId, withRestrictions)
@@ -156,7 +156,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
       .filter { it.restrictionType == restrictionType.toString() }
   }
 
-  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean, withRestrictions: Boolean): List<ContactDto> = personalRelationshipsApiClient.getPrisonerContacts(prisonerId, approvedContactsOnly, withRestrictions)
+  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean, withRestrictions: Boolean): List<PrisonerContactDto> = personalRelationshipsApiClient.getPrisonerContacts(prisonerId, approvedContactsOnly, withRestrictions)
 
-  private final fun getDefaultSortOrder(): Comparator<ContactDto> = compareBy({ it.lastName }, { it.firstName })
+  private final fun getDefaultSortOrder(): Comparator<PrisonerContactDto> = compareBy({ it.lastName }, { it.firstName })
 }

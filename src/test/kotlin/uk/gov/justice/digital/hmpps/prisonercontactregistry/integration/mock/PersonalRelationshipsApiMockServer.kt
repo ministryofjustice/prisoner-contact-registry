@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PageMetadata
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PagedResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
@@ -24,7 +25,7 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
   fun stubGetPrisonerContactViaRelationshipId(
     prisonerId: String,
     contactId: Long,
-    relationships: List<PersonalRelationshipsContactDto>? = null,
+    relationships: List<PersonalRelationshipsPrisonerContactDto>? = null,
     httpStatus: HttpStatus = HttpStatus.OK,
   ) {
     val uri = "/prisoner/$prisonerId/contact/$contactId"
@@ -43,7 +44,7 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
 
   fun stubGetAllContacts(
     prisonerId: String,
-    contacts: List<PersonalRelationshipsContactDto>? = null,
+    contacts: List<PersonalRelationshipsPrisonerContactDto>? = null,
     approvedVisitorOnly: Boolean = false,
     page: Int = 0,
     size: Int = 400,
@@ -133,6 +134,25 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
         .withStatus(HttpStatus.OK.value())
         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .withBody(TestObjectMapper.mapper.writeValueAsString(restrictions))
+    }
+
+    stubFor(get(urlPathEqualTo(uri)).willReturn(response))
+  }
+
+  fun stubGetContact(
+    contactId: Long,
+    contact: PersonalRelationshipsContactDto? = null,
+    httpStatus: HttpStatus = HttpStatus.NOT_FOUND,
+  ) {
+    val uri = "/contact/$contactId"
+
+    val response = if (contact == null) {
+      aResponse().withStatus(httpStatus.value())
+    } else {
+      aResponse()
+        .withStatus(HttpStatus.OK.value())
+        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withBody(TestObjectMapper.mapper.writeValueAsString(contact))
     }
 
     stubFor(get(urlPathEqualTo(uri)).willReturn(response))

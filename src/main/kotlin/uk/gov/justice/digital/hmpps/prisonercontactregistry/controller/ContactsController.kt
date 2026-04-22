@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.ContactsService
 
@@ -28,6 +29,48 @@ class ContactsController(
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
+
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
+  @GetMapping(CONTACTS_CONTROLLER_PATH)
+  @Operation(
+    summary = "Get a contact's global restrictions",
+    description = "Returns a contact's global restrictions",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Contact's global restrictions returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to retrieve a contact's global restrictions",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to retrieve a contact's global restrictions",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Contact not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getContact(
+    @Schema(description = "The ID of the contact whose global restrictions are sought.", example = "57392371")
+    @PathVariable
+    contactId: Long,
+  ): ContactDto {
+    log.debug("getContact called with contactId: {}", contactId)
+
+    return contactsService.getContactByContactId(contactId)
   }
 
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
