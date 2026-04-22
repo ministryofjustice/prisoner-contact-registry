@@ -21,7 +21,7 @@ class ContactsService(private val personalRelationshipsApiClient: PersonalRelati
 
   fun getContactLinkedPrisonersByContactId(contactId: Long): List<ContactLinkedPrisonerDto> {
     log.debug("getContactLinkedPrisonersByContactId called with parameters : contactId - {}", contactId)
-    return personalRelationshipsApiClient.getContactLinkedPrisoners(contactId)
+    return personalRelationshipsApiClient.getContactLinkedPrisoners(contactId).filter { it -> it.relationshipTypeCode == "S" }
   }
 
   fun getContactGlobalRestrictions(

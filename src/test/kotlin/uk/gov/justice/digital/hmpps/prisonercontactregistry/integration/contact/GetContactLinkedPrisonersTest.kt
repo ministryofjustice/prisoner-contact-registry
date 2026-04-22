@@ -43,7 +43,7 @@ class GetContactLinkedPrisonersTest : IntegrationTestBase() {
   @Test
   fun `when call to get contact linked prisoners is made then list of prisonerIds is returned`() {
     val contactId = 2187525L
-    val linkedPrisonerIds = listOf(ContactLinkedPrisonerDto("123"), ContactLinkedPrisonerDto("456"))
+    val linkedPrisonerIds = listOf(ContactLinkedPrisonerDto("123", "S"), ContactLinkedPrisonerDto("456", "O"))
 
     personalRelationshipsApiMockServer.stubGetContactLinkedPrisoners(contactId, linkedPrisoners = linkedPrisonerIds)
 
@@ -52,7 +52,7 @@ class GetContactLinkedPrisonersTest : IntegrationTestBase() {
       .expectBody()
 
     val returnedContactLinkedPrisonersList = getResults(returnResult)
-    assertThat(returnedContactLinkedPrisonersList.size).isEqualTo(2)
+    assertThat(returnedContactLinkedPrisonersList.size).isEqualTo(1)
 
     verify(personalRelationshipsApiClientSpy, times(1)).getContactLinkedPrisoners(contactId)
   }
