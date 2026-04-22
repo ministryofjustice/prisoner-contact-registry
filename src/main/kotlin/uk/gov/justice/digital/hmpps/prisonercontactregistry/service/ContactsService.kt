@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relatio
 class ContactsService(private val personalRelationshipsApiClient: PersonalRelationshipsApiClient) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+    const val SOCIAL_CONTACT_TYPE_CODE = "S"
   }
 
   fun getContactByContactId(contactId: Long): ContactDto {
@@ -21,7 +22,7 @@ class ContactsService(private val personalRelationshipsApiClient: PersonalRelati
 
   fun getContactLinkedPrisonersByContactId(contactId: Long): List<ContactLinkedPrisonerDto> {
     log.debug("getContactLinkedPrisonersByContactId called with parameters : contactId - {}", contactId)
-    return personalRelationshipsApiClient.getContactLinkedPrisoners(contactId).filter { it -> it.relationshipTypeCode == "S" }
+    return personalRelationshipsApiClient.getContactLinkedPrisoners(contactId).filter { it -> it.relationshipTypeCode == SOCIAL_CONTACT_TYPE_CODE }
   }
 
   fun getContactGlobalRestrictions(
