@@ -9,8 +9,8 @@ import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
@@ -57,10 +57,10 @@ class PrisonerGetContactViaRelationshipIdTest : IntegrationTestBase() {
 
     val relationshipIds = listOf(999001L, 999002L)
 
-    val prContacts = mutableListOf<PersonalRelationshipsContactDto>()
+    val prContacts = mutableListOf<PersonalRelationshipsPrisonerContactDto>()
 
     prContacts.addAll(
-      createPersonalRelationshipsContactDtoList(
+      createPersonalRelationshipsPrisonerContactDtoList(
         contactIds = contactIds,
         prisonerContactIds = relationshipIds,
       ),
@@ -123,10 +123,10 @@ class PrisonerGetContactViaRelationshipIdTest : IntegrationTestBase() {
 
     val relationshipIds = listOf(999001L, 999002L)
 
-    val prContacts = mutableListOf<PersonalRelationshipsContactDto>()
+    val prContacts = mutableListOf<PersonalRelationshipsPrisonerContactDto>()
 
     prContacts.addAll(
-      createPersonalRelationshipsContactDtoList(
+      createPersonalRelationshipsPrisonerContactDtoList(
         contactIds = contactIds,
         prisonerContactIds = relationshipIds,
       ),
@@ -163,7 +163,7 @@ class PrisonerGetContactViaRelationshipIdTest : IntegrationTestBase() {
     val contactId = 2187525L
     val relationshipId = 999001L
 
-    val prContacts = createPersonalRelationshipsContactDtoList(
+    val prContacts = createPersonalRelationshipsPrisonerContactDtoList(
       contactIds = listOf(contactId),
       prisonerContactIds = listOf(relationshipId),
     )
@@ -184,7 +184,7 @@ class PrisonerGetContactViaRelationshipIdTest : IntegrationTestBase() {
     result.expectStatus().isBadRequest
   }
 
-  private fun getResults(returnResult: WebTestClient.BodyContentSpec): ContactDto = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, ContactDto::class.java)
+  private fun getResults(returnResult: WebTestClient.BodyContentSpec): PrisonerContactDto = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, PrisonerContactDto::class.java)
 
   private fun callGetPrisonerContactViaRelationshipId(
     prisonerId: String,

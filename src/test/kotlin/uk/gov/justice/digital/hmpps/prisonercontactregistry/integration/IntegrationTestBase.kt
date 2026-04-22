@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelat
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock.HmppsAuthExtension
@@ -78,17 +79,31 @@ abstract class IntegrationTestBase {
     assertThat(contactAddress.noFixedAddress).isFalse()
   }
 
-  fun createPersonalRelationshipsContactDtoList(
+  fun createPersonalRelationshipsContactDto(
+    contactId: Long,
+    firstName: String = "test",
+    middleNames: String = "middle",
+    lastName: String = "user",
+    dateOfBirth: LocalDate = LocalDate.of(1980, 9, 13),
+  ): PersonalRelationshipsContactDto = PersonalRelationshipsContactDto(
+    id = contactId,
+    firstName = firstName,
+    middleNames = middleNames,
+    lastName = lastName,
+    dateOfBirth = dateOfBirth,
+  )
+
+  fun createPersonalRelationshipsPrisonerContactDtoList(
     contactIds: List<Long>,
     prisonerContactIds: List<Long>,
     isApproved: Boolean = true,
-  ): List<PersonalRelationshipsContactDto> {
+  ): List<PersonalRelationshipsPrisonerContactDto> {
     require(contactIds.size == prisonerContactIds.size) {
       "contactIds and prisonerContactIds must be the same size"
     }
 
     return contactIds.mapIndexed { index, contactId ->
-      PersonalRelationshipsContactDto(
+      PersonalRelationshipsPrisonerContactDto(
         contactId = contactId,
         prisonerContactId = prisonerContactIds[index],
         firstName = "test",

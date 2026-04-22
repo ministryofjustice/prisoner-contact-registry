@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import java.time.LocalDate
 
-@Schema(description = "A contact for a prisoner")
+@Schema(description = "A contact (no prisoner relationship)")
 data class ContactDto(
-  @param:Schema(description = "Identifier for this contact (Person in NOMIS)", example = "5871791")
-  val personId: Long? = null,
+  @param:Schema(description = "Identifier for this contact", example = "5871791")
+  val contactId: Long? = null,
   @param:Schema(description = "First name", example = "John", required = true)
   val firstName: String,
   @param:Schema(description = "Middle name", example = "Mark", required = false)
@@ -16,43 +16,13 @@ data class ContactDto(
   val lastName: String,
   @param:Schema(description = "Date of birth", example = "1980-01-28", required = false)
   val dateOfBirth: LocalDate? = null,
-  @param:Schema(description = "Code for relationship to Prisoner", example = "RO", required = true)
-  val relationshipCode: String,
-  @param:Schema(description = "Description of relationship to Prisoner", example = "Responsible Officer", required = false)
-  val relationshipDescription: String? = null,
-  @param:Schema(description = "Type of Contact", example = "O", required = true)
-  val contactType: String,
-  @param:Schema(description = "Description of Contact Type", example = "Official", required = false)
-  val contactTypeDescription: String? = null,
-  @param:Schema(description = "Approved Visitor Flag", required = true)
-  val approvedVisitor: Boolean,
-  @param:Schema(description = "Emergency Contact Flag", required = true)
-  val emergencyContact: Boolean,
-  @param:Schema(description = "Next of Kin Flag", required = true)
-  val nextOfKin: Boolean,
-  @param:Schema(description = "List of restrictions associated with the contact", required = false)
-  val restrictions: List<RestrictionDto> = listOf(),
-  @param:Schema(description = "Address associated with the contact", required = false)
-  val address: AddressDto? = null,
-  @param:Schema(description = "Additional Information", example = "This is a comment text", required = false)
-  val commentText: String? = null,
 ) {
-  constructor(personalRelationshipsContact: PersonalRelationshipsContactDto, restrictions: List<RestrictionDto>) : this(
-    personId = personalRelationshipsContact.contactId,
+  constructor(personalRelationshipsContact: PersonalRelationshipsContactDto) : this(
+    contactId = personalRelationshipsContact.id,
     firstName = personalRelationshipsContact.firstName.toNormalCase()!!,
     middleName = personalRelationshipsContact.middleNames.toNormalCase(),
     lastName = personalRelationshipsContact.lastName.toNormalCase()!!,
     dateOfBirth = personalRelationshipsContact.dateOfBirth,
-    relationshipCode = personalRelationshipsContact.relationshipToPrisonerCode,
-    relationshipDescription = personalRelationshipsContact.relationshipToPrisonerDescription,
-    contactType = personalRelationshipsContact.relationshipTypeCode,
-    contactTypeDescription = personalRelationshipsContact.relationshipTypeDescription,
-    approvedVisitor = personalRelationshipsContact.isApprovedVisitor,
-    emergencyContact = personalRelationshipsContact.isEmergencyContact,
-    nextOfKin = personalRelationshipsContact.isNextOfKin,
-    restrictions = restrictions,
-    address = AddressDto(personalRelationshipsContact),
-    commentText = personalRelationshipsContact.comments,
   )
 }
 
