@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import java.time.LocalDate
 
-@Schema(description = "A contact for a prisoner")
+@Schema(description = "A contact (no prisoner relationship)")
 data class ContactDto(
   @param:Schema(description = "Identifier for this contact", example = "5871791")
   val contactId: Long? = null,

@@ -34,16 +34,16 @@ class ContactsController(
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(CONTACTS_CONTROLLER_PATH)
   @Operation(
-    summary = "Get a contact's global restrictions",
-    description = "Returns a contact's global restrictions",
+    summary = "Get a contact via Contact ID",
+    description = "Returns a contact's basic details",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Contact's global restrictions returned",
+        description = "Contact's basic details returned",
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Incorrect request to retrieve a contact's global restrictions",
+        description = "Incorrect request to retrieve a contact's details",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -53,7 +53,7 @@ class ContactsController(
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Incorrect permissions to retrieve a contact's global restrictions",
+        description = "Incorrect permissions to retrieve a contact's details",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -64,7 +64,7 @@ class ContactsController(
     ],
   )
   fun getContact(
-    @Schema(description = "The ID of the contact whose global restrictions are sought.", example = "57392371")
+    @Schema(description = "The ID of the contact", example = "57392371")
     @PathVariable
     contactId: Long,
   ): ContactDto {
