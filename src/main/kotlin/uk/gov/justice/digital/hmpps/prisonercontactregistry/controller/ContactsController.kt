@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.ContactsService
 
 const val CONTACTS_CONTROLLER_PATH: String = "v2/contacts/{contactId}"
+
+const val GET_CONTACT_LINKED_PRISONERS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/linked-social-prisoners"
 const val GET_CONTACT_GLOBAL_RESTRICTIONS_CONTROLLER_PATH: String = "$CONTACTS_CONTROLLER_PATH/restrictions/global"
 
 @RestController
@@ -71,6 +74,48 @@ class ContactsController(
     log.debug("getContact called with contactId: {}", contactId)
 
     return contactsService.getContactByContactId(contactId)
+  }
+
+  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
+  @GetMapping(GET_CONTACT_LINKED_PRISONERS_CONTROLLER_PATH)
+  @Operation(
+    summary = "Get a contact's linked prisoners via Contact ID",
+    description = "Returns a contact's linked prisoners (prisonerIds) as a list",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Contact's linked prisoners list returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Incorrect request to retrieve a contact's linked prisoners",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Incorrect permissions to retrieve a contact's linked prisoners",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Contact not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getContactLinkedPrisoners(
+    @Schema(description = "The ID of the contact", example = "57392371")
+    @PathVariable
+    contactId: Long,
+  ): List<ContactLinkedPrisonerDto> {
+    log.debug("getContactLinkedPrisoners called with contactId: {}", contactId)
+
+    return contactsService.getContactLinkedPrisonersByContactId(contactId)
   }
 
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")

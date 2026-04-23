@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PageMetadata
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PagedResponse
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
@@ -156,6 +157,47 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     }
 
     stubFor(get(urlPathEqualTo(uri)).willReturn(response))
+  }
+
+  fun stubGetContactLinkedPrisoners(
+    contactId: Long,
+    linkedPrisoners: List<ContactLinkedPrisonerDto>? = null,
+    page: Int = 0,
+    size: Int = 100,
+    httpStatus: HttpStatus = HttpStatus.OK,
+  ) {
+    val uri = "/contact/$contactId/linked-prisoners"
+
+    val response = if (linkedPrisoners == null) {
+      aResponse().withStatus(httpStatus.value())
+    } else {
+      val totalElements = linkedPrisoners.size.toLong()
+      val totalPages = if (size <= 0) 0 else kotlin.math.ceil(totalElements.toDouble() / size.toDouble()).toInt()
+
+      aResponse()
+        .withStatus(httpStatus.value())
+        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withBody(
+          TestObjectMapper.mapper.writeValueAsString(
+            PagedResponse(
+              content = linkedPrisoners,
+              page = PageMetadata(
+                size = size,
+                number = page,
+                totalElements = totalElements,
+                totalPages = totalPages,
+              ),
+            ),
+          ),
+        )
+    }
+
+    val mapping = get(urlPathEqualTo(uri))
+      .withQueryParam("page", equalTo(page.toString()))
+      .withQueryParam("size", equalTo(size.toString()))
+      .willReturn(response)
+
+    stubFor(mapping)
   }
 
   /**

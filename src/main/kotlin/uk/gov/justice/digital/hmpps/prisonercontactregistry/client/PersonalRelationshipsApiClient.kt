@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
@@ -79,6 +80,35 @@ class PersonalRelationshipsApiClient(
         }
       }
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting a contact's global restrictions for uri $uri on personal-relationships-api") }
+  }
+
+  fun getContactLinkedPrisoners(contactId: Long): List<ContactLinkedPrisonerDto> {
+    val uri = "/contact/$contactId/linked-prisoners"
+
+    logger.info("Get a contact's linked prisoners using contactId called $uri, via the personal-relationships-api")
+
+    return webClient.get()
+      .uri { uriBuilder ->
+        uriBuilder
+          .path(uri)
+          .queryParam("page", 0)
+          .queryParam("size", 100)
+          .build()
+      }
+      .retrieve()
+      .bodyToMono(object : ParameterizedTypeReference<PagedResponse<ContactLinkedPrisonerDto>>() {})
+      .onErrorResume { e ->
+        if (!clientUtils.isNotFoundError(e)) {
+          logger.error("get contacts linked prisoners Failed for get request $uri")
+          Mono.error(e)
+        } else {
+          logger.error("get contacts linked prisoners returned NOT_FOUND for get request $uri")
+          Mono.error { PrisonerNotFoundException("Contact not found for contactId - $contactId on personal-relationships-api") }
+        }
+      }
+      .blockOptional(apiTimeout)
+      .orElseThrow { IllegalStateException("Timeout getting contact linked prisoners for contactId $contactId on personal-relationships-api") }
+      .content
   }
 
   fun getPrisonerContactViaRelationshipId(prisonerId: String, contactId: String, relationshipId: Long, withRestrictions: Boolean): PrisonerContactDto? {
