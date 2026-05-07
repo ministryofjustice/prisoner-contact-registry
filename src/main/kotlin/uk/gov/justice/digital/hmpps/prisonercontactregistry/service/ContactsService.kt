@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelat
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.toRestrictionDto
 
 @Service
 class ContactsService(private val personalRelationshipsApiClient: PersonalRelationshipsApiClient) {
@@ -29,6 +30,6 @@ class ContactsService(private val personalRelationshipsApiClient: PersonalRelati
     contactId: Long,
   ): List<RestrictionDto> {
     log.debug("getContactGlobalRestrictions called with parameters : contactId {}", contactId)
-    return personalRelationshipsApiClient.getContactGlobalRestrictions(contactId).map { RestrictionDto(it) }
+    return personalRelationshipsApiClient.getContactGlobalRestrictions(contactId).map { it.toRestrictionDto() }
   }
 }

@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers
 
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import java.time.LocalDate
 
@@ -32,7 +34,7 @@ fun PrisonerContactRestrictionsResponseDto?.toIndexedRestrictions(today: LocalDa
     .associate { group ->
       group.prisonerContactId to group.prisonerContactRestrictions
         .filter { it.expiryDate.isActiveOn(today) }
-        .map { RestrictionDto(it) }
+        .map { it.toRestrictionDto() }
     }
 
   val globalByContactId = prisonerContactRestrictions
@@ -42,7 +44,7 @@ fun PrisonerContactRestrictionsResponseDto?.toIndexedRestrictions(today: LocalDa
     .filter { it.expiryDate.isActiveOn(today) }
     .groupBy(
       keySelector = { it.contactId },
-      valueTransform = { RestrictionDto(it) },
+      valueTransform = { it.toRestrictionDto() },
     )
 
   return IndexedRestrictions(
@@ -50,5 +52,25 @@ fun PrisonerContactRestrictionsResponseDto?.toIndexedRestrictions(today: LocalDa
     globalByContactId = globalByContactId,
   )
 }
+
+fun PrisonerContactRestrictionDto.toRestrictionDto(): RestrictionDto = RestrictionDto(
+  restrictionId = prisonerContactRestrictionId.toInt(),
+  restrictionType = restrictionType,
+  restrictionTypeDescription = restrictionTypeDescription,
+  startDate = startDate,
+  expiryDate = expiryDate,
+  globalRestriction = false,
+  comment = comments,
+)
+
+fun GlobalContactRestrictionDto.toRestrictionDto(): RestrictionDto = RestrictionDto(
+  restrictionId = contactRestrictionId.toInt(),
+  restrictionType = restrictionType,
+  restrictionTypeDescription = restrictionTypeDescription,
+  startDate = startDate,
+  expiryDate = expiryDate,
+  globalRestriction = true,
+  comment = comments,
+)
 
 private fun LocalDate?.isActiveOn(today: LocalDate): Boolean = this == null || !today.isAfter(this)
