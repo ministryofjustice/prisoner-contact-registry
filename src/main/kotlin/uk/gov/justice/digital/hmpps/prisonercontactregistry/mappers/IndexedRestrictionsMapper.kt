@@ -8,24 +8,22 @@ data class IndexedRestrictions(
   private val localByPrisonerContactId: Map<Long, List<RestrictionDto>>,
   private val globalByContactId: Map<Long, List<RestrictionDto>>,
 ) {
-  fun forContact(contactId: Long, prisonerContactId: Long?): List<RestrictionDto> {
-    val local = prisonerContactId?.let { localByPrisonerContactId[it] }.orEmpty()
-    val global = globalByContactId[contactId].orEmpty()
-
-    return local + global
-  }
-
   companion object {
     val EMPTY = IndexedRestrictions(
       localByPrisonerContactId = emptyMap(),
       globalByContactId = emptyMap(),
     )
   }
+
+  fun forContact(contactId: Long, prisonerContactId: Long?): List<RestrictionDto> {
+    val local = prisonerContactId?.let { localByPrisonerContactId[it] }.orEmpty()
+    val global = globalByContactId[contactId].orEmpty()
+
+    return local + global
+  }
 }
 
-fun PrisonerContactRestrictionsResponseDto?.toIndexedRestrictions(
-  today: LocalDate = LocalDate.now(),
-): IndexedRestrictions {
+fun PrisonerContactRestrictionsResponseDto?.toIndexedRestrictions(today: LocalDate = LocalDate.now()): IndexedRestrictions {
   if (this == null) {
     return IndexedRestrictions.EMPTY
   }
