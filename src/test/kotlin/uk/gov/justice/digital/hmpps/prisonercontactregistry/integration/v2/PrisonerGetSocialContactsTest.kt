@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH
@@ -175,7 +176,8 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       assertContactAddress(contact.address!!)
     }
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = false, withRestrictions = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactRestrictions(listOf(999001L, 999002L, 999003L))
   }
 
   @Test
@@ -278,7 +280,8 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       assertContactAddress(contact.address!!)
     }
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = false, withRestrictions = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactRestrictions(listOf(999001L, 999002L, 999003L))
   }
 
   @Test
@@ -346,7 +349,8 @@ class PrisonerGetSocialContactsTest : IntegrationTestBase() {
       assertThat(contact.restrictions).isEmpty()
     }
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = false, withRestrictions = false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = false)
+    verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }
 
   @Test

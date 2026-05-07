@@ -4,10 +4,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient.Companion.logger
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
@@ -135,12 +138,23 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
   ): PrisonerContactDto {
     log.info("getPrisonerContactViaRelationship called with parameters : prisonerId $prisonerId, contactId $contactId, relationshipId $relationshipId")
 
-    val contact = personalRelationshipsApiClient.getPrisonerContactViaRelationshipId(prisonerId, contactId, relationshipId, withRestrictions)
+    val contact = personalRelationshipsApiClient.getPrisonerContactViaRelationshipId(prisonerId, contactId, relationshipId)
     if (contact == null) {
       throw VisitorNotFoundException(message = "Contact with id $contactId not found for prisoner $prisonerId, for relationship (prisonerContactId) $relationshipId")
     }
 
-    return contact
+    val allPrisonerContactRestrictions = if (withRestrictions) {
+      personalRelationshipsApiClient.getPrisonerContactRestrictions(listOf(contact.prisonerContactId))
+    } else {
+      null
+    }
+
+    val prisonerContact = convertToContactDto(listOf(contact), allPrisonerContactRestrictions).firstOrNull()
+    if (prisonerContact == null) {
+      throw VisitorNotFoundException(message = "Contact with id $contactId not found for prisoner $prisonerId, for relationship (prisonerContactId) $relationshipId")
+    }
+
+    return prisonerContact
   }
 
   private fun getContactsRestrictionDetails(prisonerId: String, visitorIds: List<Long>, restrictionType: RestrictionType): List<RestrictionDto> {
@@ -156,7 +170,78 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
       .filter { it.restrictionType == restrictionType.toString() }
   }
 
-  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean, withRestrictions: Boolean): List<PrisonerContactDto> = personalRelationshipsApiClient.getPrisonerContacts(prisonerId, approvedContactsOnly, withRestrictions)
+  private fun getContactsByPrisonerId(prisonerId: String, approvedContactsOnly: Boolean, withRestrictions: Boolean): List<PrisonerContactDto> {
+    val prisonerContacts = personalRelationshipsApiClient.getPrisonerContacts(prisonerId, approvedContactsOnly)
+
+    logger.info("Get prisoner contacts called for $prisonerId, via the personal-relationships-api returned ${prisonerContacts.size} contacts, relationshipType = S, withRestrictions = $withRestrictions, approvedVisitorOnly = $approvedContactsOnly")
+
+    val allPrisonerContactRestrictions = if (withRestrictions) {
+      personalRelationshipsApiClient.getPrisonerContactRestrictions(prisonerContacts.map { it.prisonerContactId })
+    } else {
+      null
+    }
+
+    return convertToContactDto(prisonerContacts, allPrisonerContactRestrictions)
+  }
+
+  /**
+   * Builds ContactDto entries from Personal Relationships API data to preserve the contract we have with calling APIs.
+   *
+   * Notes:
+   * - The same contactId can appear multiple times, each containing a different
+   *   relationship to the prisoner (identified by prisonerContactId).
+   * - Restrictions can be relationship-level (local) or contact-level (global).
+   *
+   * This method:
+   * - Attaches local restrictions to the correct relationship using prisonerContactId.
+   * - Attaches global restrictions to all relationships for the same contactId.
+   * - Preserves duplicate contact entries where relationships differ.
+   *
+   * Returns:
+   * - A ContactDto list [to keep the exact structure as the previous client prison-api had]
+   */
+  private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsPrisonerContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto?): List<PrisonerContactDto> {
+    // 1) Index LOCAL restrictions by prisonerContactId (relationship-level)
+    val localByPrisonerContactId: Map<Long, List<RestrictionDto>> = if (prisonerContactRestrictions != null) {
+      prisonerContactRestrictions.prisonerContactRestrictions
+        .associate { group ->
+          group.prisonerContactId to group.prisonerContactRestrictions.map { r ->
+            RestrictionDto(personalRelationshipsLocalRestriction = r)
+          }.filter {
+            it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate)
+          }
+        }
+    } else {
+      emptyMap()
+    }
+
+    // 2) Index GLOBAL restrictions by contactId (contact-level) — DEDUPED by contactRestrictionId
+    val globalByContactId: Map<Long, List<RestrictionDto>> = if (prisonerContactRestrictions != null) {
+      prisonerContactRestrictions.prisonerContactRestrictions
+        .asSequence()
+        .flatMap { group -> group.globalContactRestrictions.asSequence() }
+        .distinctBy { it.contactRestrictionId }
+        .filter {
+          it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate)
+        }
+        .groupBy(
+          keySelector = { it.contactId },
+          valueTransform = { RestrictionDto(personalRelationshipsGlobalRestriction = it) },
+        )
+    } else {
+      emptyMap()
+    }
+
+    logger.info("Indexed restrictions: localByPrisonerContactId=${localByPrisonerContactId.size}, globalByContactId=${globalByContactId.size}")
+
+    // 3) Map contacts: relationship keeps its own local restrictions + contact's global restrictions
+    return prisonerContactsList.map { c ->
+      val local = localByPrisonerContactId[c.prisonerContactId].orEmpty()
+      val global = globalByContactId[c.contactId].orEmpty()
+
+      PrisonerContactDto(personalRelationshipsPrisonerContact = c, restrictions = local + global)
+    }
+  }
 
   private final fun getDefaultSortOrder(): Comparator<PrisonerContactDto> = compareBy({ it.lastName }, { it.firstName })
 }
