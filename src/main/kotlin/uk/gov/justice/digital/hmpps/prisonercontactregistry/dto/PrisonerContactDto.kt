@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 import java.time.LocalDate
 
 @Schema(description = "A contact for a prisoner")
@@ -36,29 +35,4 @@ data class PrisonerContactDto(
   val address: AddressDto? = null,
   @param:Schema(description = "Additional Information", example = "This is a comment text", required = false)
   val commentText: String? = null,
-) {
-  constructor(personalRelationshipsPrisonerContact: PersonalRelationshipsPrisonerContactDto, restrictions: List<RestrictionDto>) : this(
-    personId = personalRelationshipsPrisonerContact.contactId,
-    firstName = personalRelationshipsPrisonerContact.firstName.toNormalCase()!!,
-    middleName = personalRelationshipsPrisonerContact.middleNames.toNormalCase(),
-    lastName = personalRelationshipsPrisonerContact.lastName.toNormalCase()!!,
-    dateOfBirth = personalRelationshipsPrisonerContact.dateOfBirth,
-    relationshipCode = personalRelationshipsPrisonerContact.relationshipToPrisonerCode,
-    relationshipDescription = personalRelationshipsPrisonerContact.relationshipToPrisonerDescription,
-    contactType = personalRelationshipsPrisonerContact.relationshipTypeCode,
-    contactTypeDescription = personalRelationshipsPrisonerContact.relationshipTypeDescription,
-    approvedVisitor = personalRelationshipsPrisonerContact.isApprovedVisitor,
-    emergencyContact = personalRelationshipsPrisonerContact.isEmergencyContact,
-    nextOfKin = personalRelationshipsPrisonerContact.isNextOfKin,
-    restrictions = restrictions,
-    address = AddressDto(personalRelationshipsPrisonerContact),
-    commentText = personalRelationshipsPrisonerContact.comments,
-  )
-}
-
-private fun String?.toNormalCase(): String? = this
-  ?.lowercase()
-  ?.split(" ")
-  ?.joinToString(" ") { word ->
-    word.replaceFirstChar { it.uppercase() }
-  }
+)

@@ -15,6 +15,8 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.toIndexedRestrictions
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.toPrisonerContactDto
 import java.time.LocalDate
 
 @Service
@@ -200,46 +202,19 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
    * Returns:
    * - A ContactDto list [to keep the exact structure as the previous client prison-api had]
    */
-  private fun convertToContactDto(prisonerContactsList: List<PersonalRelationshipsPrisonerContactDto>, prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto?): List<PrisonerContactDto> {
-    // 1) Index LOCAL restrictions by prisonerContactId (relationship-level)
-    val localByPrisonerContactId: Map<Long, List<RestrictionDto>> = if (prisonerContactRestrictions != null) {
-      prisonerContactRestrictions.prisonerContactRestrictions
-        .associate { group ->
-          group.prisonerContactId to group.prisonerContactRestrictions.map { r ->
-            RestrictionDto(personalRelationshipsLocalRestriction = r)
-          }.filter {
-            it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate)
-          }
-        }
-    } else {
-      emptyMap()
-    }
+  private fun convertToContactDto(
+    prisonerContactsList: List<PersonalRelationshipsPrisonerContactDto>,
+    prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto?,
+  ): List<PrisonerContactDto> {
+    val indexedRestrictions = prisonerContactRestrictions.toIndexedRestrictions()
 
-    // 2) Index GLOBAL restrictions by contactId (contact-level) — DEDUPED by contactRestrictionId
-    val globalByContactId: Map<Long, List<RestrictionDto>> = if (prisonerContactRestrictions != null) {
-      prisonerContactRestrictions.prisonerContactRestrictions
-        .asSequence()
-        .flatMap { group -> group.globalContactRestrictions.asSequence() }
-        .distinctBy { it.contactRestrictionId }
-        .filter {
-          it.expiryDate == null || LocalDate.now().isBefore(it.expiryDate) || LocalDate.now().isEqual(it.expiryDate)
-        }
-        .groupBy(
-          keySelector = { it.contactId },
-          valueTransform = { RestrictionDto(personalRelationshipsGlobalRestriction = it) },
-        )
-    } else {
-      emptyMap()
-    }
-
-    logger.info("Indexed restrictions: localByPrisonerContactId=${localByPrisonerContactId.size}, globalByContactId=${globalByContactId.size}")
-
-    // 3) Map contacts: relationship keeps its own local restrictions + contact's global restrictions
-    return prisonerContactsList.map { c ->
-      val local = localByPrisonerContactId[c.prisonerContactId].orEmpty()
-      val global = globalByContactId[c.contactId].orEmpty()
-
-      PrisonerContactDto(personalRelationshipsPrisonerContact = c, restrictions = local + global)
+    return prisonerContactsList.map { contact ->
+      contact.toPrisonerContactDto(
+        restrictions = indexedRestrictions.forContact(
+          contactId = contact.contactId,
+          prisonerContactId = contact.prisonerContactId,
+        ),
+      )
     }
   }
 
