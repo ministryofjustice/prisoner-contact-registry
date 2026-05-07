@@ -151,7 +151,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
       null
     }
 
-    val prisonerContact = convertToPrisonerContactDto(listOf(contact), allPrisonerContactRestrictions).firstOrNull()
+    val prisonerContact = convertToPrisonerContactDtos(listOf(contact), allPrisonerContactRestrictions).firstOrNull()
     if (prisonerContact == null) {
       throw VisitorNotFoundException(message = "Contact with id $contactId not found for prisoner $prisonerId, for relationship (prisonerContactId) $relationshipId")
     }
@@ -183,7 +183,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
       null
     }
 
-    return convertToPrisonerContactDto(prisonerContacts, allPrisonerContactRestrictions)
+    return convertToPrisonerContactDtos(prisonerContacts, allPrisonerContactRestrictions)
   }
 
   /**
@@ -202,7 +202,7 @@ class PrisonerContactRegistryServiceV2(private val personalRelationshipsApiClien
    * Returns:
    * - A ContactDto list [to keep the exact structure as the previous client prison-api had]
    */
-  private fun convertToPrisonerContactDto(
+  private fun convertToPrisonerContactDtos(
     prisonerContactsList: List<PersonalRelationshipsPrisonerContactDto>,
     prisonerContactRestrictions: PrisonerContactRestrictionsResponseDto?,
   ): List<PrisonerContactDto> {
