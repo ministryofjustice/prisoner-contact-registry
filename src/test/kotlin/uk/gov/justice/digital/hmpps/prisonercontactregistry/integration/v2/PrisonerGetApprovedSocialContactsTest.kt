@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -179,7 +180,8 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       assertContactAddress(contact.address!!)
     }
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactRestrictions(listOf(999001L, 999002L, 999003L))
   }
 
   @Test
@@ -281,7 +283,8 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       assertContactAddress(contact.address!!)
     }
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactRestrictions(listOf(999001L, 999002L, 999003L))
   }
 
   @Test
@@ -348,7 +351,8 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
       assertThat(contact.restrictions).isEmpty()
     }
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true)
+    verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }
 
   @Test
@@ -365,7 +369,8 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
 
     val responseSpec = callGetApprovedSocialContacts(prisonerId).expectStatus().isNotFound
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true)
+    verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
     assertErrorResult(responseSpec, HttpStatus.NOT_FOUND, "Contacts not found for - $prisonerId on personal-relationships-api")
   }
 
@@ -384,7 +389,8 @@ class PrisonerGetApprovedSocialContactsTest : IntegrationTestBase() {
     callGetApprovedSocialContacts(prisonerId)
       .expectStatus().isBadRequest
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true, withRestrictions = false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContacts(prisonerId = prisonerId, approvedVisitorOnly = true)
+    verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }
 
   @Test

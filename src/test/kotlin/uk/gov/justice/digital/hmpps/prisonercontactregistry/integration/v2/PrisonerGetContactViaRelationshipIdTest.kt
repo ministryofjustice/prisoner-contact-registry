@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH
@@ -110,7 +111,8 @@ class PrisonerGetContactViaRelationshipIdTest : IntegrationTestBase() {
     assertContactAddress(contact.address!!)
     assertThat(contact.restrictions.size).isEqualTo(1)
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactViaRelationshipId(prisonerId = prisonerId, contactId = chosenContact.toString(), relationshipId = 999001L, withRestrictions = true)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactViaRelationshipId(prisonerId = prisonerId, contactId = chosenContact.toString(), relationshipId = 999001L)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactRestrictions(listOf(999001L))
   }
 
   @Test
@@ -153,7 +155,8 @@ class PrisonerGetContactViaRelationshipIdTest : IntegrationTestBase() {
     assertContactAddress(contact.address!!)
     assertThat(contact.restrictions).isEmpty()
 
-    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactViaRelationshipId(prisonerId = prisonerId, contactId = chosenContact.toString(), relationshipId = 999001L, withRestrictions = false)
+    verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactViaRelationshipId(prisonerId = prisonerId, contactId = chosenContact.toString(), relationshipId = 999001L)
+    verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }
 
   @Test
