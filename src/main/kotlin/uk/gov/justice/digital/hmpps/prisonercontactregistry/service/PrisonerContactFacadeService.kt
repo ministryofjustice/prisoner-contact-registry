@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.service
 
+import org.apache.coyote.BadRequestException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -98,7 +99,10 @@ class PrisonerContactFacadeService(
       visitBookingDetails,
     )
 
-    val visitorIds = visitBookingDetails.visitorIds.map { it.toLong() }
+    val visitorIds = visitBookingDetails.visitorIds.mapNotNull { it.toLongOrNull() }
+    if (visitorIds.size != visitBookingDetails.visitorIds.size) {
+      throw BadRequestException("One or more visitorIds are not valid numeric IDs: ${visitBookingDetails.visitorIds}")
+    }
 
     val contacts = getApprovedContactsForVisitorIdsOrThrow(
       prisonerId = visitBookingDetails.prisonerId,
