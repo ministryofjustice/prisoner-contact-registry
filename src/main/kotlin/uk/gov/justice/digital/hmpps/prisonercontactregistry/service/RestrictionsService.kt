@@ -16,9 +16,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.toRestrictio
 import java.time.LocalDate
 
 @Service
-class RestrictionsService(
-  private val personalRelationshipsApiClient: PersonalRelationshipsApiClient,
-) {
+class RestrictionsService(private val personalRelationshipsApiClient: PersonalRelationshipsApiClient) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }

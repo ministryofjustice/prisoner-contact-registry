@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactService
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactFacadeService
 import java.time.LocalDate
 
 const val V2_PRISONER_CONTACTS_CONTROLLER_PATH: String = "v2/prisoners/{prisonerId}"
@@ -38,9 +38,7 @@ const val V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH: String = "$V2_PR
 @RestController
 @Validated
 @RequestMapping(name = "Contact Resource v2", produces = [MediaType.APPLICATION_JSON_VALUE])
-class PrisonerContactController(
-  private val contactService: PrisonerContactService,
-) {
+class PrisonerContactController(private val contactService: PrisonerContactFacadeService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
