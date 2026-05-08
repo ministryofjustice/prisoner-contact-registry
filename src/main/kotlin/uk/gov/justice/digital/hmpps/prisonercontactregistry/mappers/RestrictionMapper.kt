@@ -7,8 +7,8 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relatio
 import java.time.LocalDate
 
 data class IndexedRestrictions(
-  private val localByPrisonerContactId: Map<Long, List<RestrictionDto>>,
-  private val globalByContactId: Map<Long, List<RestrictionDto>>,
+  val localByPrisonerContactId: Map<Long, List<RestrictionDto>>,
+  val globalByContactId: Map<Long, List<RestrictionDto>>,
 ) {
   companion object {
     val EMPTY = IndexedRestrictions(

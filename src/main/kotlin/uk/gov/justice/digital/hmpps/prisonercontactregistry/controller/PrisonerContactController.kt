@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactRegistryServiceV2
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerContactService
 import java.time.LocalDate
 
 const val V2_PRISONER_CONTACTS_CONTROLLER_PATH: String = "v2/prisoners/{prisonerId}"
@@ -38,8 +38,8 @@ const val V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH: String = "$V2_PR
 @RestController
 @Validated
 @RequestMapping(name = "Contact Resource v2", produces = [MediaType.APPLICATION_JSON_VALUE])
-class PrisonerContactControllerV2(
-  private val contactService: PrisonerContactRegistryServiceV2,
+class PrisonerContactController(
+  private val contactService: PrisonerContactService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -290,7 +290,7 @@ class PrisonerContactControllerV2(
   fun getDateRangesForVisitorRestrictionsWhichEffectRequestVisits(
     @RequestBody @Valid
     requestVisitVisitorRestrictionsDto: RequestVisitVisitorRestrictionsBodyDto,
-  ): List<DateRangeDto> = contactService.getDateRangesForVisitorRestrictionsWhichEffectRequestVisits(requestVisitVisitorRestrictionsDto)
+  ): List<DateRangeDto> = contactService.getDateRangesForVisitorRestrictionsWhichAffectRequestVisits(requestVisitVisitorRestrictionsDto)
 
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH)

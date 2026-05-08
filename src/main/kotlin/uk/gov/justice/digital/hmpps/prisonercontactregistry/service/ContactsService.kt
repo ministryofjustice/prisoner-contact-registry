@@ -7,10 +7,12 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelat
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.toRestrictionDto
 
 @Service
-class ContactsService(private val personalRelationshipsApiClient: PersonalRelationshipsApiClient) {
+class ContactsService(
+  private val restrictionsService: RestrictionsService,
+  private val personalRelationshipsApiClient: PersonalRelationshipsApiClient,
+) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
     const val SOCIAL_CONTACT_TYPE_CODE = "S"
@@ -26,10 +28,5 @@ class ContactsService(private val personalRelationshipsApiClient: PersonalRelati
     return personalRelationshipsApiClient.getContactLinkedPrisoners(contactId).filter { it -> it.relationshipTypeCode == SOCIAL_CONTACT_TYPE_CODE }
   }
 
-  fun getContactGlobalRestrictions(
-    contactId: Long,
-  ): List<RestrictionDto> {
-    log.debug("getContactGlobalRestrictions called with parameters : contactId {}", contactId)
-    return personalRelationshipsApiClient.getContactGlobalRestrictions(contactId).map { it.toRestrictionDto() }
-  }
+  fun getContactGlobalRestrictions(contactId: Long): List<RestrictionDto> = restrictionsService.getContactGlobalRestrictions(contactId)
 }
