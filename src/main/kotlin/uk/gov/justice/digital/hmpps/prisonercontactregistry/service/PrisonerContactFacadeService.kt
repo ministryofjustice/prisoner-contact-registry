@@ -90,10 +90,6 @@ class PrisonerContactFacadeService(
     return restrictionsService.getClosedRestrictionStatusForContacts(contacts)
   }
 
-  /**
-   * Keeping the original method name with "Effect" to avoid unnecessary controller/test churn.
-   * You can rename it to "Affect" later as a separate cleanup.
-   */
   fun getDateRangesForVisitorRestrictionsWhichAffectRequestVisits(
     visitBookingDetails: RequestVisitVisitorRestrictionsBodyDto,
   ): List<DateRangeDto> {
