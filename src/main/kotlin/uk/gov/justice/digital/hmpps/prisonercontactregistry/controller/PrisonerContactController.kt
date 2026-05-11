@@ -103,7 +103,7 @@ class PrisonerContactController(private val contactService: PrisonerContactFacad
   @GetMapping(V2_PRISONER_SEARCH_CONTACTS)
   @Operation(
     summary = "Search for contacts with a potential relationship to a prisoner",
-    description = "Returns details contact (including relationship details of prisoner if found)",
+    description = "Returns contact details (including relationship details of prisoner if found)",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -130,7 +130,7 @@ class PrisonerContactController(private val contactService: PrisonerContactFacad
     @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
     @PathVariable
     prisonerId: String,
-    @RequestParam(required = false)
+    @RequestParam(required = true)
     @Parameter(`in` = ParameterIn.QUERY, description = "Contact IDs. Comma-separated list of contact IDs, e.g. contactIds=123,456,789", example = "123,456,789", required = true)
     contactIds: List<Long>,
     @RequestParam(required = false)

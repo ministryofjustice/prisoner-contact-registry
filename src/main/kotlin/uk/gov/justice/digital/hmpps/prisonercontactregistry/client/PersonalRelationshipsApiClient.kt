@@ -166,7 +166,7 @@ class PersonalRelationshipsApiClient(
   }
 
   fun searchContact(prisonerId: String, contactIds: List<Long>): List<PersonalRelationshipsContactSearchResultDto> {
-    logger.info("searchContact called for $prisonerId, with contactIds ${contactIds.forEach { it.toString() }} via the personal-relationships-api")
+    logger.info("searchContact called for $prisonerId, with contactIds ${contactIds.joinToString { it.toString() }} via the personal-relationships-api")
 
     val uri = "/contact/search"
 
@@ -177,7 +177,6 @@ class PersonalRelationshipsApiClient(
           .queryParam("includePrisonerRelationships", prisonerId)
           .queryParam("contactIds", contactIds.joinToString(","))
           .queryParam("searchType", "EXACT")
-          .queryParam("size", 400)
           .build()
       }
       .retrieve()
@@ -187,7 +186,7 @@ class PersonalRelationshipsApiClient(
         Mono.error(e)
       }
       .blockOptional(apiTimeout)
-      .orElseThrow { IllegalStateException("Timeout calling searchContact - $prisonerId / ${contactIds.forEach { it.toString() }} on personal-relationships-api") }
+      .orElseThrow { IllegalStateException("Timeout calling searchContact - $prisonerId / ${contactIds.joinToString { it.toString() }} on personal-relationships-api") }
       .content
   }
 
