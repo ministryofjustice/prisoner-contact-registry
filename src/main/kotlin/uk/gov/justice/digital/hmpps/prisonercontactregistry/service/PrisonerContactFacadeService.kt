@@ -23,7 +23,6 @@ class PrisonerContactFacadeService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  // TODO: Confirm should we be filtering on this endpoint to only keep "S" Social contacts? Or because it's hand fed the IDs, do we just return the info?
   fun searchContacts(prisonerId: String, contactIds: List<Long>, withRestrictions: Boolean): List<ContactWithOptionalPrisonerRelationshipDto> {
     log.debug(
       "searchContacts called with parameters : prisonerId - {}, contactIds - {}, withRestrictions - {}",

@@ -27,7 +27,7 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
     @Test
     fun `requires authentication`() {
       val prisonerId = "A1234AA"
-      webTestClient.get().uri("v2/prisoners/$prisonerId/contacts/search")
+      webTestClient.get().uri("/v2/prisoners/$prisonerId/contacts/search")
         .exchange()
         .expectStatus().isUnauthorized
     }
