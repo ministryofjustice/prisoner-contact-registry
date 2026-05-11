@@ -34,7 +34,7 @@ class PrisonerContactFacadeService(
     val foundContacts = prisonerContactService.searchContacts(prisonerId, contactIds)
 
     val contacts = foundContacts.flatMap { contact ->
-      contact.toContactWithOptionalPrisonerRelationshipDto()
+      contact.toContactWithOptionalPrisonerRelationshipDto().filter { it.contactType != "O" }
     }
 
     if (!withRestrictions) {
