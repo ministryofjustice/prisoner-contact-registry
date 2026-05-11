@@ -103,7 +103,7 @@ class PrisonerContactController(private val contactService: PrisonerContactFacad
   @GetMapping(V2_PRISONER_SEARCH_CONTACTS)
   @Operation(
     summary = "Search for contacts with a potential relationship to a prisoner",
-    description = "Returns contact details (including relationship details of prisoner if found)",
+    description = "Returns contact details (including relationship details of prisoner if found). Filters out Official contacts in response.",
     responses = [
       ApiResponse(
         responseCode = "200",
