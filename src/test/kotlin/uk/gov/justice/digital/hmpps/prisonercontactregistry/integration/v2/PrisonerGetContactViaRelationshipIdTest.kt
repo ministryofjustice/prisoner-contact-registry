@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.Integrat
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 
 @Suppress("ClassName")
-@DisplayName("PrisonerContactControllerV2 - $V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH")
+@DisplayName("PrisonerContactController - $V2_GET_PRISONER_CONTACT_RELATIONSHIP_CONTROLLER_PATH")
 class PrisonerGetContactViaRelationshipIdTest : IntegrationTestBase() {
   @Nested
   inner class authentication {

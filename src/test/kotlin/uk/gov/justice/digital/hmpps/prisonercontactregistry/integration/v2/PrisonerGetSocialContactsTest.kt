@@ -19,7 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObje
 import java.time.LocalDate
 
 @Suppress("ClassName")
-@DisplayName("PrisonerContactControllerV2 - $V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH")
+@DisplayName("PrisonerContactController - $V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH")
 class PrisonerGetSocialContactsTest : IntegrationTestBase() {
   val socialContactWithRestrictionId = 1L
   val socialContactWithExpiredRestrictionId = 2L

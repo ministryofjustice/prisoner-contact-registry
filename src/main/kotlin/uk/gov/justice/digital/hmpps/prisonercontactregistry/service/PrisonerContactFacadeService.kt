@@ -4,9 +4,11 @@ import org.apache.coyote.BadRequestException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactWithOptionalPrisonerRelationshipDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.toContactWithOptionalPrisonerRelationshipDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.visit.scheduler.RequestVisitVisitorRestrictionsBodyDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.VisitorNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.IndexedRestrictions
@@ -19,6 +21,55 @@ class PrisonerContactFacadeService(
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
+
+  // TODO: Confirm should we be filtering on this endpoint to only keep "S" Social contacts? Or because it's hand fed the IDs, do we just return the info?
+  fun searchContacts(prisonerId: String, contactIds: List<Long>, withRestrictions: Boolean): List<ContactWithOptionalPrisonerRelationshipDto> {
+    log.debug(
+      "searchContacts called with parameters : prisonerId - {}, contactIds - {}, withRestrictions - {}",
+      prisonerId,
+      contactIds,
+      withRestrictions,
+    )
+
+    val foundContacts = prisonerContactService.searchContacts(prisonerId, contactIds)
+
+    val contacts = foundContacts.flatMap { contact ->
+      contact.toContactWithOptionalPrisonerRelationshipDto()
+    }
+
+    if (!withRestrictions) {
+      return contacts
+    }
+
+    val indexedGlobalAndLocalRestrictions = restrictionsService.getContactsGlobalAndLocalRestrictions(
+      contacts
+        .mapNotNull { it.prisonerContactId }
+        .distinct(),
+    )
+
+    // Because local restrictions are bound between prisoner and contact, if relationship is null we need to do a separate
+    // global restrictions lookup for these contacts.
+    val globalRestrictionsByContactId = contacts
+      .filter { it.prisonerContactId == null }
+      .map { it.contactId }
+      .distinct()
+      .associateWith { contactId ->
+        restrictionsService.getContactGlobalRestrictions(contactId)
+      }
+
+    return contacts.map { contact ->
+      val restrictions = if (contact.prisonerContactId != null) {
+        indexedGlobalAndLocalRestrictions.forContact(
+          contactId = contact.contactId,
+          prisonerContactId = contact.prisonerContactId,
+        )
+      } else {
+        globalRestrictionsByContactId[contact.contactId].orEmpty()
+      }
+
+      contact.copy(restrictions = restrictions)
+    }
   }
 
   fun getSocialContactList(

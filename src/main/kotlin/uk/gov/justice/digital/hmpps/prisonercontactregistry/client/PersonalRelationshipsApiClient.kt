@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactSearchResultDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
@@ -161,6 +162,32 @@ class PersonalRelationshipsApiClient(
       }
       .blockOptional(apiTimeout)
       .orElseThrow { IllegalStateException("Timeout getting contact for - $prisonerId on personal-relationships-api") }
+      .content
+  }
+
+  fun searchContact(prisonerId: String, contactIds: List<Long>): List<PersonalRelationshipsContactSearchResultDto> {
+    logger.info("searchContact called for $prisonerId, with contactIds ${contactIds.forEach { it.toString() }} via the personal-relationships-api")
+
+    val uri = "/contact/search"
+
+    return webClient.get()
+      .uri { uriBuilder ->
+        uriBuilder
+          .path(uri)
+          .queryParam("includePrisonerRelationships", prisonerId)
+          .queryParam("contactIds", contactIds.joinToString(","))
+          .queryParam("searchType", "EXACT")
+          .queryParam("size", 400)
+          .build()
+      }
+      .retrieve()
+      .bodyToMono(object : ParameterizedTypeReference<PagedResponse<PersonalRelationshipsContactSearchResultDto>>() {})
+      .onErrorResume { e ->
+        logger.error("searchContact Failed for get request $uri")
+        Mono.error(e)
+      }
+      .blockOptional(apiTimeout)
+      .orElseThrow { IllegalStateException("Timeout calling searchContact - $prisonerId / ${contactIds.forEach { it.toString() }} on personal-relationships-api") }
       .content
   }
 
