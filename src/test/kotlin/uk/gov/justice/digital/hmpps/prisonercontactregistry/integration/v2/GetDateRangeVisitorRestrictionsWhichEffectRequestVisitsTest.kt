@@ -136,7 +136,7 @@ class GetDateRangeVisitorRestrictionsWhichEffectRequestVisitsTest : IntegrationT
       .jsonPath("$.userMessage")
       .isEqualTo("One of the visitors provided could not found")
       .jsonPath("$.developerMessage")
-      .isEqualTo("Not all visitors provided (${requestDto.visitorIds}) are contacts for prisoner ${requestDto.prisonerId}")
+      .isEqualTo("Not all visitors provided (${requestDto.visitorIds}) are listed contacts for prisoner ${requestDto.prisonerId}")
   }
 
   @Test

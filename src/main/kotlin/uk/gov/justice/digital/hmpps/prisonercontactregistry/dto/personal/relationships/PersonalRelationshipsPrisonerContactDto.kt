@@ -1,6 +1,9 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships
 
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import java.time.LocalDate
 
 data class PersonalRelationshipsPrisonerContactDto(
@@ -75,4 +78,31 @@ data class PersonalRelationshipsPrisonerContactDto(
 
   @param:Schema(description = "Primary Address", example = "true", required = false)
   val primaryAddress: Boolean? = null,
-)
+) {
+  fun toPrisonerContactDto(
+    restrictions: List<RestrictionDto>,
+  ): PrisonerContactDto = PrisonerContactDto(
+    personId = contactId,
+    firstName = firstName.toNormalCase().orEmpty(),
+    middleName = middleNames.toNormalCase(),
+    lastName = lastName.toNormalCase().orEmpty(),
+    dateOfBirth = dateOfBirth,
+    relationshipCode = relationshipToPrisonerCode,
+    relationshipDescription = relationshipToPrisonerDescription,
+    contactType = relationshipTypeCode,
+    contactTypeDescription = relationshipTypeDescription,
+    approvedVisitor = isApprovedVisitor,
+    emergencyContact = isEmergencyContact,
+    nextOfKin = isNextOfKin,
+    restrictions = restrictions,
+    address = AddressDto(this),
+    commentText = comments,
+  )
+
+  private fun String?.toNormalCase(): String? = this
+    ?.lowercase()
+    ?.split(" ")
+    ?.joinToString(" ") { word ->
+      word.replaceFirstChar { it.uppercase() }
+    }
+}
