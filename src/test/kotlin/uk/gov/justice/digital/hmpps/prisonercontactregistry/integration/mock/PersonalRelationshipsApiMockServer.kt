@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PagedResponse
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactSearchResultDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
@@ -41,6 +42,51 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     }
 
     stubFor(get(urlPathEqualTo(uri)).willReturn(response))
+  }
+
+  fun stubSearchContacts(
+    prisonerId: String,
+    contactIds: List<Long>,
+    contacts: List<PersonalRelationshipsContactSearchResultDto>? = null,
+    page: Int = 0,
+    size: Int = 50,
+    httpStatus: HttpStatus = HttpStatus.OK,
+  ) {
+    val uri = "/contact/search"
+
+    val response = if (contacts == null) {
+      aResponse().withStatus(httpStatus.value())
+    } else {
+      val totalElements = contacts.size.toLong()
+      val totalPages = if (size <= 0) 0 else kotlin.math.ceil(totalElements.toDouble() / size.toDouble()).toInt()
+
+      aResponse()
+        .withStatus(httpStatus.value())
+        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withBody(
+          TestObjectMapper.mapper.writeValueAsString(
+            PagedResponse(
+              content = contacts,
+              page = PageMetadata(
+                size = size,
+                number = page,
+                totalElements = totalElements,
+                totalPages = totalPages,
+              ),
+            ),
+          ),
+        )
+    }
+
+    stubFor(
+      get(urlPathEqualTo(uri))
+        .withQueryParam("includePrisonerRelationships", equalTo(prisonerId))
+        .withQueryParam("contactIds", equalTo(contactIds.joinToString(",")))
+        .withQueryParam("searchType", equalTo("EXACT"))
+        .withQueryParam("page", equalTo(page.toString()))
+        .withQueryParam("size", equalTo(size.toString()))
+        .willReturn(response),
+    )
   }
 
   fun stubGetAllContacts(

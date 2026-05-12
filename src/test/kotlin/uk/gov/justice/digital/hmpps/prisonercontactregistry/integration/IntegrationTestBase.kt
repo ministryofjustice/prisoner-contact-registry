@@ -15,8 +15,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ExistingRelationshipToPrisonerDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactSearchResultDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsPrisonerContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.helper.JwtAuthHelper
@@ -91,6 +93,62 @@ abstract class IntegrationTestBase {
     middleNames = middleNames,
     lastName = lastName,
     dateOfBirth = dateOfBirth,
+  )
+
+  fun createPersonalRelationshipsContactSearchResultDtoList(
+    contactIds: List<Long>,
+    prisonerContactIds: List<Long?> = List(contactIds.size) { null },
+  ): List<PersonalRelationshipsContactSearchResultDto> {
+    require(contactIds.size == prisonerContactIds.size) {
+      "contactIds and prisonerContactIds must be the same size"
+    }
+
+    return contactIds.mapIndexed { index, contactId ->
+      createPersonalRelationshipsContactSearchResultDto(
+        contactId = contactId,
+        prisonerContactId = prisonerContactIds[index],
+      )
+    }
+  }
+
+  fun createPersonalRelationshipsContactSearchResultDto(
+    contactId: Long,
+    prisonerContactId: Long? = null,
+  ): PersonalRelationshipsContactSearchResultDto = PersonalRelationshipsContactSearchResultDto(
+    id = contactId,
+    firstName = "test",
+    middleNames = "middle",
+    lastName = "user",
+    dateOfBirth = LocalDate.of(1912, 9, 13),
+    flat = "Flat 1",
+    property = "221B",
+    street = "Baker Street",
+    area = "Marylebone",
+    cityDescription = "London",
+    countyDescription = "Greater London",
+    postcode = "NW1 6XE",
+    countryDescription = "England",
+    noFixedAddress = false,
+    existingRelationships = prisonerContactId?.let {
+      listOf(
+        createPersonalRelationshipsContactSearchResultRelationshipDto(
+          prisonerContactId = it,
+        ),
+      )
+    },
+    mailAddress = true,
+    comments = "blah blah blah",
+  )
+
+  fun createPersonalRelationshipsContactSearchResultRelationshipDto(
+    prisonerContactId: Long,
+  ): ExistingRelationshipToPrisonerDto = ExistingRelationshipToPrisonerDto(
+    prisonerContactId = prisonerContactId,
+    relationshipToPrisonerCode = "FRI",
+    relationshipToPrisonerDescription = "Friend",
+    relationshipTypeCode = "S",
+    relationshipTypeDescription = "Social",
+    isRelationshipActive = true,
   )
 
   fun createPersonalRelationshipsPrisonerContactDtoList(

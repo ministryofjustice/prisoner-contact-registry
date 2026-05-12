@@ -27,9 +27,7 @@ class RestrictionsService(private val personalRelationshipsApiClient: PersonalRe
     return personalRelationshipsApiClient.getContactGlobalRestrictions(contactId).map { it.toRestrictionDto() }
   }
 
-  fun getContactsGlobalAndLocalRestrictions(
-    prisonerContactRelationshipIds: List<Long>,
-  ): IndexedRestrictions {
+  fun getContactsGlobalAndLocalRestrictions(prisonerContactRelationshipIds: List<Long>): IndexedRestrictions {
     if (prisonerContactRelationshipIds.isEmpty()) {
       return IndexedRestrictions.EMPTY
     }

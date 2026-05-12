@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.Integrat
 import java.time.LocalDate
 
 @Suppress("ClassName")
-@DisplayName("PrisonerContactControllerV2 - $V2_PRISONER_GET_SOCIAL_RESTRICTION_CLOSED_CONTROLLER_PATH")
+@DisplayName("PrisonerContactController - $V2_PRISONER_GET_SOCIAL_RESTRICTION_CLOSED_CONTROLLER_PATH")
 class GetVisitorClosedRestrictionTypeStatusTest : IntegrationTestBase() {
 
   @Nested

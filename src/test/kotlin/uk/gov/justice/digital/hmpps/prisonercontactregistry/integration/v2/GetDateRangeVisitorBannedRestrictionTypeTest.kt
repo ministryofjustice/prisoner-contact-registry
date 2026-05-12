@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.Integrat
 import java.time.LocalDate
 
 @Suppress("ClassName")
-@DisplayName("PrisonerContactControllerV2 - $V2_PRISONER_GET_SOCIAL_RESTRICTION_BANNED_DATE_RANGE_CONTROLLER_PATH")
+@DisplayName("PrisonerContactController - $V2_PRISONER_GET_SOCIAL_RESTRICTION_BANNED_DATE_RANGE_CONTROLLER_PATH")
 class GetDateRangeVisitorBannedRestrictionTypeTest : IntegrationTestBase() {
   @Nested
   inner class authentication {
