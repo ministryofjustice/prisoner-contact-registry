@@ -178,7 +178,7 @@ class PersonalRelationshipsApiClient(
           .queryParam("contactIds", contactIds.joinToString(","))
           .queryParam("searchType", "EXACT")
           .queryParam("page", 0)
-          .queryParam("size", 50)
+          .queryParam("size", 400)
           .build()
       }
       .retrieve()

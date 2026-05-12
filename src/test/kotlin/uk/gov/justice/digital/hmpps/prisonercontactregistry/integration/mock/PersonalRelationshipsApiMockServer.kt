@@ -49,7 +49,7 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     contactIds: List<Long>,
     contacts: List<PersonalRelationshipsContactSearchResultDto>? = null,
     page: Int = 0,
-    size: Int = 50,
+    size: Int = 400,
     httpStatus: HttpStatus = HttpStatus.OK,
   ) {
     val uri = "/contact/search"
