@@ -177,6 +177,8 @@ class PersonalRelationshipsApiClient(
           .queryParam("includePrisonerRelationships", prisonerId)
           .queryParam("contactIds", contactIds.joinToString(","))
           .queryParam("searchType", "EXACT")
+          .queryParam("page", 0)
+          .queryParam("size", 50)
           .build()
       }
       .retrieve()

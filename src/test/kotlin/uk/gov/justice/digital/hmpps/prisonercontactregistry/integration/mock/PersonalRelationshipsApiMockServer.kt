@@ -49,7 +49,7 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     contactIds: List<Long>,
     contacts: List<PersonalRelationshipsContactSearchResultDto>? = null,
     page: Int = 0,
-    size: Int = 400,
+    size: Int = 50,
     httpStatus: HttpStatus = HttpStatus.OK,
   ) {
     val uri = "/contact/search"
@@ -83,6 +83,8 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
         .withQueryParam("includePrisonerRelationships", equalTo(prisonerId))
         .withQueryParam("contactIds", equalTo(contactIds.joinToString(",")))
         .withQueryParam("searchType", equalTo("EXACT"))
+        .withQueryParam("page", equalTo(page.toString()))
+        .withQueryParam("size", equalTo(size.toString()))
         .willReturn(response),
     )
   }
