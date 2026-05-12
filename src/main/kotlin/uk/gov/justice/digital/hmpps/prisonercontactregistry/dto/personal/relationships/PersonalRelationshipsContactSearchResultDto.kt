@@ -107,7 +107,7 @@ data class PersonalRelationshipsContactSearchResultDto(
     nullable = true,
     required = false,
   )
-  val existingRelationships: List<ExistingRelationshipToPrisoner>? = null,
+  val existingRelationships: List<ExistingRelationshipToPrisonerDto>? = null,
 )
 
 fun PersonalRelationshipsContactSearchResultDto.toContactWithOptionalPrisonerRelationshipDto(): List<ContactWithOptionalPrisonerRelationshipDto> {

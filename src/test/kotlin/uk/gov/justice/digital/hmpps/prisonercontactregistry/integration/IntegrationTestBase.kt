@@ -15,7 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PersonalRelationshipsApiClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.AddressDto
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ExistingRelationshipToPrisoner
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ExistingRelationshipToPrisonerDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactSearchResultDto
@@ -142,7 +142,7 @@ abstract class IntegrationTestBase {
 
   fun createPersonalRelationshipsContactSearchResultRelationshipDto(
     prisonerContactId: Long,
-  ): ExistingRelationshipToPrisoner = ExistingRelationshipToPrisoner(
+  ): ExistingRelationshipToPrisonerDto = ExistingRelationshipToPrisonerDto(
     prisonerContactId = prisonerContactId,
     relationshipToPrisonerCode = "FRI",
     relationshipToPrisonerDescription = "Friend",

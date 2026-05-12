@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relati
 
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class ExistingRelationshipToPrisoner(
+data class ExistingRelationshipToPrisonerDto(
   @param:Schema(description = "The unique identifier for the prisoner contact", example = "123456")
   val prisonerContactId: Long,
 
