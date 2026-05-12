@@ -148,9 +148,9 @@ fun PersonalRelationshipsContactSearchResultDto.toContactWithOptionalPrisonerRel
       ContactWithOptionalPrisonerRelationshipDto(
         contactId = id,
         prisonerContactId = null,
-        firstName = firstName,
-        middleName = middleNames,
-        lastName = lastName,
+        firstName = firstName.toNormalCase().orEmpty(),
+        middleName = middleNames.toNormalCase(),
+        lastName = lastName.toNormalCase().orEmpty(),
         dateOfBirth = dateOfBirth,
         relationshipCode = null,
         relationshipDescription = null,
@@ -165,9 +165,9 @@ fun PersonalRelationshipsContactSearchResultDto.toContactWithOptionalPrisonerRel
       ContactWithOptionalPrisonerRelationshipDto(
         contactId = id,
         prisonerContactId = relationship.prisonerContactId,
-        firstName = firstName,
-        middleName = middleNames,
-        lastName = lastName,
+        firstName = firstName.toNormalCase().orEmpty(),
+        middleName = middleNames.toNormalCase(),
+        lastName = lastName.toNormalCase().orEmpty(),
         dateOfBirth = dateOfBirth,
         relationshipCode = relationship.relationshipToPrisonerCode,
         relationshipDescription = relationship.relationshipToPrisonerDescription,
@@ -179,3 +179,10 @@ fun PersonalRelationshipsContactSearchResultDto.toContactWithOptionalPrisonerRel
     }
   }
 }
+
+private fun String?.toNormalCase(): String? = this
+  ?.lowercase()
+  ?.split(" ")
+  ?.joinToString(" ") { word ->
+    word.replaceFirstChar { it.uppercase() }
+  }
