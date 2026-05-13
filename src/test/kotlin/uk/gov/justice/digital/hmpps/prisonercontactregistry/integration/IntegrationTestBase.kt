@@ -149,6 +149,10 @@ abstract class IntegrationTestBase {
     relationshipTypeCode = "S",
     relationshipTypeDescription = "Social",
     isRelationshipActive = true,
+    isApprovedVisitor = true,
+    isEmergencyContact = false,
+    isNextOfKin = false,
+    comments = null,
   )
 
   fun createPersonalRelationshipsPrisonerContactDtoList(
