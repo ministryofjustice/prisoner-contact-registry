@@ -45,8 +45,8 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
   }
 
   fun stubSearchContacts(
-    prisonerId: String,
     contactIds: List<Long>,
+    prisonerId: String? = null,
     contacts: List<PersonalRelationshipsContactSearchResultDto>? = null,
     page: Int = 0,
     size: Int = 400,
@@ -78,15 +78,17 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
         )
     }
 
-    stubFor(
-      get(urlPathEqualTo(uri))
-        .withQueryParam("includePrisonerRelationships", equalTo(prisonerId))
-        .withQueryParam("contactIds", equalTo(contactIds.joinToString(",")))
-        .withQueryParam("searchType", equalTo("EXACT"))
-        .withQueryParam("page", equalTo(page.toString()))
-        .withQueryParam("size", equalTo(size.toString()))
-        .willReturn(response),
-    )
+    val request = get(urlPathEqualTo(uri))
+      .withQueryParam("contactIds", equalTo(contactIds.joinToString(",")))
+      .withQueryParam("searchType", equalTo("EXACT"))
+      .withQueryParam("page", equalTo(page.toString()))
+      .withQueryParam("size", equalTo(size.toString()))
+
+    prisonerId?.let {
+      request.withQueryParam("includePrisonerRelationships", equalTo(it))
+    }
+
+    stubFor(request.willReturn(response))
   }
 
   fun stubGetAllContacts(
@@ -161,7 +163,6 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     stubFor(
       post(urlPathEqualTo(uri))
         .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
-        // ignoreArrayOrder = true, ignoreExtraElements = true
         .withRequestBody(equalToJson(expectedRequestJson, true, true))
         .willReturn(wiremockResponse),
     )

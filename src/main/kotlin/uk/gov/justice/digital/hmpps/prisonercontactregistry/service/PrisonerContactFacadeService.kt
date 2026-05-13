@@ -23,6 +23,7 @@ class PrisonerContactFacadeService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
+  // Remove
   fun searchContacts(prisonerId: String, contactIds: List<Long>, withRestrictions: Boolean): List<ContactWithOptionalPrisonerRelationshipDto> {
     log.debug(
       "searchContacts called with parameters : prisonerId - {}, contactIds - {}, withRestrictions - {}",

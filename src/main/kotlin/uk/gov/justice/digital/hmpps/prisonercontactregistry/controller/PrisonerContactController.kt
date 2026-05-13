@@ -99,6 +99,7 @@ class PrisonerContactController(private val contactService: PrisonerContactFacad
     )
   }
 
+  @Deprecated("Use v2/contacts/search instead.")
   @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
   @GetMapping(V2_PRISONER_SEARCH_CONTACTS)
   @Operation(

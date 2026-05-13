@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.v2
+package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.contact
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -11,7 +11,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.V2_PRISONER_SEARCH_CONTACTS
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.CONTACT_SEARCH_PATH
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactWithOptionalPrisonerRelationshipDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
@@ -20,14 +20,14 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObje
 import java.time.LocalDate
 
 @Suppress("ClassName")
-@DisplayName("PrisonerContactController - $V2_PRISONER_SEARCH_CONTACTS")
-class PrisonerSearchContactsTest : IntegrationTestBase() {
+@DisplayName("ContactController - $CONTACT_SEARCH_PATH")
+class SearchContactsTest : IntegrationTestBase() {
   @Nested
   inner class authentication {
     @Test
     fun `requires authentication`() {
       val prisonerId = "A1234AA"
-      webTestClient.get().uri("/v2/prisoners/$prisonerId/contacts/search")
+      webTestClient.get().uri("/v2/contacts/search")
         .exchange()
         .expectStatus().isUnauthorized
     }
@@ -38,7 +38,7 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
       val contactIds = listOf(2187524L, 3147515L)
 
       webTestClient.get()
-        .uri("/v2/prisoners/$prisonerId/contacts/search?contactIds=${contactIds.joinToString(",")}")
+        .uri("/v2/contacts/search?contactIds=${contactIds.joinToString(",")}")
         .headers(setAuthorisation(roles = listOf("AnyThingWillDo")))
         .exchange()
         .expectStatus().isForbidden
@@ -138,7 +138,7 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
 
     personalRelationshipsApiMockServer.stubSearchContacts(
       contactIds = contactIds,
-      prisonerId = prisonerId,
+      prisonerId = null,
       contacts = contacts,
     )
 
@@ -149,8 +149,8 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
 
     // When
     val result = callSearchContacts(
-      prisonerId = prisonerId,
       contactIds = contactIds,
+      prisonerId = null,
       withRestrictions = true,
     )
 
@@ -166,7 +166,7 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
     assertThat(responseList[0].restrictions[0].restrictionType).isEqualTo("CHILD")
     assertThat(responseList[0].restrictions[0].globalRestriction).isTrue()
 
-    verify(personalRelationshipsApiClientSpy, times(1)).searchContact(prisonerId, contactIds)
+    verify(personalRelationshipsApiClientSpy, times(1)).searchContact(null, contactIds)
     verify(personalRelationshipsApiClientSpy, never()).getPrisonerContactRestrictions(any())
     verify(personalRelationshipsApiClientSpy, times(1)).getContactGlobalRestrictions(contactIds[0])
     verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
@@ -234,8 +234,8 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
 
     // When
     val result = callSearchContacts(
-      prisonerId = prisonerId,
       contactIds = contactIds,
+      prisonerId = prisonerId,
       withRestrictions = true,
     )
 
@@ -283,8 +283,8 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
 
     // When
     val result = callSearchContacts(
-      prisonerId = prisonerId,
       contactIds = contactIds,
+      prisonerId = prisonerId,
       withRestrictions = false,
     )
 
@@ -318,8 +318,8 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
 
     // When
     val result = callSearchContacts(
-      prisonerId = prisonerId,
       contactIds = contactIds,
+      prisonerId = prisonerId,
     )
 
     // Then
@@ -334,17 +334,17 @@ class PrisonerSearchContactsTest : IntegrationTestBase() {
   private fun getContactResults(returnResult: WebTestClient.BodyContentSpec): Array<ContactWithOptionalPrisonerRelationshipDto> = TestObjectMapper.mapper.readValue(returnResult.returnResult().responseBody, Array<ContactWithOptionalPrisonerRelationshipDto>::class.java)
 
   private fun callSearchContacts(
-    prisonerId: String,
     contactIds: List<Long>,
+    prisonerId: String? = null,
     withRestrictions: Boolean? = null,
   ): WebTestClient.ResponseSpec {
     val queryParams = mutableListOf<String>()
 
     queryParams.add("contactIds=${contactIds.joinToString(",")}")
-
+    prisonerId?.let { queryParams.add("prisonerId=$it") }
     withRestrictions?.let { queryParams.add("withRestrictions=$it") }
 
-    val uri = "/v2/prisoners/$prisonerId/contacts/search?${queryParams.joinToString("&")}"
+    val uri = "/v2/contacts/search?${queryParams.joinToString("&")}"
 
     return webTestClient
       .get()
