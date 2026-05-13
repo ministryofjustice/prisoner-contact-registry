@@ -156,7 +156,7 @@ fun PersonalRelationshipsContactSearchResultDto.toContactWithOptionalPrisonerRel
         relationshipDescription = null,
         contactType = null,
         contactTypeDescription = null,
-        restrictions = emptyList(),
+        restrictions = emptyList(), // Restrictions are handled after retrieval of contact information, hence setting to emptyList() here.
         address = address,
         approvedVisitor = null,
         emergencyContact = null,
@@ -177,7 +177,7 @@ fun PersonalRelationshipsContactSearchResultDto.toContactWithOptionalPrisonerRel
         relationshipDescription = relationship.relationshipToPrisonerDescription,
         contactType = relationship.relationshipTypeCode,
         contactTypeDescription = relationship.relationshipTypeDescription,
-        restrictions = emptyList(),
+        restrictions = emptyList(), // Restrictions are handled after retrieval of contact information, hence setting to emptyList() here.
         address = address,
         approvedVisitor = relationship.isApprovedVisitor,
         emergencyContact = relationship.isEmergencyContact,
