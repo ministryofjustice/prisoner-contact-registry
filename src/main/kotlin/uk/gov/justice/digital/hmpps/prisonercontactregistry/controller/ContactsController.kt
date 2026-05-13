@@ -120,7 +120,7 @@ class ContactsController(
     @Parameter(description = "Defaults to false. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
     withRestrictions: Boolean? = false,
   ): List<ContactWithOptionalPrisonerRelationshipDto> {
-    PrisonerContactController.Companion.log.debug("searchContacts called with params : Prisoner: {}, contactIds = {}, withRestrictions = {}", prisonerId, contactIds, withRestrictions)
+    log.debug("searchContacts called with params : Prisoner: {}, contactIds = {}, withRestrictions = {}", prisonerId, contactIds, withRestrictions)
 
     return contactsService.searchContacts(
       contactIds = contactIds,
