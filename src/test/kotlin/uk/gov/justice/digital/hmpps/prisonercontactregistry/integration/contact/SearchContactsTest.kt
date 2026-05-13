@@ -26,7 +26,6 @@ class SearchContactsTest : IntegrationTestBase() {
   inner class authentication {
     @Test
     fun `requires authentication`() {
-      val prisonerId = "A1234AA"
       webTestClient.get().uri("/v2/contacts/search")
         .exchange()
         .expectStatus().isUnauthorized
@@ -34,7 +33,6 @@ class SearchContactsTest : IntegrationTestBase() {
 
     @Test
     fun `requires correct role`() {
-      val prisonerId = "A1234AA"
       val contactIds = listOf(2187524L, 3147515L)
 
       webTestClient.get()
@@ -116,7 +114,6 @@ class SearchContactsTest : IntegrationTestBase() {
   @Test
   fun `search contacts returns contact with global restrictions only when no prisoner relationship exists`() {
     // Given
-    val prisonerId = "A1234AA"
     val contactIds = listOf(2187524L)
     val prisonerContactIds = listOf<Long?>(null)
 
