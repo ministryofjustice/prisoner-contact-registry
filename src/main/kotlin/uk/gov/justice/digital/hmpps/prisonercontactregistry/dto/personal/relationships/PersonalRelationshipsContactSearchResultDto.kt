@@ -158,6 +158,10 @@ fun PersonalRelationshipsContactSearchResultDto.toContactWithOptionalPrisonerRel
         contactTypeDescription = null,
         restrictions = emptyList(),
         address = address,
+        approvedVisitor = null,
+        emergencyContact = null,
+        nextOfKin = null,
+        comments = null,
       ),
     )
   } else {
@@ -175,6 +179,10 @@ fun PersonalRelationshipsContactSearchResultDto.toContactWithOptionalPrisonerRel
         contactTypeDescription = relationship.relationshipTypeDescription,
         restrictions = emptyList(),
         address = address,
+        approvedVisitor = relationship.isApprovedVisitor,
+        emergencyContact = relationship.isEmergencyContact,
+        nextOfKin = relationship.isNextOfKin,
+        comments = relationship.comments,
       )
     }
   }

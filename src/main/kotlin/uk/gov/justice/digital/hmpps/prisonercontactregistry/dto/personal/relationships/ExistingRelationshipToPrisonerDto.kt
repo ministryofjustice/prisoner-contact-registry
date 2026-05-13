@@ -28,4 +28,16 @@ data class ExistingRelationshipToPrisonerDto(
 
   @param:Schema(description = "Is this prisoner's contact relationship active?", example = "true")
   val isRelationshipActive: Boolean,
+
+  @param:Schema(description = "Is this prisoner's contact relationship approved?", example = "true")
+  val isApprovedVisitor: Boolean,
+
+  @param:Schema(description = "Is this prisoner's contact relationship the emergency contact?", example = "true")
+  val isEmergencyContact: Boolean,
+
+  @param:Schema(description = "Is this prisoner's contact relationship the next of kin?", example = "true")
+  val isNextOfKin: Boolean,
+
+  @param:Schema(description = "comments of the relationship", nullable = true)
+  val comments: String?,
 )
