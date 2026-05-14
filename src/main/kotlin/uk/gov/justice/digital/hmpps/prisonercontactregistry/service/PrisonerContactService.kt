@@ -23,9 +23,4 @@ class PrisonerContactService(private val personalRelationshipsApiClient: Persona
     contactId = contactId,
     relationshipId = relationshipId,
   )
-
-  fun searchContacts(
-    prisonerId: String,
-    contactIds: List<Long>,
-  ) = personalRelationshipsApiClient.searchContact(prisonerId, contactIds)
 }
