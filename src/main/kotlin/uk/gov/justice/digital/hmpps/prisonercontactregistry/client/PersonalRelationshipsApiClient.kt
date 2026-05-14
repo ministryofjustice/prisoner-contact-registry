@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactsRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactSearchResultDto
@@ -78,6 +80,27 @@ class PersonalRelationshipsApiClient(
         }
       }
       .blockOptional(apiTimeout).orElseThrow { IllegalStateException("Timeout getting a contact's global restrictions for uri $uri on personal-relationships-api") }
+  }
+
+  fun getContactsGlobalRestrictions(contactIds: List<Long>): ContactsRestrictionsResponseDto {
+    val uri = "/contacts/restrictions"
+
+    logger.info("Get contacts global restrictions called $uri, via the personal-relationships-api")
+
+    return webClient
+      .post()
+      .uri(uri)
+      .bodyValue(ContactIdsRequestDto(contactIds))
+      .retrieve()
+      .bodyToMono(object : ParameterizedTypeReference<ContactsRestrictionsResponseDto>() {})
+      .onErrorResume { e ->
+        logger.error("get contacts global restrictions returned an error for post to $uri")
+        Mono.error(e)
+      }
+      .blockOptional(apiTimeout)
+      .orElseThrow {
+        IllegalStateException("Timeout getting contacts global restrictions for uri $uri on personal-relationships-api")
+      }
   }
 
   fun getContactLinkedPrisoners(contactId: Long): List<ContactLinkedPrisonerDto> {

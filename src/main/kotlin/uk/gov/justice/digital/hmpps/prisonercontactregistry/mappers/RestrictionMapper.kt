@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers
 
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactsRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
@@ -72,5 +73,19 @@ fun GlobalContactRestrictionDto.toRestrictionDto(): RestrictionDto = Restriction
   globalRestriction = true,
   comment = comments,
 )
+
+fun ContactsRestrictionsResponseDto?.toGlobalRestrictionsByContactId(
+  today: LocalDate = LocalDate.now(),
+): Map<Long, List<RestrictionDto>> {
+  if (this == null) {
+    return emptyMap()
+  }
+
+  return contactRestrictions.associate { contactRestriction ->
+    contactRestriction.contactId to contactRestriction.globalContactRestrictions
+      .filter { it.expiryDate.isActiveOn(today) }
+      .map { it.toRestrictionDto() }
+  }
+}
 
 private fun LocalDate?.isActiveOn(today: LocalDate): Boolean = this == null || !today.isAfter(this)

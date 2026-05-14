@@ -13,7 +13,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PageMetadata
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.client.PagedResponse
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactIdsRequestDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactLinkedPrisonerDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactRestrictionsDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactsRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.GlobalContactRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PersonalRelationshipsContactSearchResultDto
@@ -187,6 +190,37 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     stubFor(get(urlPathEqualTo(uri)).willReturn(response))
   }
 
+  fun stubGetContactsGlobalRestrictions(
+    contactIds: List<Long>,
+    response: ContactsRestrictionsResponseDto? = defaultContactRestrictionsResponse(contactIds),
+    httpStatus: HttpStatus = HttpStatus.OK,
+  ) {
+    val uri = "/contacts/restrictions"
+
+    val expectedRequestJson =
+      TestObjectMapper.mapper.writeValueAsString(
+        ContactIdsRequestDto(contactIds),
+      )
+
+    val wiremockResponse =
+      if (response == null) {
+        aResponse()
+          .withStatus(httpStatus.value())
+      } else {
+        aResponse()
+          .withStatus(httpStatus.value())
+          .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+          .withBody(TestObjectMapper.mapper.writeValueAsString(response))
+      }
+
+    stubFor(
+      post(urlPathEqualTo(uri))
+        .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
+        .withRequestBody(equalToJson(expectedRequestJson, true, true))
+        .willReturn(wiremockResponse),
+    )
+  }
+
   fun stubGetContact(
     contactId: Long,
     contact: PersonalRelationshipsContactDto? = null,
@@ -258,6 +292,20 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
       PrisonerContactRestrictionsDto(
         prisonerContactId = relationshipId,
         prisonerContactRestrictions = emptyList(),
+        globalContactRestrictions = emptyList(),
+      )
+    },
+  )
+
+  /**
+   * Default: one entry per contactId, no global restrictions
+   */
+  private fun defaultContactRestrictionsResponse(
+    contactIds: List<Long>,
+  ): ContactsRestrictionsResponseDto = ContactsRestrictionsResponseDto(
+    contactRestrictions = contactIds.map { contactId ->
+      ContactRestrictionsDto(
+        contactId = contactId,
         globalContactRestrictions = emptyList(),
       )
     },
