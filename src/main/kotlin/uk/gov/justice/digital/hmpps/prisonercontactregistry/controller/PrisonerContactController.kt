@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.prisonercontactregistry.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactWithOptionalPrisonerRelationshipDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.DateRangeDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.HasClosedRestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.PrisonerContactDto
@@ -29,7 +27,6 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.service.PrisonerCont
 import java.time.LocalDate
 
 const val V2_PRISONER_CONTACTS_CONTROLLER_PATH: String = "v2/prisoners/{prisonerId}"
-const val V2_PRISONER_SEARCH_CONTACTS = "$V2_PRISONER_CONTACTS_CONTROLLER_PATH/contacts/search"
 const val V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH: String = "$V2_PRISONER_CONTACTS_CONTROLLER_PATH/contacts/social"
 const val V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_CONTROLLER_PATH/approved"
 const val V2_PRISONER_GET_SOCIAL_RESTRICTION_CLOSED_CONTROLLER_PATH: String = "$V2_PRISONER_GET_SOCIAL_CONTACTS_APPROVED_CONTROLLER_PATH/restrictions/closed"
@@ -95,54 +92,6 @@ class PrisonerContactController(private val contactService: PrisonerContactFacad
       prisonerId = prisonerId,
       hasDateOfBirth = hasDateOfBirth ?: false,
       approvedContactsOnly = false,
-      withRestrictions = withRestrictions ?: false,
-    )
-  }
-
-  @Deprecated("Use v2/contacts/search instead.")
-  @PreAuthorize("hasRole('PRISONER_CONTACT_REGISTRY')")
-  @GetMapping(V2_PRISONER_SEARCH_CONTACTS)
-  @Operation(
-    summary = "Search for contacts with a potential relationship to a prisoner",
-    description = "Returns contact details (including relationship details of prisoner if found). Filters out Official contacts in response.",
-    responses = [
-      ApiResponse(
-        responseCode = "200",
-        description = "Contact information returned, including relationship details of prisoner if found",
-      ),
-      ApiResponse(
-        responseCode = "400",
-        description = "Incorrect request to search for contacts with a potential relationship to a prisoner",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Incorrect permissions to search for contacts with a potential relationship to a prisoner",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-    ],
-  )
-  fun searchContacts(
-    @Schema(description = "Prisoner Identifier (NOMIS Offender No)", example = "A1234AA", required = true)
-    @PathVariable
-    prisonerId: String,
-    @RequestParam(required = true)
-    @Parameter(`in` = ParameterIn.QUERY, description = "Contact IDs. Comma-separated list of contact IDs, e.g. contactIds=123,456,789", example = "123,456,789", required = true)
-    contactIds: List<Long>,
-    @RequestParam(required = false)
-    @Parameter(description = "Defaults to false. Returns all contacts restrictions if set to true, skips grabbing restrictions if false", example = "false")
-    withRestrictions: Boolean? = false,
-  ): List<ContactWithOptionalPrisonerRelationshipDto> {
-    log.debug("searchContacts called with params : Prisoner: {}, contactIds = {}, withRestrictions = {}", prisonerId, contactIds, withRestrictions)
-
-    return contactService.searchContacts(
-      prisonerId = prisonerId,
-      contactIds = contactIds,
       withRestrictions = withRestrictions ?: false,
     )
   }
