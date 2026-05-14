@@ -8,13 +8,13 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.CONTACTS_CONTROLLER_PATH
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.SINGLE_CONTACT_PATH
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.TestObjectMapper
 
 @Suppress("ClassName")
-@DisplayName("ContactsController - Get Contact - $CONTACTS_CONTROLLER_PATH")
+@DisplayName("ContactsController - Get Contact - $SINGLE_CONTACT_PATH")
 class GetContactTest : IntegrationTestBase() {
   @Nested
   inner class authentication {
@@ -22,7 +22,7 @@ class GetContactTest : IntegrationTestBase() {
     fun `requires authentication`() {
       val contactId = 2187525L
 
-      webTestClient.get().uri(CONTACTS_CONTROLLER_PATH.replace("{contactId}", contactId.toString()))
+      webTestClient.get().uri(SINGLE_CONTACT_PATH.replace("{contactId}", contactId.toString()))
         .exchange()
         .expectStatus().isUnauthorized
     }
@@ -31,7 +31,7 @@ class GetContactTest : IntegrationTestBase() {
     fun `requires correct role`() {
       val contactId = 2187525L
 
-      webTestClient.get().uri(CONTACTS_CONTROLLER_PATH.replace("{contactId}", contactId.toString()))
+      webTestClient.get().uri(SINGLE_CONTACT_PATH.replace("{contactId}", contactId.toString()))
         .headers(setAuthorisation(roles = listOf("AnyThingWillDo")))
         .exchange()
         .expectStatus().isForbidden
@@ -83,7 +83,7 @@ class GetContactTest : IntegrationTestBase() {
   private fun callGetContact(
     contactId: Long,
   ): WebTestClient.ResponseSpec {
-    val uri = CONTACTS_CONTROLLER_PATH.replace("{contactId}", contactId.toString())
+    val uri = SINGLE_CONTACT_PATH.replace("{contactId}", contactId.toString())
     return webTestClient
       .get()
       .uri(uri)

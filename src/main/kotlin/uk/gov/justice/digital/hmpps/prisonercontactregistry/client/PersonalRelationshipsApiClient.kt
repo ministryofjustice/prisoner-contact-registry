@@ -165,21 +165,25 @@ class PersonalRelationshipsApiClient(
       .content
   }
 
-  fun searchContact(prisonerId: String, contactIds: List<Long>): List<PersonalRelationshipsContactSearchResultDto> {
-    logger.info("searchContact called for $prisonerId, with contactIds ${contactIds.joinToString { it.toString() }} via the personal-relationships-api")
+  fun searchContact(prisonerId: String? = null, contactIds: List<Long>): List<PersonalRelationshipsContactSearchResultDto> {
+    logger.info("searchContact called with contactIds ${contactIds.joinToString { it.toString() }} and prisonerId if provided = $prisonerId - via the personal-relationships-api")
 
     val uri = "/contact/search"
 
     return webClient.get()
       .uri { uriBuilder ->
-        uriBuilder
+        val builder = uriBuilder
           .path(uri)
-          .queryParam("includePrisonerRelationships", prisonerId)
           .queryParam("contactIds", contactIds.joinToString(","))
           .queryParam("searchType", "EXACT")
           .queryParam("page", 0)
           .queryParam("size", 400)
-          .build()
+
+        prisonerId?.let {
+          builder.queryParam("includePrisonerRelationships", it)
+        }
+
+        builder.build()
       }
       .retrieve()
       .bodyToMono(object : ParameterizedTypeReference<PagedResponse<PersonalRelationshipsContactSearchResultDto>>() {})
