@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.controller.CONTACT_SEARCH_PATH
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.ContactWithOptionalPrisonerRelationshipDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactRestrictionsDto
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.ContactsRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.personal.relationships.PrisonerContactRestrictionsResponseDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.IntegrationTestBase
@@ -107,7 +109,7 @@ class SearchContactsTest : IntegrationTestBase() {
 
     verify(personalRelationshipsApiClientSpy, times(1)).searchContact(prisonerId, contactIds)
     verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactRestrictions(prisonerContactIds)
-    verify(personalRelationshipsApiClientSpy, never()).getContactGlobalRestrictions(any())
+    verify(personalRelationshipsApiClientSpy, never()).getContactsGlobalRestrictions(any())
     verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }
 
@@ -139,9 +141,16 @@ class SearchContactsTest : IntegrationTestBase() {
       contacts = contacts,
     )
 
-    personalRelationshipsApiMockServer.stubGetContactGlobalRestrictions(
-      contactId = contactIds[0],
-      restrictions = globalRestrictions,
+    personalRelationshipsApiMockServer.stubGetContactsGlobalRestrictions(
+      contactIds = contactIds,
+      response = ContactsRestrictionsResponseDto(
+        contactRestrictions = listOf(
+          ContactRestrictionsDto(
+            contactId = contactIds[0],
+            globalContactRestrictions = globalRestrictions,
+          ),
+        ),
+      ),
     )
 
     // When
@@ -165,7 +174,95 @@ class SearchContactsTest : IntegrationTestBase() {
 
     verify(personalRelationshipsApiClientSpy, times(1)).searchContact(null, contactIds)
     verify(personalRelationshipsApiClientSpy, never()).getPrisonerContactRestrictions(any())
-    verify(personalRelationshipsApiClientSpy, times(1)).getContactGlobalRestrictions(contactIds[0])
+    verify(personalRelationshipsApiClientSpy, times(1)).getContactsGlobalRestrictions(contactIds)
+    verify(personalRelationshipsApiClientSpy, never()).getContactGlobalRestrictions(any())
+    verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
+  }
+
+  @Test
+  fun `search contacts returns contacts information when no prisonerId supplied and restrictions data with restrictions true`() {
+    // Given
+    val contactIds = listOf(2187524L, 2187525L)
+    val prisonerContactIds = listOf<Long?>(null, null)
+
+    val contacts = createPersonalRelationshipsContactSearchResultDtoList(
+      contactIds = contactIds,
+      prisonerContactIds = prisonerContactIds,
+    )
+
+    val contactOneGlobalRestrictions = listOf(
+      createGlobalRestriction(
+        contactRestrictionId = 123L,
+        contactId = 2187524L,
+        restrictionType = "CHILD",
+        restrictionTypeDescription = "Banned",
+        startDate = LocalDate.now().plusDays(5),
+        expiryDate = null,
+      ),
+    )
+
+    val contactTwoGlobalRestrictions = listOf(
+      createGlobalRestriction(
+        contactRestrictionId = 456L,
+        contactId = 2187525L,
+        restrictionType = "CLOSED",
+        restrictionTypeDescription = "Closed",
+        startDate = LocalDate.now().plusDays(10),
+        expiryDate = null,
+      ),
+    )
+
+    personalRelationshipsApiMockServer.stubSearchContacts(
+      contactIds = contactIds,
+      prisonerId = null,
+      contacts = contacts,
+    )
+
+    personalRelationshipsApiMockServer.stubGetContactsGlobalRestrictions(
+      contactIds = contactIds,
+      response = ContactsRestrictionsResponseDto(
+        contactRestrictions = listOf(
+          ContactRestrictionsDto(
+            contactId = 2187524L,
+            globalContactRestrictions = contactOneGlobalRestrictions,
+          ),
+          ContactRestrictionsDto(
+            contactId = 2187525L,
+            globalContactRestrictions = contactTwoGlobalRestrictions,
+          ),
+        ),
+      ),
+    )
+
+    // When
+    val result = callSearchContacts(
+      contactIds = contactIds,
+      prisonerId = null,
+      withRestrictions = true,
+    )
+
+    // Then
+    result.expectStatus().isOk
+
+    val responseList = getContactResults(result.expectBody())
+    assertThat(responseList).hasSize(2)
+
+    val firstContact = responseList.first { it.contactId == 2187524L }
+    assertThat(firstContact.prisonerContactId).isNull()
+    assertThat(firstContact.restrictions).hasSize(1)
+    assertThat(firstContact.restrictions[0].restrictionType).isEqualTo("CHILD")
+    assertThat(firstContact.restrictions[0].globalRestriction).isTrue()
+
+    val secondContact = responseList.first { it.contactId == 2187525L }
+    assertThat(secondContact.prisonerContactId).isNull()
+    assertThat(secondContact.restrictions).hasSize(1)
+    assertThat(secondContact.restrictions[0].restrictionType).isEqualTo("CLOSED")
+    assertThat(secondContact.restrictions[0].globalRestriction).isTrue()
+
+    verify(personalRelationshipsApiClientSpy, times(1)).searchContact(null, contactIds)
+    verify(personalRelationshipsApiClientSpy, never()).getPrisonerContactRestrictions(any())
+    verify(personalRelationshipsApiClientSpy, times(1)).getContactsGlobalRestrictions(contactIds)
+    verify(personalRelationshipsApiClientSpy, never()).getContactGlobalRestrictions(any())
     verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }
 
@@ -224,9 +321,16 @@ class SearchContactsTest : IntegrationTestBase() {
       response = prisonerContactRestrictionResponse,
     )
 
-    personalRelationshipsApiMockServer.stubGetContactGlobalRestrictions(
-      contactId = 2187525L,
-      restrictions = globalRestrictions,
+    personalRelationshipsApiMockServer.stubGetContactsGlobalRestrictions(
+      contactIds = listOf(2187525L),
+      response = ContactsRestrictionsResponseDto(
+        contactRestrictions = listOf(
+          ContactRestrictionsDto(
+            contactId = 2187525L,
+            globalContactRestrictions = globalRestrictions,
+          ),
+        ),
+      ),
     )
 
     // When
@@ -256,7 +360,8 @@ class SearchContactsTest : IntegrationTestBase() {
 
     verify(personalRelationshipsApiClientSpy, times(1)).searchContact(prisonerId, contactIds)
     verify(personalRelationshipsApiClientSpy, times(1)).getPrisonerContactRestrictions(listOf(999001L))
-    verify(personalRelationshipsApiClientSpy, times(1)).getContactGlobalRestrictions(2187525L)
+    verify(personalRelationshipsApiClientSpy, times(1)).getContactsGlobalRestrictions(listOf(2187525L))
+    verify(personalRelationshipsApiClientSpy, never()).getContactGlobalRestrictions(any())
     verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }
 
@@ -296,6 +401,7 @@ class SearchContactsTest : IntegrationTestBase() {
 
     verify(personalRelationshipsApiClientSpy, times(1)).searchContact(prisonerId, contactIds)
     verify(personalRelationshipsApiClientSpy, never()).getPrisonerContactRestrictions(any())
+    verify(personalRelationshipsApiClientSpy, never()).getContactsGlobalRestrictions(any())
     verify(personalRelationshipsApiClientSpy, never()).getContactGlobalRestrictions(any())
     verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }
@@ -324,6 +430,7 @@ class SearchContactsTest : IntegrationTestBase() {
 
     verify(personalRelationshipsApiClientSpy, times(1)).searchContact(prisonerId, contactIds)
     verify(personalRelationshipsApiClientSpy, never()).getPrisonerContactRestrictions(any())
+    verify(personalRelationshipsApiClientSpy, never()).getContactsGlobalRestrictions(any())
     verify(personalRelationshipsApiClientSpy, never()).getContactGlobalRestrictions(any())
     verifyNoMoreInteractions(personalRelationshipsApiClientSpy)
   }

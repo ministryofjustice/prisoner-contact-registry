@@ -51,13 +51,12 @@ class ContactsService(
 
     // Because local restrictions are bound between prisoner and contact, if relationship is null we need to do a separate
     // global restrictions lookup for these contacts.
-    val globalRestrictionsByContactId = contacts
-      .filter { it.prisonerContactId == null }
-      .map { it.contactId }
-      .distinct()
-      .associateWith { contactId ->
-        restrictionsService.getContactGlobalRestrictions(contactId)
-      }
+    val globalRestrictionsByContactId = restrictionsService.getContactsGlobalRestrictions(
+      contacts
+        .filter { it.prisonerContactId == null }
+        .map { it.contactId }
+        .distinct(),
+    )
 
     return contacts.map { contact ->
       val restrictions = if (contact.prisonerContactId != null) {

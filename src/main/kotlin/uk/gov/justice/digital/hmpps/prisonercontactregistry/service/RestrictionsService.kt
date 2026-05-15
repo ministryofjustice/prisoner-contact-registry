@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.prisonercontactregistry.dto.RestrictionDto
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.enum.RestrictionType
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.exception.DateRangeNotFoundException
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.IndexedRestrictions
+import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.toGlobalRestrictionsByContactId
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.toIndexedRestrictions
 import uk.gov.justice.digital.hmpps.prisonercontactregistry.mappers.toRestrictionDto
 import java.time.LocalDate
@@ -25,6 +26,18 @@ class RestrictionsService(private val personalRelationshipsApiClient: PersonalRe
     log.debug("RestrictionsService - getContactGlobalRestrictions called with parameters : contactId {}", contactId)
 
     return personalRelationshipsApiClient.getContactGlobalRestrictions(contactId).map { it.toRestrictionDto() }
+  }
+
+  fun getContactsGlobalRestrictions(contactIds: List<Long>): Map<Long, List<RestrictionDto>> {
+    log.debug("RestrictionsService - getContactsGlobalRestrictions called with parameters : contactIds {}", contactIds)
+
+    if (contactIds.isEmpty()) {
+      return emptyMap()
+    }
+
+    return personalRelationshipsApiClient
+      .getContactsGlobalRestrictions(contactIds)
+      .toGlobalRestrictionsByContactId()
   }
 
   fun getContactsGlobalAndLocalRestrictions(prisonerContactRelationshipIds: List<Long>): IndexedRestrictions {
