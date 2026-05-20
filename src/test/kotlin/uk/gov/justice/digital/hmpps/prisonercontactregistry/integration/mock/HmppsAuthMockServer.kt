@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonercontactregistry.integration.mock
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 
 class HmppsAuthExtension :
   BeforeAllCallback,
@@ -27,14 +25,15 @@ class HmppsAuthExtension :
 
   override fun beforeAll(context: ExtensionContext) {
     hmppsAuthApi.start()
+  }
+
+  override fun beforeEach(context: ExtensionContext) {
+    hmppsAuthApi.resetAll()
+
     hmppsAuthApi.stubGrantToken()
     hmppsAuthApi.stubGetUserDetails("created-user")
     hmppsAuthApi.stubGetUserDetails("updated-user")
     hmppsAuthApi.stubGetUserDetails("cancelled-user")
-  }
-
-  override fun beforeEach(context: ExtensionContext) {
-    hmppsAuthApi.resetRequests()
   }
 
   override fun afterAll(context: ExtensionContext) {
@@ -53,6 +52,7 @@ class HmppsAuthMockServer : WireMockServer(WIREMOCK_PORT) {
         .willReturn(
           aResponse()
             .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
+            .withHeader("Connection", "close")
             .withBody(
               """
               {
@@ -66,24 +66,22 @@ class HmppsAuthMockServer : WireMockServer(WIREMOCK_PORT) {
   }
 
   fun stubGetUserDetails(userId: String, fullName: String? = "$userId-name") {
-    val responseBuilder = createJsonResponseBuilder()
-
     stubFor(
       get("/auth/api/user/$userId")
         .willReturn(
-          responseBuilder
+          aResponse()
             .withStatus(HttpStatus.OK.value())
+            .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
+            .withHeader("Connection", "close")
             .withBody(
               """
               {
-                 "username": "$userId",
-                 "name": "$fullName"
-                }
+                "username": "$userId",
+                "name": "$fullName"
+              }
               """.trimIndent(),
             ),
         ),
     )
   }
-
-  private fun createJsonResponseBuilder(): ResponseDefinitionBuilder = aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
 }
