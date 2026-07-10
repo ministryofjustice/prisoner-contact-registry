@@ -15,6 +15,8 @@ data class PrisonerContactDto(
   val lastName: String,
   @param:Schema(description = "Date of birth", example = "1980-01-28", required = false)
   val dateOfBirth: LocalDate? = null,
+  @param:Schema(description = "Key of specific relationship", example = "1234567", required = true)
+  val relationshipId: Long,
   @param:Schema(description = "Code for relationship to Prisoner", example = "RO", required = true)
   val relationshipCode: String,
   @param:Schema(description = "Description of relationship to Prisoner", example = "Responsible Officer", required = false)
