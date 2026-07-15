@@ -36,6 +36,11 @@ Then view output file for coverage report.
 
 This service connects to a development environment for downstream APIs. 
 
+First, copy the [example.env file](./example.env) at the project root and [add 2 secrets to it](.env).
+```bash
+cp example.env .env
+```
+
 Create a Spring Boot run configuration with active profile of 'dev', to run against te development environment.
 
 Ports

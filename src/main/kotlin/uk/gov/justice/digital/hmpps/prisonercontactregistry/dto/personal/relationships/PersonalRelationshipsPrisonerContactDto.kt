@@ -87,6 +87,7 @@ data class PersonalRelationshipsPrisonerContactDto(
     middleName = middleNames.toNormalCase(),
     lastName = lastName.toNormalCase().orEmpty(),
     dateOfBirth = dateOfBirth,
+    relationshipId = prisonerContactId,
     relationshipCode = relationshipToPrisonerCode,
     relationshipDescription = relationshipToPrisonerDescription,
     contactType = relationshipTypeCode,
