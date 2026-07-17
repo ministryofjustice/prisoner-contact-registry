@@ -164,7 +164,7 @@ class PersonalRelationshipsApiClient(
           .path(uri)
           .queryParam("relationshipType", "S")
           .queryParam("page", 0)
-          .queryParam("size", 400)
+          .queryParam("size", 450)
           .apply {
             // Only set this param if it's true. Setting it to false returns only unapproved visitors (we do not want this).
             if (approvedVisitorOnly) {
@@ -200,7 +200,7 @@ class PersonalRelationshipsApiClient(
           .queryParam("contactIds", contactIds.joinToString(","))
           .queryParam("searchType", "EXACT")
           .queryParam("page", 0)
-          .queryParam("size", 400)
+          .queryParam("size", 450)
 
         prisonerId?.let {
           builder.queryParam("includePrisonerRelationships", it)

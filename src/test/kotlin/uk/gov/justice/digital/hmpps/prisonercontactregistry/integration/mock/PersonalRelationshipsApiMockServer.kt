@@ -52,7 +52,7 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     prisonerId: String? = null,
     contacts: List<PersonalRelationshipsContactSearchResultDto>? = null,
     page: Int = 0,
-    size: Int = 400,
+    size: Int = 450,
     httpStatus: HttpStatus = HttpStatus.OK,
   ) {
     val uri = "/contact/search"
@@ -99,7 +99,7 @@ class PersonalRelationshipsApiMockServer : WireMockServer(8093) {
     contacts: List<PersonalRelationshipsPrisonerContactDto>? = null,
     approvedVisitorOnly: Boolean = false,
     page: Int = 0,
-    size: Int = 400,
+    size: Int = 450,
     httpStatus: HttpStatus = HttpStatus.OK,
   ) {
     val uri = "/prisoner/$prisonerId/contact"
