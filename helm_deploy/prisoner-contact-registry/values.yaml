@@ -45,5 +45,4 @@ generic-service:
       - internal
 
 generic-prometheus-alerts:
-  alertSeverity: visits-alerts-nonprod
   targetApplication: prisoner-contact-registry
